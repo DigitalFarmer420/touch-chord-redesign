@@ -18,7 +18,7 @@ import { APP_VERSION } from "../version.js?v=112.13";
 import { playAlongKeyOk, paHintMiss, paHintHide } from "../ui/hints.js?v=112.13";
 import { kidsTonic } from "../ui/keyboard.js?v=112.13";
 import { kidsHintItem, kidsGoldStep, kidsGoldGo, kidsGoldPad } from "../ui/next.js?v=112.13";
-import { renderPads, keyHaptic } from "../ui/pads.js?v=112.13";
+import { renderPads, keyHaptic, padKey } from "../ui/pads.js?v=112.13";
 import { stripPress, stripRelease } from "../ui/strip.js?v=112.13";
 import { keyOf, soundFinger, liftFinger, resoundHeldFinger } from "../ui/touch.js?v=112.13";
 import { api as ChordAudio } from "../audio/index.js?v=112.13";
@@ -354,7 +354,8 @@ function wireKey(k) {
     var needReplay = !(ChordAudio.ctx && ChordAudio.ctx.state === "running");
     var pending = unlock();
     try { k.setPointerCapture(e.pointerId); } catch (err) {}
-    soundFinger(e.pointerId, keyOf(k.dataset.id, k.dataset.pc, k.dataset.midi, null, false, true));
+    var twin = document.querySelector('#pads .pad[data-midi="' + k.dataset.midi + '"]');   // the hidden Kids keyboard's own key (same id, degree, in-key rule: out-of-key black keys stay silent as in the Kids style)
+    soundFinger(e.pointerId, twin ? padKey(twin) : keyOf(k.dataset.id, k.dataset.pc, k.dataset.midi, null, false, false));
     if (needReplay && pending && typeof pending.then === "function") pending.then(function () { resoundHeldFinger(e.pointerId); });
     paint(true);
   });

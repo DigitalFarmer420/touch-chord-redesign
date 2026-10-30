@@ -22,7 +22,7 @@ export function eatMove(el) {
 }
 
 // A keyboard key element as the sound path's plain key (touch.js keyOf).
-function padKey(pad) { return keyOf(pad.dataset.id, pad.dataset.pc, pad.dataset.midi, pad.dataset.degree, pad.dataset.borrow, padPlayable(pad)); }
+export function padKey(pad) { return keyOf(pad.dataset.id, pad.dataset.pc, pad.dataset.midi, pad.dataset.degree, pad.dataset.borrow, padPlayable(pad)); }
 // Lifts every finger (pedal-aware). hard = stop audio regardless of Sustain.
 export function releaseFingers(hard) {
   Object.keys(fingers).forEach(function (id) {

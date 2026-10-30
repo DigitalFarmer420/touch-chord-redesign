@@ -20,7 +20,8 @@ const SUITE = [   // [name, file, args]  (both phone sizes each: the tests loop 
   ['playoff', 'playoff.cjs', []],   // v112.11: Play along off = no guide (dot / chip marks hidden), MIDI, lit and layout identical ON vs OFF
   ['upload13', 'upload13.cjs', []],
   ['kidsview-360', 'kidsview.cjs', ['360x780']], ['kidsview-780', 'kidsview.cjs', ['780x360']],   // Kids redesign: the Kids view (Simple) at the four sizes
-  ['kidsview-768', 'kidsview.cjs', ['768x1024']], ['kidsview-1024', 'kidsview.cjs', ['1024x768']],   // v112.12: Song Contract v1.3 upload (form order, length warning, chord tidy, JSON repair, honest messages)
+  ['kidsview-768', 'kidsview.cjs', ['768x1024']], ['kidsview-1024', 'kidsview.cjs', ['1024x768']],
+  ['kvaudio', 'kvaudio.cjs', []],   // Kids redesign: the Kids view's pads / keys / Next / Play sound exactly like the Kids style   // v112.12: Song Contract v1.3 upload (form order, length warning, chord tidy, JSON repair, honest messages)
 ];
 const only = process.env.ONLY ? process.env.ONLY.split(',') : null;
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.webp': 'image/webp', '.json': 'application/json', '.png': 'image/png' };
