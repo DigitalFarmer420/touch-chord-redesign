@@ -59,6 +59,9 @@ https://digitalfarmer420.github.io/touch-chord-redesign/ . Never touch-chord (pr
 - [x] merge + one mode switch + badge; unit 90/90 (node --test tests/unit/*.test.js)
 - [x] e2e group 1 at 4610bf0 (worktree ../wt): 19/19 PASS in 26.5 min - howto112, tour112, lyrfit111, hints112 x2, hints1121 x2,
       keysplit, validate, labelfit, kidsascend, kidsgold, upload13, kidsview x4 (360/780/768/1024), kvaudio, expert (328 checks)
-- [ ] e2e group 2 (worktree ../wt2): test111, kbfix, kbaccept-360 x2 PASS so far; kbaccept-780 x2, playoff running
-- [ ] grownup (pixel compare vs 351c02c) + audioeq (audio calls vs 351c02c): run-ga.sh, logs ../logs
+- [x] e2e group 2 (worktree ../wt2): 7/7 PASS in 46.7 min - test111, kbfix, kbaccept x4, playoff
+- [x] audioeq vs 351c02c: 64 runs, 4268 audio-engine calls, 0 differences (sound / timing identical)
+- [ ] grownup vs 351c02c: first run 81/84 identical (3 'menu' shots at 768x1024 / 1024x768 differ only in whether the
+      walked Am chord is still lit when the gear menu opens - timing under load, the set changes run to run);
+      1024x768 rerun 21/21; 768x1024 rerun under way
 - [ ] new repo + Pages + live check
