@@ -402,14 +402,14 @@ function lyrHtml() {
   if (cur >= prog.steps.length) cur = prog.steps.length - 1;
   if (cur >= 0) L.forEach(function (ln, i) { if (ln.markers.some(function (m) { return m.chordIndex <= cur; })) li = i; });
   function esc(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
-  function line(ln) {
-    var mk = ln.markers, out = "<span class=\"" + (cur >= mk[0].chordIndex ? "done" : "w") + "\">" + esc(ln.text.slice(0, mk[0].charIndex)) + "</span>";
-    mk.forEach(function (m, j) {
-      var sg = ln.text.slice(m.charIndex, j + 1 < mk.length ? mk[j + 1].charIndex : ln.text.length);
-      if (m.chordIndex === cur) { var w = sg.match(/^([^\s,.!?;:]*)([\s\S]*)$/); out += "<span class=\"now\">" + esc(w[1]) + "</span><span class=\"w\">" + esc(w[2]) + "</span>"; }
-      else out += "<span class=\"" + (m.chordIndex < cur ? "done" : "w") + "\">" + esc(sg) + "</span>";
-    });
-    return out;
+  function line(ln) {   // sung words solid, the current word (whole word, even when the note is its 2nd syllable) on gold, the rest faint
+    var t = ln.text, mk = ln.markers, m = null;
+    mk.forEach(function (x) { if (x.chordIndex === cur) m = x; });
+    if (!m) return "<span class=\"" + (cur >= mk[mk.length - 1].chordIndex ? "done" : "w") + "\">" + esc(t) + "</span>";
+    var L = /[A-Za-z\u00C0-\u024F'\u2019-]/, ws = m.charIndex, we = m.charIndex;
+    while (ws > 0 && L.test(t.charAt(ws - 1)) && t.charAt(ws - 1) !== "-") ws--;
+    while (we < t.length && L.test(t.charAt(we)) && t.charAt(we) !== "-") we++;
+    return "<span class=\"done\">" + esc(t.slice(0, ws)) + "</span><span class=\"now\">" + esc(t.slice(ws, we)) + "</span><span class=\"w\">" + esc(t.slice(we)) + "</span>";
   }
   return "<div class=\"kv-l1\">" + line(L[li]) + "</div><div class=\"kv-l2\">" + (L[li + 1] ? esc(L[li + 1].text) : "&nbsp;") + "</div>";
 }
