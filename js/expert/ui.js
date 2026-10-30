@@ -199,6 +199,10 @@ function paintType() {
     var k = b.dataset.type ? "t:" + b.dataset.type : "e:" + b.dataset.ext;
     b.classList.toggle("x-held", !!held[k]);
   });
+  // Keys: light the sounding chord's pitch classes (mockup h: F A C E on the C..B keys)
+  var lit = {};
+  Object.keys(fingers).forEach(function (id) { (fingers[id].midis || []).forEach(function (m) { lit[((m % 12) + 12) % 12] = 1; }); });
+  Array.prototype.forEach.call(document.querySelectorAll("#pads .pad"), function (k) { k.classList.toggle("x-pclit", !!lit[+k.dataset.pc] && !k.classList.contains("held")); });
   // NOW box: the played-with-a-held-type cue (teal ring + \u266a))) on the notes)
   document.documentElement.classList.toggle("x-heldplay", lab.held && Object.keys(fingers).length > 0);
 }

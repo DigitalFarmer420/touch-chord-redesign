@@ -14,9 +14,15 @@ Spec: /workspace/touchchord-review/redesign/expert-v9-*.png, expert-ipad-v2-*.pn
   tests/e2e/run.cjs (+expert suite).
 
 ## Status
-- [ ] model.js + unit tests
-- [ ] ui.js + expert.css (phone portrait)
-- [ ] iPad portrait, landscape (iPad + phone)
-- [ ] e2e expert.cjs + full suites
-- [ ] compare screenshots
+- [x] model.js + unit tests (tests/unit/expert.test.js: 17 tests; unit total 87/87)
+- [x] ui.js + expert.css: phone portrait, iPad portrait, iPad landscape, phone landscape
+- [x] e2e tests/e2e/expert.cjs (4 sizes, 324 checks, 0 fails) + added to run.cjs
+- [ ] full e2e suite run (PORT=8291, log ../e2e-full.log)
+- [ ] compare screenshots in ../compare
 - [ ] mirror to fork
+
+## Notes / deviations (for the report)
+- Type bar at rest reads "Auto" (a key plays its own chord in the key: kb-fix rule); the mockup says "Major".
+- The key window still follows a played chip / Next chord and snaps back to the key's tonic (classic kb-fix behaviour), so it rests at C..B in C major, G..F# in G major.
+- Expert is opt-in (mode switch or ?expert=1); the classic Full screen stays the default for "not Kids, not Simple" so the existing suites run unchanged.
+- Sound sheet keeps the app's 6 voices and the 5-step voicing slider (mockup: 8 voices, 4 voicing buttons) - no audio change.

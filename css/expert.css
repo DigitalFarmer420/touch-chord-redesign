@@ -52,7 +52,7 @@ html.expert.lay-pad-land #app, html.expert.lay-phone-land #app {
   grid-template-rows: var(--x-row) var(--x-src-h) var(--x-sus-h) minmax(0, 1fr) var(--x-kb-h) !important;
   grid-template-areas: "xtop xtop xtop xtop xtop" "now xsrc xgo xgo xgo" "grid grid grid sus sus" "grid grid grid xctl xctl" "kb kb kb kb kb" !important;
 }
-html.expert.lay-pad-land #app { --x-g: 10px; --x-now-w: 120px; --x-row: 60px; --x-src-h: 60px; --x-sus-h: 84px; --x-ctl-h: 64px; --x-kb-h: 300px; --x-chip-r: 14px; --x-fs: 20px; padding: 14px 16px 12px !important; }
+html.expert.lay-pad-land #app { --x-side: 196px; --x-g: 10px; --x-now-w: 120px; --x-row: 60px; --x-src-h: 60px; --x-sus-h: 84px; --x-ctl-h: 64px; --x-kb-h: 300px; --x-chip-r: 14px; --x-fs: 20px; padding: 14px 16px 12px !important; }
 html.expert.lay-phone-land #app { --x-g: 5px; --x-now-w: 96px; --x-row: 36px; --x-src-h: 40px; --x-sus-h: 46px; --x-ctl-h: 40px; --x-kb-h: 112px; --x-side: 200px; --x-chip-r: 9px; --x-fs: 13px; padding: 6px max(8px, env(safe-area-inset-right)) 4px max(8px, env(safe-area-inset-left)) !important; }
 /* Landscape, table open: the right column holds Type / Full Range / Sound, and under it Sustain (tall) beside the 4x2 table. */
 html.expert.lay-pad-land.x-types-open #app, html.expert.lay-phone-land.x-types-open #app {
@@ -300,3 +300,7 @@ html.expert.x-ctl-on #ctl .ctl-tabs button[data-tab] { flex: 1; height: 40px; bo
 html.expert.x-ctl-on #ctl .ctl-tabs button[aria-selected="true"] { background: var(--x-ink); color: var(--x-onink); }
 html.expert.x-ctl-on #ctl .sound-tiles button.on, html.expert.x-ctl-on #ctl .seg button.on { background: var(--x-gold) !important; color: #3B2600 !important; border-color: transparent !important; }
 html.expert.x-ctl-on #ctl .pane-h { display: none; }
+/* decision 9 / mockup h: a held-type chord lights its notes by pitch class on the C..B keys (F A C E), even the ones the
+   window shows an octave lower (the exact sounding keys keep the classic .held lit) */
+html.expert .kb.piano .white.x-pclit { background: #FFE7A6 !important; }
+html.expert .kb.piano .black.x-pclit { background: #8a6a1a !important; }
