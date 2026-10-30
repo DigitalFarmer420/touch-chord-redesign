@@ -35,6 +35,7 @@ export const shared = {
   saveTimer: 0,   // owner: state.js
   lastSaved: "",   // owner: state.js
   persistReady: false,   // owner: state.js
+  kidsView: false,   // owner: kids/view.js (the Kids view is on: one fixed C..B octave on the Kids tonic)
 };
 export var VOICINGS;
 
@@ -61,6 +62,9 @@ export const state = {
   allKeys: false,
   playAlong: true,             // v108: Config > Play along enable
   paHints: true,               // v112: Config > Show hints (Play along hints)
+  expert: true,                // Kids redesign: false = the Kids view (Simple), true = the full app (Expert)
+  theme: "day",                // Kids redesign: Kids view look, "day" (Daylight) or "lamp" (Lamplight)
+  kidsSong: null,              // Kids redesign: the last Kids song played in the Kids view (picker "last", Hello resume)
   keySpell: {}                 // v50: key root spelling picks, e.g. { "1major": "Db" }
 };
 
@@ -121,7 +125,12 @@ export function factoryDefaults() {
     paHints: true,   // v112: Show hints on by default
     volume: 100,
     band: 0,   // Band fix: one slider, 0 = off, 1..100 = on at that level (saved as bandLvl)
-    lockKey: null
+    lockKey: null,
+    // Kids redesign: a saved setup from before it (no "expert") opens the full app as before; only a first visit
+    // (loadSettings) opens the Kids view. Factory reset keeps the full app, so it is unchanged.
+    expert: true,
+    theme: "day",
+    kidsSong: null
   };
 }
 
@@ -168,7 +177,10 @@ function sanitizeSettings(raw) {
     volume: num(raw.volume, 0, 100, d.volume, true),
     band: num(raw.bandLvl, 0, 100, d.band, true),   // Band fix: saves from before it (raw.band, toggle always off at load) migrate to 0 = off
     lockKey: (raw.lockKey && typeof raw.lockKey === "object" && raw.lockKey.pc === (raw.lockKey.pc | 0) && raw.lockKey.pc >= 0 && raw.lockKey.pc < 12 && SCALES.indexOf(raw.lockKey.mode) >= 0)
-      ? { pc: raw.lockKey.pc, mode: raw.lockKey.mode } : null
+      ? { pc: raw.lockKey.pc, mode: raw.lockKey.mode } : null,
+    expert: bool(raw.expert, d.expert),
+    theme: pick(raw.theme, ["day", "lamp"], d.theme),
+    kidsSong: typeof raw.kidsSong === "string" && raw.kidsSong.length < 80 ? raw.kidsSong : null
     // Legacy `latch` key (cce4d86) is ignored; Sustain is never persisted.
   };
 }
@@ -186,7 +198,7 @@ export function storageClear() {
 // Future builds: read older keys/versions here and migrate into v1+ shape.
 export function loadSettings() {
   var str = storageGet();
-  if (!str) { var first = factoryDefaults(); first.style = "kids"; shared.firstFresh = true; return first; }   // v111 (G): first visit opens in Kids (Twinkle, C); v112: then the tour
+  if (!str) { var first = factoryDefaults(); first.style = "kids"; first.expert = typeof location !== "undefined" && /[?&]test=1(&|$)/.test(location.search) && !/[?&]kv=1(&|$)/.test(location.search);   /* Kids redesign: a first visit opens the Kids view (tests: a fresh ?test=1 opens the full app as before, ?test=1&kv=1 = a real first visit) */ shared.firstFresh = true; return first; }   // v111 (G): first visit opens in Kids (Twinkle, C); v112: then the tour
   try {
     var env = JSON.parse(str);
     if (!env || typeof env !== "object" || env.v !== STORE_VERSION) return factoryDefaults();
@@ -223,7 +235,10 @@ export function collectSettings() {
     volume: state.volume == null ? 100 : state.volume,
     bandLvl: state.band | 0,
     band: (state.band | 0) >= 1 ? state.band | 0 : 50,   // older builds read this (1..100) and start Band off anyway
-    lockKey: shared.lockKey ? { pc: shared.lockKey.pc, mode: shared.lockKey.mode } : null
+    lockKey: shared.lockKey ? { pc: shared.lockKey.pc, mode: shared.lockKey.mode } : null,
+    expert: state.expert !== false,
+    theme: state.theme === "lamp" ? "lamp" : "day",
+    kidsSong: state.kidsSong || null
   };
 }
 

@@ -36,3 +36,19 @@ test('invalid values are sanitized', () => {
   const s = S.loadSettings(), d = S.factoryDefaults();
   assert.equal(s.style, d.style); assert.equal(s.sound, d.sound); assert.equal(s.simple, true);
 });
+// Kids redesign: Simple/Expert, the theme and the last Kids song persist; old saves stay in Expert (the full app).
+test('Kids redesign: first visit = Simple (Kids view), Daylight; old v112.3 saves open Expert', () => {
+  for (const k in store) delete store[k];
+  let s = S.loadSettings(); assert.equal(s.expert, false); assert.equal(s.theme, 'day'); assert.equal(s.kidsSong, null);
+  store['touchChord.settings.v1'] = saved['touchChord.settings.v1'];
+  s = S.loadSettings(); assert.equal(s.expert, true); assert.equal(s.theme, 'day');
+  assert.equal(S.factoryDefaults().expert, true); assert.equal(S.factoryDefaults().theme, 'day');
+});
+test('Kids redesign: expert / theme / kidsSong saved values load back; junk is sanitized', () => {
+  const put = o => { for (const k in store) delete store[k]; store['touchChord.settings.v1'] = JSON.stringify({ v: 1, settings: Object.assign(JSON.parse(saved['touchChord.settings.v1']).settings, o) }); return S.loadSettings(); };
+  let s = put({ expert: false, theme: 'lamp', kidsSong: 'Kids Row Your Boat' });
+  assert.equal(s.expert, false); assert.equal(s.theme, 'lamp'); assert.equal(s.kidsSong, 'Kids Row Your Boat');
+  s = put({ expert: 'yes', theme: 'neon', kidsSong: 42 }); assert.equal(s.expert, true); assert.equal(s.theme, 'day'); assert.equal(s.kidsSong, null);
+  const src = readFileSync(root + 'js/state.js', 'utf8');
+  assert.match(src, /expert: state\.expert !== false/); assert.match(src, /theme: state\.theme === "lamp" \? "lamp" : "day"/); assert.match(src, /kidsSong: state\.kidsSong \|\| null/);
+});
