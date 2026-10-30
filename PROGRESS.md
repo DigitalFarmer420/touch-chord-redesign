@@ -57,5 +57,8 @@ https://digitalfarmer420.github.io/touch-chord-redesign/ . Never touch-chord (pr
 
 ## Status
 - [x] merge + one mode switch + badge; unit 90/90 (node --test tests/unit/*.test.js)
-- [ ] full e2e (two groups in parallel, run-all.sh, logs in ../logs) + grownup (vs 351c02c) + audioeq (vs 351c02c)
+- [x] e2e group 1 at 4610bf0 (worktree ../wt): 19/19 PASS in 26.5 min - howto112, tour112, lyrfit111, hints112 x2, hints1121 x2,
+      keysplit, validate, labelfit, kidsascend, kidsgold, upload13, kidsview x4 (360/780/768/1024), kvaudio, expert (328 checks)
+- [ ] e2e group 2 (worktree ../wt2): test111, kbfix, kbaccept-360 x2 PASS so far; kbaccept-780 x2, playoff running
+- [ ] grownup (pixel compare vs 351c02c) + audioeq (audio calls vs 351c02c): run-ga.sh, logs ../logs
 - [ ] new repo + Pages + live check
