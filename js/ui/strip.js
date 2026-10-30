@@ -405,13 +405,7 @@ export function wireStripTap(b, item) {
     clearTimeout(pressT);
     b.classList.add("press");
     try { b.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
-    if (kidsGoldPad(b)) { kidsGoldGo(b, "pad"); return; }   // v79
-    shared.paEvT = e.timeStamp || performance.now();
-    if (paTwin("chip", null, item, b)) return;   // v111 (D6): the same press as a root key just now
-    if (playAlongChip(b, item)) { playAlongGo(b, "chip"); return; }   // v108
-    paHintMiss("chip", b);   // v112: a hint (the chip still sounds)
-    fxTapPulse(b);   // v93
-    stripDown(item, e.pointerId);
+    stripPress(b, item, e);
   });
   function up(e) { upAt = Date.now(); unpress(); stripUp(e.pointerId); }
   b.addEventListener("pointerup", up);
@@ -426,6 +420,18 @@ export function wireStripTap(b, item) {
     stripTap(item);
   });
 }
+// A chip / Kids pad press (the pointerdown path of wireStripTap): b = the strip button the press belongs to (its
+// gold / Play along / hint checks), item = the chord it sounds. Exported so the Kids view's pads use this exact path.
+export function stripPress(b, item, e) {
+  if (kidsGoldPad(b)) { kidsGoldGo(b, "pad"); return; }   // v79
+  shared.paEvT = e.timeStamp || performance.now();
+  if (paTwin("chip", null, item, b)) return;   // v111 (D6): the same press as a root key just now
+  if (playAlongChip(b, item)) { playAlongGo(b, "chip"); return; }   // v108
+  paHintMiss("chip", b);   // v112: a hint (the chip still sounds)
+  fxTapPulse(b);   // v93
+  stripDown(item, e.pointerId);
+}
+export function stripRelease(pointerId) { stripUp(pointerId); }
 // No key yet: the strip on screen becomes the key (same as the first chord
 // locking it), so tapping a note doesn't re-key the strip under the finger.
 export var stripKey;
