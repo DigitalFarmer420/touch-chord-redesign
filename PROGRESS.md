@@ -105,3 +105,12 @@ Badge v112.13-rd3. e2e: expert section 14 (8 styles), kidsview 11 (slide + keybo
 3. Key window (moving / snap-back) untouched. Badge v112.13-rd4.
 Tests: unit 90/90; kidsview x5 PASS; kvaudio PASS; expert 1516 checks / 0 fails; grownup 84/84 (768x1024 walk3 timing flake
 in the loaded run - B still showed the walked Am - re-run twice 21/21); audioeq 64 runs / 4268 calls / 0 differences.
+
+## rd5 (Uiux LOW, landscape phone Style list)
+Landscape phone only (html.lay-phone-land): the open Style list grows into the space below (8px safe margin; js/expert/ui.js
+fitStyleMenu). It shows every row that fits; if it still scrolls, it stops half way through a row and fades at the bottom
+(.x-more, removed at the end of the list). 780x360 and 844x390: 6 full rows + half of Yoga (rd4: 3 and 4 rows). Portrait and
+iPad unchanged (all 8 rows). e2e: expert "style list" block at 780x360, 844x390 (+ 390x844, 360x780, 820x1180, 1180x820).
+Key window untouched. Badge v112.13-rd5.
+Tests: unit 90/90; kidsview x5 PASS; kvaudio PASS; expert 1552 / 0 fails; grownup 84/84 (768x1024 screenshot timeout and a
+1024x768 one-chip pixel diff under box load in the parallel run; both re-run alone 21/21); audioeq 64 runs / 4268 calls / 0 diffs.
