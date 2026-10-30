@@ -1,0 +1,302 @@
+/* Touch Chord Expert redesign (html.expert). Loaded last; every rule is scoped to html.expert (or to the Expert-only
+   x-* elements, which are hidden outside Expert), so Kids, Simple and the classic Full screen are unchanged.
+   Mockups: /workspace/touchchord-review/redesign/expert-v9-*.png (phone), expert-ipad-v2-*.png (iPad). */
+
+/* ---------- Expert-only elements: never shown outside Expert ---------- */
+html:not(.expert) #xTop, html:not(.expert) #xTog, html:not(.expert) #xGo, html:not(.expert) #xSrc, html:not(.expert) #xPList,
+html:not(.expert) #xCtl, html:not(.expert) #xScrim, html:not(.expert) #xStyleMenu, html:not(.expert) #xKeySheet,
+html:not(.expert) #xSettings, html:not(.expert) .x-volrow { display: none !important; }
+[hidden].x-scrim, [hidden].x-menu, [hidden].x-sheet, [hidden].x-plist { display: none !important; }
+/* Decision 11: the mode switch in the classic gear menu */
+.x-gearmode { display: flex; align-items: center; gap: 8px; padding: 6px 10px 8px; border-bottom: 1px solid var(--line); }
+.x-gearmode .x-seg { display: flex; flex: 1; gap: 3px; background: rgba(0,0,0,.25); border-radius: 10px; padding: 3px; }
+.x-gearmode .x-seg button { flex: 1; min-height: 34px; border-radius: 8px; border: 0; background: transparent; color: var(--muted); font-weight: 700; font-size: var(--fs-s, 13px); }
+.x-gearmode .x-seg button.on { background: var(--ink); color: var(--bg, #14120f); }
+
+/* ---------- Theme: Lamplight (decision 1, default) and Day ---------- */
+html.expert.x-lamp { --x-bg: #1E1914; --x-surface: #2A231C; --x-card: #2F271F; --x-ink: #F4EAD9; --x-muted: #B9A890; --x-line: #43382C;
+  --x-gold: #FFC21A; --x-gold-deep: #E39A00; --x-next: #2F8F83; --x-next-l: #4FB3A5; --x-danger: #E07A62; --x-onink: #1E1914;
+  --x-happy: #7FD3B5; --x-sad: #9AAAD6; --x-tension: #8C7A68; --x-borrow: #F2B48A; --x-gridbg: rgba(0,0,0,.18); --x-sus: #3a3026; --x-susb: #6b5a46; }
+html.expert.x-day { --x-bg: #F6EFE3; --x-surface: #FFFFFF; --x-card: #FBF6EE; --x-ink: #2B2118; --x-muted: #7A6855; --x-line: #E2D6C4;
+  --x-gold: #FFC21A; --x-gold-deep: #E39A00; --x-next: #2F8F83; --x-next-l: #2F8F83; --x-danger: #C4553E; --x-onink: #FFFFFF;
+  --x-happy: #7FD3B5; --x-sad: #9AAAD6; --x-tension: #8C7A68; --x-borrow: #C9764A; --x-gridbg: rgba(0,0,0,.05); --x-sus: #EFE5D6; --x-susb: #B9A890; }
+html.expert, html.expert body { background: var(--x-bg); color: var(--x-ink); }
+
+/* ---------- Hidden in Expert (replaced by the Expert controls; still in the DOM, still wired) ---------- */
+html.expert header.topbar, html.expert #styles, html.expert .now-col > :not(.now-card), html.expert #keyRow,
+html.expert #songBar, html.expert #kidsLyr, html.expert #sbLock, html.expert #chords .dock-label, html.expert #ctlFold,
+html.expert #nxArrow { display: none !important; }
+
+/* ---------- Grid: phone portrait (360x780) ---------- */
+html.expert #app {
+  --x-g: 6px; --x-now-w: 78px; --x-sus-w: 108px; --x-row: 44px; --x-src-h: 60px; --x-ctl-h: 52px; --x-chip-r: 12px; --x-fs: 15px; --x-pal-h: 92px; --x-grid-h: 236px;
+  display: grid !important; gap: var(--x-g) !important; padding: 10px 8px calc(6px + env(safe-area-inset-bottom)) !important;
+  grid-template-columns: var(--x-now-w) calc(var(--x-sus-w) - var(--x-now-w) - var(--x-g)) minmax(0, 1fr) auto !important;
+  grid-template-rows: var(--x-row) var(--x-row) var(--x-src-h) var(--x-grid-h) var(--x-ctl-h) minmax(0, 1fr) !important;
+  grid-template-areas: "xtop xtop xtop xtop" "xtog xtog xtog xgo" "now xsrc xsrc xsrc" "grid grid grid grid" "sus sus xctl xctl" "kb kb kb kb" !important;
+  height: 100dvh !important; max-height: 100dvh; box-sizing: border-box; background: var(--x-bg); color: var(--x-ink); font-family: Nunito, "Segoe UI", system-ui, sans-serif;
+}
+html.expert.x-types-open #app {
+  --x-grid-h: 216px;
+  grid-template-rows: var(--x-row) var(--x-row) var(--x-src-h) var(--x-grid-h) var(--x-ctl-h) var(--x-pal-h) minmax(0, 1fr) !important;
+  grid-template-areas: "xtop xtop xtop xtop" "xtog xtog xtog xgo" "now xsrc xsrc xsrc" "grid grid grid grid" "sus sus xctl xctl" "sus sus pal pal" "kb kb kb kb" !important;
+}
+/* iPad portrait (820x1180) */
+html.expert.lay-pad-port #app { --x-g: 10px; --x-now-w: 150px; --x-sus-w: 230px; --x-row: 64px; --x-src-h: 88px; --x-ctl-h: 72px; --x-chip-r: 16px; --x-fs: 21px; --x-pal-h: 140px; --x-grid-h: 400px; padding: 16px 16px 12px !important; }
+html.expert.lay-pad-port.x-types-open #app { --x-grid-h: 380px; }
+/* Landscape (iPad 1180x820 mockup n; phone 780x360 follows it): top bar with the toggle, NOW + song + Next + Play,
+   grid on the left with a right-hand column (Sustain first, then Type, then Full Range / Sound), keys under all. */
+html.expert.lay-pad-land #app, html.expert.lay-phone-land #app {
+  --x-side: 206px; --x-side1: 0px;
+  grid-template-columns: var(--x-now-w) minmax(0, 1fr) auto var(--x-side1) var(--x-side) !important;
+  grid-template-rows: var(--x-row) var(--x-src-h) var(--x-sus-h) minmax(0, 1fr) var(--x-kb-h) !important;
+  grid-template-areas: "xtop xtop xtop xtop xtop" "now xsrc xgo xgo xgo" "grid grid grid sus sus" "grid grid grid xctl xctl" "kb kb kb kb kb" !important;
+}
+html.expert.lay-pad-land #app { --x-g: 10px; --x-now-w: 120px; --x-row: 60px; --x-src-h: 60px; --x-sus-h: 84px; --x-ctl-h: 64px; --x-kb-h: 300px; --x-chip-r: 14px; --x-fs: 20px; padding: 14px 16px 12px !important; }
+html.expert.lay-phone-land #app { --x-g: 5px; --x-now-w: 96px; --x-row: 36px; --x-src-h: 40px; --x-sus-h: 46px; --x-ctl-h: 40px; --x-kb-h: 112px; --x-side: 200px; --x-chip-r: 9px; --x-fs: 13px; padding: 6px max(8px, env(safe-area-inset-right)) 4px max(8px, env(safe-area-inset-left)) !important; }
+/* Landscape, table open: the right column holds Type / Full Range / Sound, and under it Sustain (tall) beside the 4x2 table. */
+html.expert.lay-pad-land.x-types-open #app, html.expert.lay-phone-land.x-types-open #app {
+  --x-side1: 84px; --x-side: 300px;
+  grid-template-rows: var(--x-row) var(--x-src-h) var(--x-ctl-h) minmax(0, 1fr) var(--x-kb-h) !important;
+  grid-template-areas: "xtop xtop xtop xtop xtop" "now xsrc xgo xgo xgo" "grid grid grid xctl xctl" "grid grid grid sus pal" "kb kb kb kb kb" !important;
+}
+html.expert.lay-phone-land.x-types-open #app { --x-side1: 58px; --x-side: 236px; }
+
+html.expert #xTop { grid-area: xtop; } html.expert #xTog { grid-area: xtog; } html.expert #xGo { grid-area: xgo; }
+html.expert .now-col { grid-area: now; } html.expert #xSrc { grid-area: xsrc; } html.expert .next-card { grid-area: grid; }
+html.expert #sustainBtn { grid-area: sus; } html.expert #xCtl { grid-area: xctl; } html.expert #chords { grid-area: pal; }
+html.expert .kb-wrap { grid-area: kb; }
+html.expert:not(.x-types-open) #chords { display: none !important; }
+
+/* ---------- shared bits ---------- */
+html.expert .x-b { display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 0; border-radius: 14px; background: var(--x-surface);
+  border: 1.5px solid var(--x-line); color: var(--x-ink); font: 700 var(--x-fs) Nunito, system-ui, sans-serif; white-space: nowrap; padding: 0 10px; touch-action: manipulation; }
+html.expert .x-car { color: var(--x-muted); font-size: .9em; }
+html.expert .x-lbl { font-size: 11px; letter-spacing: 1.1px; font-weight: 800; color: var(--x-muted); text-transform: uppercase; }
+html.expert .x-seg { display: flex; background: var(--x-card); border-radius: 14px; padding: 3px; gap: 3px; min-width: 0; }
+html.expert .x-seg button { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; border: 0; border-radius: 11px; background: transparent;
+  color: var(--x-muted); font: 700 calc(var(--x-fs) - 1px) Nunito, system-ui, sans-serif; white-space: nowrap; overflow: hidden; }
+html.expert .x-seg button.on { background: var(--x-ink); color: var(--x-onink); }
+
+/* ---------- top bar (decision 6: 'Pop ▾' is the one style control) ---------- */
+html.expert #xTop { display: flex; gap: 8px; align-items: stretch; min-width: 0; }
+html.expert #xTop .x-key { flex: 0 1 112px; } html.expert #xTop .x-style { flex: 0 1 100px; }
+html.expert #xTop .x-slot { flex: 1 1 0; min-width: 0; display: flex; justify-content: center; }
+html.expert #xTop .x-badge { flex: 0 0 auto; color: var(--x-gold); border-color: #6b5320; font-size: calc(var(--x-fs) - 1.5px); }
+html.expert #xTop .x-help { flex: 0 0 var(--x-row); border-radius: 50%; padding: 0; font-size: 18px; }
+html.expert #xTop .x-style.open { border-color: var(--x-gold); color: var(--x-gold); }
+html.expert.lay-pad-port #xTop .x-key, html.expert.lay-pad-land #xTop .x-key { flex-basis: 190px; }
+html.expert.lay-pad-port #xTop .x-style, html.expert.lay-pad-land #xTop .x-style { flex-basis: 170px; }
+html.expert.lay-pad-port #xTop .x-badge, html.expert.lay-pad-land #xTop .x-badge { flex-basis: 120px; }
+html.expert #xTop .x-slot #xTog { flex: 0 1 380px; }
+
+/* ---------- Song | Progressions (decision 8) ---------- */
+html.expert #xTog { height: 100%; box-sizing: border-box; }
+html.expert #xTog button.on { background: var(--x-ink); color: var(--x-onink); }
+html.expert #xGo { display: flex; gap: var(--x-g); min-width: 0; }
+html.expert #xGo .x-next { background: var(--x-next); border-color: transparent; color: #fff; padding: 0 12px; font-family: Fredoka, Nunito, system-ui, sans-serif; }
+html.expert #xGo .x-play { width: var(--x-row); padding: 0; font-size: 16px; }
+html.expert.lay-pad-port #xGo .x-next { width: 180px; }
+html.expert.lay-pad-land #xGo .x-next { width: 150px; } html.expert.lay-phone-land #xGo .x-next { width: 84px; }
+html.expert.lay-phone-land #xGo .x-play, html.expert.lay-pad-land #xGo .x-play { width: var(--x-src-h); }
+html.expert #xSrc { display: flex; min-width: 0; }
+html.expert #xSrc.x-mode-song { background: var(--x-surface); border: 1.5px solid var(--x-line); border-radius: 18px; padding: 4px 4px 4px 10px; gap: 6px; align-items: center; box-sizing: border-box; }
+html.expert .x-songc { flex: 1; min-width: 0; }
+html.expert .x-stitle { font: 600 12px Fredoka, Nunito, system-ui, sans-serif; color: var(--x-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html.expert .x-sline { font: 700 16px Andika, Nunito, system-ui, sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html.expert .x-sline .x-now { background: var(--x-gold); color: #3B2600; border-radius: 6px; padding: 0 4px; }
+html.expert .x-empty .x-sline { font-size: 13px; color: var(--x-muted); font-weight: 600; }
+html.expert .x-lock { flex: none; width: 46px; height: calc(100% - 2px); flex-direction: column; gap: 0; font-size: 10.5px; padding: 0; border-radius: 12px; }
+html.expert .x-lock .x-lki { font-size: 15px; line-height: 1.1; }
+html.expert.lay-pad-port .x-stitle, html.expert.lay-pad-land .x-stitle { font-size: 15px; }
+html.expert.lay-pad-port .x-sline { font-size: 26px; } html.expert.lay-pad-land .x-sline { font-size: 22px; }
+html.expert.lay-pad-port .x-lock, html.expert.lay-pad-land .x-lock { width: 72px; font-size: 13px; }
+html.expert.lay-phone-land .x-stitle { font-size: 10.5px; } html.expert.lay-phone-land .x-sline { font-size: 14px; }
+html.expert.lay-phone-land #xSrc.x-mode-song { padding: 2px 3px 2px 8px; border-radius: 12px; }
+html.expert.lay-phone-land .x-lock { width: 40px; font-size: 9.5px; }
+html.expert .x-pbar { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--x-surface); border: 1.5px solid var(--x-line);
+  border-radius: 18px; padding: 0 12px; color: var(--x-ink); text-align: left; }
+html.expert .x-pbar.open { border-color: var(--x-gold); }
+html.expert .x-pcol { display: flex; flex-direction: column; min-width: 0; line-height: 1.1; }
+html.expert .x-pn { font: 600 16px Fredoka, Nunito, system-ui, sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html.expert .x-pn small { font: 700 11.5px Nunito, system-ui, sans-serif; color: var(--x-muted); }
+html.expert .x-dots { display: flex; gap: 5px; margin-top: 5px; }
+html.expert .x-dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--x-line); box-sizing: border-box; }
+html.expert .x-dots i.now { background: var(--x-gold); } html.expert .x-dots i.next { background: transparent; border: 2px dashed var(--x-next-l); }
+html.expert.lay-pad-port .x-pn, html.expert.lay-pad-land .x-pn { font-size: 22px; }
+html.expert.lay-phone-land .x-pn { font-size: 14px; } html.expert.lay-phone-land .x-dots { margin-top: 2px; }
+html.expert.lay-phone-land .x-pbar { border-radius: 12px; }
+/* the progression list opens over the grid, never over the keys */
+html.expert #xPList { position: fixed; z-index: 60; left: 12px; right: 12px; max-height: calc(var(--x-kb-top, 70vh) - var(--x-pl-top, 200px) - 6px); overflow: auto;
+  background: var(--x-surface); border: 1.5px solid var(--x-line); border-radius: 18px; padding: 10px; box-shadow: 0 14px 30px rgba(0,0,0,.5); box-sizing: border-box; }
+html.expert.lay-pad-port #xPList { left: 170px; right: 16px; } html.expert.lay-pad-land #xPList, html.expert.lay-phone-land #xPList { left: 25%; right: 25%; }
+html.expert .x-prow { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 8px; min-height: 58px; margin-top: 8px; padding: 6px 10px;
+  border-radius: 14px; background: var(--x-card); border: 1.5px solid var(--x-line); color: var(--x-ink); text-align: left; box-sizing: border-box; }
+html.expert .x-prow.on { border: 2px solid var(--x-gold); }
+html.expert .x-prow b { font: 600 15px Fredoka, Nunito, system-ui, sans-serif; } html.expert .x-prow small { font-size: 11px; color: var(--x-muted); font-weight: 700; }
+html.expert .x-pchips { display: flex; gap: 5px; flex: none; }
+html.expert .x-pc { font-style: normal; min-width: 30px; height: 30px; padding: 0 4px; box-sizing: border-box; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center;
+  font: 600 12.5px Fredoka, Nunito, system-ui, sans-serif; background: var(--x-happy); color: #22180f; }
+html.expert .x-pc.minor, html.expert .x-pc.dim { background: var(--x-sad); }
+html.expert .x-pnote { margin: 10px 2px 2px; font-size: 12px; color: var(--x-muted); }
+html.expert.lay-phone-land .x-prow { min-height: 44px; margin-top: 5px; }
+
+/* ---------- NOW box ---------- */
+html.expert .now-col { display: flex !important; min-height: 0; }
+html.expert .now-card { flex: 1; margin: 0 !important; min-height: 0 !important; height: 100% !important; box-sizing: border-box; display: flex !important; flex-direction: column; align-items: center; justify-content: center;
+  background: var(--x-surface) !important; border: 1.5px solid var(--x-line) !important; border-radius: 18px !important; padding: 2px 4px !important; }
+html.expert .now-card .card-label { font-size: 9px !important; letter-spacing: .6px; color: var(--x-muted) !important; margin: 0 !important; }
+html.expert #symbol { font-family: Fredoka, Nunito, system-ui, sans-serif !important; font-size: 26px !important; line-height: 1 !important; color: var(--x-gold) !important; }
+html.expert #tones { font-size: 10.5px !important; font-weight: 800; letter-spacing: 1.2px; color: var(--x-muted) !important; white-space: nowrap; }
+html.expert.lay-pad-port #symbol { font-size: 40px !important; } html.expert.lay-pad-port #tones { font-size: 14px !important; } html.expert.lay-pad-port .now-card .card-label { font-size: 12px !important; }
+html.expert.lay-pad-land #symbol { font-size: 30px !important; }
+html.expert.lay-phone-land .now-card { flex-direction: row !important; gap: 6px; border-radius: 12px !important; }
+html.expert.lay-phone-land .now-card .card-label { display: none; } html.expert.lay-phone-land #symbol { font-size: 20px !important; }
+html.expert.x-heldplay .now-card { box-shadow: 0 0 0 3px var(--x-next-l); }
+html.expert.x-heldplay #tones::before { content: "\266a))) "; color: var(--x-next-l); }
+
+/* ---------- chord grid (decision 5: black border; decision 7: the full 7x5 grid from strip.js) ---------- */
+html.expert .next-card { background: var(--x-gridbg) !important; border: 2px solid #000 !important; border-radius: 14px !important; padding: 3px !important; min-height: 0; box-sizing: border-box; display: flex !important; }
+html.expert #suggest.ss { height: 100% !important; flex: 1; --ss-fs: 17px; --ss-note: 17px; --ss-small: 10px; --ss-lbl: 0px !important; --ss-cgap: 4px; --ss-rg: 4px; --ss-mid: 1fr; padding-right: 0 !important; grid-template-rows: [b-start g-start] minmax(0, 1fr) [b-end h-start] minmax(0, 1fr) [h-end n-start] minmax(0, 1fr) [n-end s-start] minmax(0, 1fr) [s-end t-start] minmax(0, 1fr) [t-end g-end] !important; }
+html.expert #suggest .ss-chip { border-radius: var(--x-chip-r); font-family: Fredoka, Nunito, system-ui, sans-serif; border: 0; }
+html.expert #suggest .ss-chip.major, html.expert #suggest .ss-chip.color { background: var(--x-happy); color: #22180f; }
+html.expert #suggest .ss-chip.minor { background: var(--x-sad); color: #22180f; }
+html.expert #suggest .ss-chip.dim, html.expert #suggest .ss-chip.tension { background: var(--x-tension); color: #F4EAD9; }
+html.expert #suggest .ss-chip.borrowed { background: transparent; color: var(--x-borrow); border: 2px dashed var(--x-borrow); }
+html.expert #suggest .ss-track { display: none; }
+html.expert #suggest .ss-note { background: var(--x-surface); border: 1.5px solid var(--x-line); border-radius: var(--x-chip-r); font-family: Fredoka, Nunito, system-ui, sans-serif; color: var(--x-ink); }
+html.expert #suggest .ss-note::after { content: ""; position: absolute; bottom: 3px; left: 25%; width: 50%; height: 3px; border-radius: 2px; background: var(--x-nc, transparent); }
+html.expert #suggest .ss-note.home { border: 2px solid var(--x-ink); color: var(--x-ink); }
+html.expert #suggest .ss-note.home::before { display: none; }
+html.expert #suggest .ss-note.home small { color: var(--x-muted); }
+html.expert #suggest .ss-gl { display: none; }
+html.expert .next-card::before { content: none; }
+
+/* ---------- Sustain + the control row (decision 3: [Sustain][Type][Full Range][Sound]) ---------- */
+html.expert #sustainBtn { width: auto !important; height: auto !important; min-height: 0 !important; margin: 0 !important; align-self: stretch; justify-self: stretch;
+  display: flex !important; flex-direction: column; align-items: center; justify-content: center; gap: 0;
+  background: var(--x-sus) !important; border: 2px solid var(--x-susb) !important; border-radius: 14px !important; color: var(--x-ink) !important;
+  font: 600 17px Fredoka, Nunito, system-ui, sans-serif !important; letter-spacing: 1px; text-transform: uppercase; }
+html.expert #sustainBtn::after { content: "hold"; font: 700 10px Nunito, system-ui, sans-serif; letter-spacing: 0; text-transform: none; color: var(--x-muted); }
+html.expert #sustainBtn[aria-pressed="true"] { background: var(--x-gold) !important; color: #3B2600 !important; border-color: var(--x-gold-deep) !important; }
+html.expert #sustainBtn[aria-pressed="true"]::after { color: #5a3a00; }
+html.expert.lay-pad-port #sustainBtn, html.expert.lay-pad-land #sustainBtn { font-size: 24px !important; }
+html.expert #xCtl { display: flex; gap: var(--x-g); min-width: 0; }
+html.expert #xCtl .x-b { height: 100%; box-sizing: border-box; }
+html.expert #xCtl .x-type { flex: 0 0 96px; justify-content: space-between; padding: 0 10px; }
+html.expert #xCtl .x-tcol { display: flex; flex-direction: column; line-height: 1.05; align-items: flex-start; min-width: 0; }
+html.expert #xCtl .x-tcol .x-lbl { font-size: 9.5px; letter-spacing: .8px; }
+html.expert #xCtl .x-tv { font: 600 17px Fredoka, Nunito, system-ui, sans-serif; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+html.expert #xCtl .x-type.held .x-tv { color: var(--x-next-l); }
+html.expert.x-types-open #xCtl .x-type { border: 2px solid var(--x-gold); } html.expert.x-types-open #xCtl .x-type .x-car { color: var(--x-gold); }
+html.expert #xCtl .x-full { flex: 1; white-space: normal; text-align: center; font-size: 12.5px; line-height: 1.1; padding: 0 4px; }
+html.expert #xCtl .x-full.on { background: var(--x-gold); color: #3B2600; border-color: transparent; }
+html.expert #xCtl .x-sound { flex: 1; flex-direction: column; gap: 0; font-size: 13px; line-height: 1.1; padding: 0 4px; }
+html.expert #xCtl .x-sound small { font-size: 9px; color: var(--x-muted); }
+html.expert #xCtl .x-sound.open { border-color: var(--x-gold); }
+html.expert.lay-pad-port #xCtl .x-type { flex-basis: 170px; } html.expert.lay-pad-port #xCtl .x-tv { font-size: 24px; }
+html.expert.lay-pad-port #xCtl .x-full, html.expert.lay-pad-port #xCtl .x-sound { font-size: 18px; } html.expert.lay-pad-port #xCtl .x-sound small { font-size: 12px; }
+/* landscape right column: Type on its own row, then Full Range + Sound */
+html.expert.lay-pad-land #xCtl, html.expert.lay-phone-land #xCtl { flex-wrap: wrap; align-content: flex-start; }
+html.expert.lay-pad-land:not(.x-types-open) #xCtl .x-type, html.expert.lay-phone-land:not(.x-types-open) #xCtl .x-type { flex: 1 0 100%; height: var(--x-ctl-h); }
+html.expert.lay-pad-land:not(.x-types-open) #xCtl .x-full, html.expert.lay-pad-land:not(.x-types-open) #xCtl .x-sound,
+html.expert.lay-phone-land:not(.x-types-open) #xCtl .x-full, html.expert.lay-phone-land:not(.x-types-open) #xCtl .x-sound { height: calc(var(--x-ctl-h) - 8px); }
+html.expert.lay-pad-land.x-types-open #xCtl, html.expert.lay-phone-land.x-types-open #xCtl { flex-wrap: nowrap; align-content: stretch; }
+html.expert.lay-pad-land.x-types-open #xCtl .x-type, html.expert.lay-phone-land.x-types-open #xCtl .x-type { flex: 1 1 auto; }
+html.expert.lay-phone-land #xCtl .x-type { padding: 0 8px; } html.expert.lay-phone-land #xCtl .x-tv { font-size: 15px; }
+html.expert.lay-phone-land #xCtl .x-full { font-size: 11px; } html.expert.lay-phone-land #xCtl .x-sound { font-size: 11.5px; } html.expert.lay-phone-land #xCtl .x-sound small { font-size: 8px; }
+html.expert.lay-phone-land #sustainBtn { font-size: 15px !important; }
+html.expert.lay-pad-land #xCtl .x-tv { font-size: 21px; }
+
+/* ---------- chord-type table, docked (decisions 2, 4, 9) ---------- */
+html.expert #chords { display: flex !important; margin: 0 !important; padding: 4px !important; min-height: 0; box-sizing: border-box; border-radius: 14px;
+  background: rgba(255,194,26,.06) !important; border: 1.5px solid rgba(255,194,26,.35) !important; width: auto !important; height: auto !important; position: relative; }
+html.expert #palette { display: grid !important; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); grid-auto-flow: row !important; gap: 4px; flex: 1; min-width: 0; min-height: 0; }
+html.expert #types, html.expert #exts { display: contents !important; }
+html.expert #palette button { width: auto !important; height: auto !important; min-height: 0 !important; margin: 0 !important; border-radius: 12px !important; background: var(--x-card) !important;
+  border: 1.5px solid var(--x-line) !important; color: var(--x-ink) !important; font: 700 15px Nunito, system-ui, sans-serif !important; position: relative; box-shadow: none !important; }
+html.expert.lay-pad-port #palette button, html.expert.lay-pad-land #palette button { font-size: 20px !important; }
+html.expert.lay-phone-land #palette button { font-size: 12.5px !important; border-radius: 9px !important; }
+html.expert #palette button.x-held { background: var(--x-next) !important; color: #fff !important; border-color: transparent !important; box-shadow: 0 0 0 4px rgba(79,179,165,.55), 0 0 18px rgba(79,179,165,.8) !important; z-index: 1; }
+html.expert #palette button.x-held::after { content: "HELD"; position: absolute; top: -9px; right: -4px; background: #fff; color: var(--x-next); font: 900 9px Nunito, system-ui, sans-serif; letter-spacing: .8px; padding: 2px 5px; border-radius: 6px; }
+html.expert #palette button.nofit { opacity: .4; }
+
+/* ---------- keys: docked C–B, 7 white keys (decision 10) ---------- */
+html.expert .kb-wrap { min-height: 0; background: #0f0d0b; border-radius: 16px; padding: 4px; box-sizing: border-box; }
+html.expert .phase-track { display: none; }
+html.expert .kb.piano .pad.white { background: #F7F1E6; color: #6b5a48; border-radius: 0 0 10px 10px; position: relative; }
+html.expert .kb.piano .pad.white::before { content: ""; position: absolute; left: 15%; right: 15%; bottom: calc(var(--x-kfs, 13px) + 12px); height: 7px; border-radius: 4px; background: var(--x-kc, transparent); }
+html.expert .kb.piano .pad[data-pc="0"] { --x-kc: #EF8A7E; } html.expert .kb.piano .pad[data-pc="2"] { --x-kc: #F2A0C4; } html.expert .kb.piano .pad[data-pc="4"] { --x-kc: #B9A3E8; }
+html.expert .kb.piano .pad[data-pc="5"] { --x-kc: #8EC5F0; } html.expert .kb.piano .pad[data-pc="7"] { --x-kc: #7FD3B5; } html.expert .kb.piano .pad[data-pc="9"] { --x-kc: #A8D47E; }
+html.expert .kb.piano .pad[data-pc="11"] { --x-kc: #D8A47F; }
+html.expert .kb.piano .pad.black { background: #2a2119; border: 1.5px solid #4a3c2e; border-top: 0; color: #a89680; }
+
+/* ---------- sheets / menus ---------- */
+html.expert #xScrim { position: fixed; left: 0; right: 0; top: 0; height: var(--x-kb-top, 100%); background: rgba(0,0,0,.45); z-index: 50; }
+html.expert .x-menu { position: fixed; z-index: 61; width: 172px; background: #2a231c; border: 1.5px solid var(--x-line); border-radius: 18px; padding: 6px; box-shadow: 0 14px 30px rgba(0,0,0,.5);
+  max-height: calc(var(--x-kb-top, 80vh) - 70px); overflow: auto; box-sizing: border-box; }
+html.expert .x-mi { display: flex; width: 100%; align-items: center; justify-content: space-between; height: 46px; padding: 0 10px; border: 0; border-radius: 12px; background: transparent; color: var(--x-ink); box-sizing: border-box; }
+html.expert .x-mi b { font: 600 15px Fredoka, Nunito, system-ui, sans-serif; } html.expert .x-mi span { font-size: 10.5px; color: var(--x-muted); font-weight: 700; }
+html.expert .x-mi.on { background: var(--x-gold); color: #3B2600; } html.expert .x-mi.on span { color: #3B2600; } html.expert .x-mi.on span::before { content: "\2713 "; }
+html.expert .x-sheet { position: fixed; z-index: 61; left: 8px; right: 8px; background: var(--x-surface); border: 1.5px solid var(--x-line); border-radius: 26px; padding: 10px 16px 14px;
+  box-shadow: 0 -12px 30px rgba(0,0,0,.45); box-sizing: border-box; overflow: auto; color: var(--x-ink); }
+html.expert .x-grab { width: 48px; height: 5px; border-radius: 3px; background: var(--x-line); margin: 0 auto 8px; }
+html.expert .x-sh-h { display: flex; justify-content: space-between; align-items: center; font: 600 22px Fredoka, Nunito, system-ui, sans-serif; margin-bottom: 8px; }
+html.expert .x-close { width: 44px; height: 44px; border-radius: 50%; padding: 0; }
+html.expert .x-keysheet { top: auto; bottom: 8px; max-height: calc(100% - 60px); }
+html.expert .x-mini { position: relative; height: 120px; margin: 4px 0 12px; }
+html.expert .x-mw { display: flex; height: 100%; gap: 3px; }
+html.expert .x-mk.wk { flex: 1; border: 0; border-radius: 0 0 8px 8px; background: #F7F1E6; color: #3a2e22; font: 800 14px Nunito, system-ui, sans-serif; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 6px; position: relative; }
+html.expert .x-mk.wk::before { content: ""; position: absolute; left: 20%; right: 20%; bottom: 28px; height: 5px; border-radius: 3px; background: var(--x-kc); }
+html.expert .x-mk.n0 { --x-kc: #EF8A7E; } html.expert .x-mk.n2 { --x-kc: #F2A0C4; } html.expert .x-mk.n4 { --x-kc: #B9A3E8; } html.expert .x-mk.n5 { --x-kc: #8EC5F0; }
+html.expert .x-mk.n7 { --x-kc: #7FD3B5; } html.expert .x-mk.n9 { --x-kc: #A8D47E; } html.expert .x-mk.n11 { --x-kc: #D8A47F; }
+html.expert .x-mbk { position: absolute; left: 0; right: 0; top: 0; height: 55%; pointer-events: none; }
+html.expert .x-mk.bk { position: absolute; top: 0; width: 13%; height: 100%; pointer-events: auto; background: #2a2119; border: 1.5px solid #4a3c2e; border-radius: 0 0 6px 6px; color: #a89680; font: 700 10px Nunito, system-ui, sans-serif; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 4px; }
+html.expert .x-mk.on { background: var(--x-gold) !important; color: #3B2600 !important; box-shadow: inset 0 0 0 3px var(--x-gold-deep); }
+html.expert .x-kmode { height: 46px; } html.expert .x-kmode button.on { background: var(--x-ink); color: var(--x-onink); }
+html.expert .x-settings { top: calc(var(--x-top-b, 54px) - 14px); bottom: 0; border-radius: 26px 26px 0 0; }
+html.expert .x-settings > .x-lbl { margin: 4px 0 6px; }
+html.expert .x-settings .x-mode { height: 46px; margin-bottom: 4px; }
+html.expert .x-set { display: flex; width: 100%; align-items: center; min-height: 56px; gap: 10px; padding: 0; border: 0; border-bottom: 1.5px solid var(--x-line); background: transparent; color: var(--x-ink);
+  font: 700 16px Nunito, system-ui, sans-serif; text-align: left; }
+html.expert .x-st { flex: 1; } html.expert .x-st small { display: block; font-weight: 600; font-size: 12.5px; color: var(--x-muted); }
+html.expert .x-tg { width: 64px; height: 38px; border-radius: 19px; background: #5a4d3e; position: relative; flex: none; }
+html.expert .x-tg::after { content: ""; position: absolute; top: 4px; left: 4px; width: 30px; height: 30px; border-radius: 50%; background: #F4EAD9; transition: left .15s; }
+html.expert .x-set.on .x-tg { background: var(--x-next); } html.expert .x-set.on .x-tg::after { left: 30px; }
+html.expert .x-look .x-seg { flex: none; } html.expert .x-look .x-seg button { padding: 8px 12px; }
+html.expert .x-chev { color: var(--x-muted); font-size: 22px; }
+html.expert .x-danger .x-st { color: var(--x-danger); }
+html.expert .x-ver { margin-top: 10px; font-size: 12px; color: var(--x-muted); text-align: center; }
+/* Sound / FX / Layout / Loop: the existing #ctl panel as a sheet that stops above the keys */
+html.expert #ctl { display: none !important; }
+html.expert.x-ctl-on #ctl { display: block !important; position: fixed !important; z-index: 61; left: 8px !important; right: 8px !important; width: auto !important;
+  top: calc(var(--x-top-b, 54px) + 50px) !important; bottom: auto !important; max-height: calc(var(--x-kb-top, 80vh) - var(--x-top-b, 54px) - 58px); overflow: auto;
+  background: var(--x-surface) !important; border: 1.5px solid var(--x-line) !important; border-radius: 26px !important; padding: 12px 14px !important; box-shadow: 0 14px 30px rgba(0,0,0,.5); transform: none !important; }
+html.expert.x-ctl-on #ctl .pane { display: none; }
+html.expert.x-ctl-on #ctl[data-open="sound"] #paneSound, html.expert.x-ctl-on #ctl[data-open="fx"] #paneFx,
+html.expert.x-ctl-on #ctl[data-open="key"] #paneKey, html.expert.x-ctl-on #ctl[data-open="loop"] #paneLoop { display: block !important; }
+html.expert.lay-pad-land.x-ctl-on #ctl, html.expert.lay-phone-land.x-ctl-on #ctl { left: 20% !important; right: 20% !important; top: calc(var(--x-top-b, 40px) + 4px) !important; }
+html.expert .x-volrow { display: flex; align-items: center; gap: 12px; margin-top: 10px; font-weight: 800; font-size: 12px; color: var(--x-muted); text-transform: uppercase; letter-spacing: 1px; }
+html.expert .x-volrow input { flex: 1; } html.expert .x-volrow b { width: 34px; color: var(--x-ink); }
+html.expert #howto, html.expert #uploadPick, html.expert #keyPick, html.expert #tour { z-index: 80; }
+html.expert.lay-pad-port #suggest.ss, html.expert.lay-pad-land #suggest.ss { --ss-fs: 24px; --ss-note: 24px; --ss-small: 13px; --ss-cgap: 8px; --ss-rg: 8px; }
+html.expert.lay-phone-land #suggest.ss { --ss-fs: 14px; --ss-note: 14px; --ss-small: 9px; --ss-rg: 3px; }
+/* key marks in the Expert colours: sounding = gold, next chord = dashed teal (Play along marks keep their classes) */
+html.expert .kb.piano .white.held { background: #FFE7A6 !important; color: #5a3a00 !important; }
+html.expert .kb.piano .black.held { background: var(--x-gold-deep) !important; }
+html.expert .kb.piano .pad.nx { outline: 2.5px dashed var(--x-next-l) !important; outline-offset: -6px; box-shadow: none !important; }
+html.expert .kb.piano .pad.black.nokey { opacity: 1; background: #3a3129; color: #7a6a58; border-color: #4a3c2e; }
+html.expert .kb.piano .pad.white.nokey { opacity: .45; }
+html.expert #xScrim.x-clear { background: transparent; }
+html.expert .x-mk.wk { height: 100%; box-sizing: border-box; }
+html.expert .x-mbk .x-mk.bk { height: 100%; }
+html.expert .x-mini { height: 150px; }
+html.lay-pad-port.expert .x-mini, html.lay-pad-land.expert .x-mini { height: 200px; }
+html.expert.lay-pad-land .x-keysheet, html.expert.lay-phone-land .x-keysheet, html.expert.lay-pad-port .x-keysheet { left: 20%; right: 20%; }
+html.expert.lay-pad-land .x-settings, html.expert.lay-phone-land .x-settings, html.expert.lay-pad-port .x-settings { left: 18%; right: 18%; }
+/* the Sound sheet in the Expert colours */
+html.expert.x-ctl-on #ctl .ctl-tabs { display: flex; background: var(--x-card); border-radius: 14px; padding: 3px; gap: 3px; margin-bottom: 10px; }
+html.expert.x-ctl-on #ctl .ctl-tabs button[data-tab] { flex: 1; height: 40px; border-radius: 11px; border: 0; background: transparent; color: var(--x-muted); font-weight: 700; }
+html.expert.x-ctl-on #ctl .ctl-tabs button[aria-selected="true"] { background: var(--x-ink); color: var(--x-onink); }
+html.expert.x-ctl-on #ctl .sound-tiles button.on, html.expert.x-ctl-on #ctl .seg button.on { background: var(--x-gold) !important; color: #3B2600 !important; border-color: transparent !important; }
+html.expert.x-ctl-on #ctl .pane-h { display: none; }

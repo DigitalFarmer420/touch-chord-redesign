@@ -48,6 +48,7 @@ import * as uiNowbox from "./ui/nowbox.js?v=112.13";
 import * as uiKeychip from "./ui/keychip.js?v=112.13";
 import * as settings from "./settings.js?v=112.13";
 import * as uiLayout from "./ui/layout.js?v=112.13";
+import * as expertUi from "./expert/ui.js?v=112.13";   // Expert redesign (html.expert screen set)
 // Entry point: loads every module, runs the boot steps in the v112.3 order, final boot (saved settings, first song, tour), deliberate globals, test hooks with ?test=1.
 import { wireKidKey } from "./kids.js?v=112.13";
 import { applySettings } from "./settings.js?v=112.13";
@@ -145,3 +146,4 @@ uiKeychip.boot();
 settings.boot();
 uiLayout.boot();
 boot();
+expertUi.boot();   // Expert redesign: after the app boot (saved settings applied)

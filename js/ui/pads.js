@@ -256,6 +256,8 @@ function addFourths() {
 // Simple mode forces the Octave layout; on regular (iPad) size it spans two
 // octaves. Full mode is unchanged (Octave = one octave on every size).
 export var padSpan;
+var winKeys = 0;   // Expert redesign: window key count override (0 = the classic 13); set by js/expert/ui.js
+export function setWinKeys(n) { winKeys = n | 0; }
 export function octaveSpan() {
   return 1; // v38: Simple is always one octave (C..B); keys widen to fill
 }
@@ -278,7 +280,7 @@ export function renderKeys() {
   padSpan = layout === "octave" ? octaveSpan() : 0;
   if (layout === "fourths") addFourths();
   else if (layout === "full") { var fr = kbFullRange(); shared.kbFullLo = fr.lo; addPiano(2, fr.lo, fr.hi - fr.lo + 1); }   // v85; v111 Kids from the tonic
-  else addPiano(1, shared.kbWinLow, 13);   // v83: Octave and Piano = one 13-key window, root on the left
+  else addPiano(1, shared.kbWinLow, winKeys || 13);   // v83: Octave and Piano = one 13-key window, root on the left (Expert: 12 = C..B, setWinKeys)
 }
 
 function bindPad(b) {
