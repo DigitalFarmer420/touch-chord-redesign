@@ -61,7 +61,7 @@ https://digitalfarmer420.github.io/touch-chord-redesign/ . Never touch-chord (pr
       keysplit, validate, labelfit, kidsascend, kidsgold, upload13, kidsview x4 (360/780/768/1024), kvaudio, expert (328 checks)
 - [x] e2e group 2 (worktree ../wt2): 7/7 PASS in 46.7 min - test111, kbfix, kbaccept x4, playoff
 - [x] audioeq vs 351c02c: 64 runs, 4268 audio-engine calls, 0 differences (sound / timing identical)
-- [ ] grownup vs 351c02c: first run 81/84 identical (3 'menu' shots at 768x1024 / 1024x768 differ only in whether the
+- [x] grownup vs 351c02c: first run 81/84 identical (3 'menu' shots at 768x1024 / 1024x768 differ only in whether the
       walked Am chord is still lit when the gear menu opens - timing under load, the set changes run to run);
-      1024x768 rerun 21/21; 768x1024 rerun under way
+      reruns at quiet load: 1024x768 21/21, 768x1024 21/21 (360x780 and 780x360 were 42/42 in the first run)
 - [ ] new repo + Pages + live check
