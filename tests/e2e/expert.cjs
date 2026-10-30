@@ -163,6 +163,70 @@ const SUS = { '360x780': [108, 52], '820x1180': [230, 72], '1180x820': [206, 84]
     const cl = await p2.evaluate(() => ({ expert: document.documentElement.classList.contains('expert'), keys: document.querySelectorAll('#pads .pad').length, top: getComputedStyle(document.querySelector('header.topbar')).display, xtop: getComputedStyle(document.getElementById('xTop')).display }));
     F(!cl.expert && cl.keys === 13 && cl.top !== 'none' && cl.xtop === 'none', 'without Expert: the classic Full screen (13-key window, classic top bar) ' + JSON.stringify(cl));
     await c2.close();
+    // 14. rd3 (Noff rd2 MED + steering a/b): the 7-white-key window marks every pitch class of the sounding chord (gold) and of
+    // the next chord (teal) - a note outside the window lights its same-name key with a small up / down arrow - across the 8
+    // styles (Next steps, held chips, Play song); and every key's label is the note name of the pitch it plays (window start,
+    // after a chord, after snap-back, during playback).
+    const c3 = await b.newContext({ viewport: { width: w, height: h } });
+    await c3.addInitScript(`try{if(!sessionStorage.getItem('x')){sessionStorage.setItem('x',1);localStorage.clear();localStorage.setItem('touchChord.tour.v1','done');localStorage.setItem('touchChord.settings.v1',JSON.stringify({v:1,settings:{style:'pop',simple:false,playAlong:true,paHints:false,lockKey:{pc:0,mode:'major'}}}));}}catch(e){}`);
+    const p3 = await c3.newPage(); const errs3 = []; p3.on('pageerror', e => errs3.push(e.message));
+    await p3.goto(URL0 + (URL0.includes('?') ? '&' : '?') + 'test=1&expert=1'); await p3.waitForTimeout(1300);
+    await p3.evaluate(() => {
+      const A = window.ChordAudio; window.__L = []; const pc = A.playChord.bind(A);
+      A.playChord = function (g, m, o) { window.__L.push({ g, m: (m || []).map(Number).filter(isFinite) }); return pc(g, m, o); };
+      window.__pd = (el, id, t) => { const r = el.getBoundingClientRect(); el.dispatchEvent(new PointerEvent(t || 'pointerdown', { pointerId: id, button: 0, bubbles: true, cancelable: true, pointerType: 'touch', isPrimary: true, clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 })); };
+      const NM = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+      window.__chk = (sounding) => {   // sounding: the true notes (null = none); next from the app's own next-chord rule
+        const pc = m => ((m % 12) + 12) % 12, out = [];
+        const keys = [...document.querySelectorAll('#pads .pad')].map(e => { const nm = (e.querySelector('.nm') || e).textContent.trim(); const a = getComputedStyle(e, '::after');
+          return { m: +e.dataset.midi, dpc: +e.dataset.pc, nm, c: e.classList, arrow: a.display !== 'none' && /[\u2191\u2193]/.test(a.content) ? (a.content.includes('\u2191') ? 'up' : 'down') : null }; });
+        const lab = []; keys.forEach(k => { const t = k.nm.replace(/[♯#]/, '+').replace(/[♭]/, '-'); const v = NM[t[0]]; const lp = v == null ? null : pc(v + (t.includes('+') ? 1 : 0) - (t.includes('-') ? 1 : 0));
+          if (lp !== pc(k.m) || k.dpc !== pc(k.m)) lab.push(`${k.m} labelled ${k.nm} (data-pc ${k.dpc})`); });
+        const lo = Math.min(...keys.map(k => k.m)), hi = Math.max(...keys.map(k => k.m)), byPc = {}; keys.forEach(k => byPc[pc(k.m)] = k);
+        const gold = k => k.c.contains('held') || k.c.contains('selected') || k.c.contains('x-pclit');
+        const teal = k => k.c.contains('nx') || k.c.contains('x-pcnx');
+        const want = (list, kind) => { const pcs = [...new Set(list.map(pc))];
+          pcs.forEach(q => { const k = byPc[q]; if (!k) { out.push(`${kind} pc ${q} has no key`); return; }
+            const ok = kind === 'gold' ? gold(k) : (gold(k) || teal(k)); if (!ok) { out.push(`${kind} ${q} (${list.filter(m => pc(m) === q)}) unmarked on ${k.m}`); return; }
+            if (kind === 'teal' && gold(k)) return;   // the same key already sounds: gold wins
+            const inWin = list.some(m => pc(m) === q && m >= lo && m <= hi); const dir = list.some(m => pc(m) === q && m > hi) ? 'up' : 'down';
+            if (!inWin && k.arrow !== dir) out.push(`${kind} ${q} only outside ${lo}..${hi} (${list.filter(m => pc(m) === q)}): key ${k.m} arrow ${k.arrow}, want ${dir}`);
+            if (inWin && k.arrow && !list.some(m => m < lo || m > hi)) out.push(`${kind} ${q}: arrow ${k.arrow} on an in-window note`); }); };
+        const snd = sounding || []; want(snd, 'gold'); const nx = window.__xMarks ? window.__xMarks.next() : []; want(nx, 'teal');
+        if (!snd.length) keys.forEach(k => { if (k.c.contains('x-pclit')) out.push(`nothing sounds but ${k.m} is gold`); });
+        return { lab, out, lo, snd, nx };
+      };
+    });
+    const STY = ['pop', 'jazz', 'rnb', 'ballad', 'reggae', 'funk', 'yogaDeep', 'country'];
+    const lastChord = () => p3.evaluate(() => { const l = window.__L.filter(x => x.m.length > 1); window.__L = []; return l.length ? l[l.length - 1].m : null; });
+    const chk = async (what, snd) => { await p3.waitForTimeout(60); const r = await p3.evaluate(s => window.__chk(s), snd);
+      F(!r.lab.length, `${what}: key labels match the pitches (window ${r.lo}) ${r.lab.join('; ')}`);
+      F(!r.out.length, `${what}: every pitch class of the sounding ${JSON.stringify(r.snd)} and next ${JSON.stringify(r.nx)} chords is marked: ${r.out.join('; ')}`); return r; };
+    D.marks = {};
+    for (const sty of STY) {
+      await p3.evaluate(() => { const b = document.getElementById('xStyle'); b.click(); }); await p3.waitForTimeout(120);
+      await p3.evaluate(s => document.querySelector(`#xStyleMenu [data-style="${s}"]`).click(), sty); await p3.waitForTimeout(400);
+      F(await p3.evaluate(s => document.querySelector('#styles .on').dataset.style === s, sty), `style ${sty} picked`);
+      await p3.evaluate(() => { __progApi.stop && __progApi.stop(); window.__L = []; }); await p3.waitForTimeout(150);
+      const st = D.marks[sty] = [];
+      st.push(await chk(`${sty} rest`, null));
+      for (let i = 0; i < 4; i++) { await p3.evaluate(() => __progApi.next()); await p3.waitForTimeout(220); const m = await lastChord(); F(!!m, `${sty} Next ${i + 1} sounds`); st.push(await chk(`${sty} Next ${i + 1}`, m)); }
+      const nch = await p3.evaluate(() => [...document.querySelectorAll('#suggest .ss-chip')].filter(x => x.getClientRects().length && getComputedStyle(x).visibility !== 'hidden').length);
+      for (let i = 0; i < Math.min(nch, 7); i++) {
+        await p3.evaluate(i => { window.__L = []; const c = [...document.querySelectorAll('#suggest .ss-chip')].filter(x => x.getClientRects().length && getComputedStyle(x).visibility !== 'hidden')[i]; window.__chip = c; window.__pd(c, 80 + i); }, i);
+        await p3.waitForTimeout(260); const m = await lastChord(); const nm = await p3.evaluate(() => window.__chip.textContent.trim());
+        st.push(await chk(`${sty} hold chip ${nm}`, m));
+        await p3.evaluate(i => window.__pd(window.__chip, 80 + i, 'pointerup'), i); await p3.waitForTimeout(200);
+      }
+      if (sty === 'pop' || sty === 'jazz') { await p3.waitForTimeout(3600); st.push(await chk(`${sty} after snap-back`, null)); }
+      await p3.evaluate(() => { const i = __prog.list.findIndex(x => x.style === undefined || true); __progApi.play(); }); 
+      for (let k = 0; k < 3; k++) { await p3.waitForTimeout(900); const snd = await p3.evaluate(() => window.__xMarks ? window.__xMarks.sounding() : []); st.push(await chk(`${sty} Play song ${k + 1}`, snd.length ? snd : null)); }
+      await p3.evaluate(() => __progApi.stop()); await p3.waitForTimeout(300);
+    }
+    if (SHOTS) { await p3.evaluate(() => { const b = document.getElementById('xStyle'); b.click(); }); await p3.waitForTimeout(100); await p3.evaluate(() => document.querySelector('#xStyleMenu [data-style="pop"]').click()); await p3.waitForTimeout(400);
+      const g = await p3.evaluate(() => { const c = [...document.querySelectorAll('#suggest .ss-chip')].find(x => /^G\b/.test(x.textContent.trim()) && x.getClientRects().length); if (c) { window.__chip = c; window.__pd(c, 99); } return !!c; });
+      if (g) { await p3.waitForTimeout(300); await p3.screenshot({ path: path.join(SHOTS, `${tag}-holdG.png`) }); await p3.evaluate(() => window.__pd(window.__chip, 99, 'pointerup')); } }
+    F(!errs3.length, 'marks: no page errors ' + errs3.join(' | ')); await c3.close();
     console.log(`${tag}: ${R.fails.filter(f => f.startsWith(tag)).length} fails`);
   }
   await b.close();
