@@ -76,3 +76,5 @@ https://digitalfarmer420.github.io/touch-chord-redesign/ . Never touch-chord (pr
 7. Noff: a finger down before a mode switch does not act on the new screen on lift (its click is dropped, the old hold still released).
 e2e: kidsview (gap, iPad-portrait key height, lyric contrast, stale lift; + 820x1180), expert (key marks, 344 checks).
 Compare: /workspace/chord-touch/redesigndev/compare-rd2/
+rd2 tests (a872db7): unit 90/90; kidsview x5 (360/780/768/1024/820) PASS, kvaudio PASS, expert 344 checks PASS;
+grownup vs 351c02c 84/84 identical (menu shot now waits for the walked chord to finish); audioeq vs 351c02c 64 runs / 4268 calls, 0 differences.
