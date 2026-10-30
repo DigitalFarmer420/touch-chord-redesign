@@ -6,7 +6,7 @@
 // pad in #suggest), a piano key through touch.js soundFinger / liftFinger, a gold tap through next.js kidsGoldGo,
 // Next / Play song through magic.js progNext / playback.js progPlay. So sound and timing are those of the Kids style.
 import { unlock } from "../audio/unlock.js?v=112.13";
-import { activeKey } from "../keys.js?v=112.13";
+import { activeKey, keyDegrees } from "../keys.js?v=112.13";
 import { KIDS_SONG_KEY } from "../songs/kids-songs.js?v=112.13";
 import { KIDS_LYRICS } from "../songs/kids-songs.js?v=112.13";
 import { magicQueue, progNext } from "../songs/magic.js?v=112.13";
@@ -16,7 +16,7 @@ import { state, fingers, shared, scheduleSave } from "../state.js?v=112.13";
 import { wrap12 } from "../theory/quality.js?v=112.13";
 import { APP_VERSION } from "../version.js?v=112.13";
 import { playAlongKeyOk, paHintMiss, paHintHide } from "../ui/hints.js?v=112.13";
-import { kidsTonic } from "../ui/keyboard.js?v=112.13";
+import { kidsTonic, kidsKeyNow } from "../ui/keyboard.js?v=112.13";
 import { kidsHintItem, kidsGoldStep, kidsGoldGo, kidsGoldPad } from "../ui/next.js?v=112.13";
 import { renderPads, keyHaptic, padKey } from "../ui/pads.js?v=112.13";
 import { stripPress, stripRelease } from "../ui/strip.js?v=112.13";
@@ -333,6 +333,16 @@ function goldMidi() {
   return kidsTonic() + (it.mel != null ? it.mel : wrap12(it.rootPc - k));   // the song pitch (keyboard.js kidsNatural; Octave kidsPlace = itself)
 }
 function keyMidi(pc) { return kidsTonic() + wrap12(pc - wrap12(kidsTonic())); }   // C..B on the Kids tonic octave (C major: C4..B4)
+// rd3 (Noff rd2 Low 3): an out-of-key key is silent in the Kids view (Full Range off), the same rule paintKeyChip paints as
+// "nokey" and padPlayable reads. Root cause of the first-tap chord: enter() rebuilds the hidden twin pads with renderPads(),
+// which (unlike kbRebuild) does not run paintKeyChip, so the twins have no "nokey" until the first tap repaints them and the
+// first out-of-key tap read as playable (C# / Bb major). The old Kids style (351c02c) paints them on load: no bug there.
+function keyOutOfKey(twin, pc) {
+  if (state.allKeys || (twin && twin.dataset.borrow)) return false;
+  var k = activeKey() || kidsKeyNow();
+  if (!k) return false;
+  return !keyDegrees(k).some(function (d) { return wrap12(d.pc) === wrap12(pc); });
+}
 function wireKey(k) {
   k.dataset.midi = String(keyMidi(Number(k.dataset.pc)));
   k.dataset.id = "kv" + k.dataset.pc;
@@ -356,7 +366,9 @@ function wireKey(k) {
     var pending = unlock();
     try { k.setPointerCapture(e.pointerId); } catch (err) {}
     var twin = document.querySelector('#pads .pad[data-midi="' + k.dataset.midi + '"]');   // the hidden Kids keyboard's own key (same id, degree, in-key rule: out-of-key black keys stay silent as in the Kids style)
-    soundFinger(e.pointerId, twin ? padKey(twin) : keyOf(k.dataset.id, k.dataset.pc, k.dataset.midi, null, false, false));
+    var kk = twin ? padKey(twin) : keyOf(k.dataset.id, k.dataset.pc, k.dataset.midi, null, false, false);
+    if (kk.playable && keyOutOfKey(twin, Number(k.dataset.pc))) kk.playable = false;   // rd3: decided from the key itself, not from the twin's "nokey" paint (unpainted on the first tap after a song opens)
+    soundFinger(e.pointerId, kk);
     if (needReplay && pending && typeof pending.then === "function") pending.then(function () { resoundHeldFinger(e.pointerId); });
     paint(true);
   });

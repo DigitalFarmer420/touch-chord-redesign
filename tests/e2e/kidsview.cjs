@@ -187,13 +187,43 @@ const st = p => p.evaluate(() => { const rc = e => { const r = e.getBoundingClie
     D.staleUnder = await p.evaluate(([x, y]) => { const e = document.elementFromPoint(x, y); return e ? (e.closest('.ss-chip, .ss-note, button') || e).textContent.trim().slice(0, 12) : null; }, [fr.x, fr.y]);
     F(await p.evaluate(() => document.documentElement.classList.contains('simple') && !document.documentElement.classList.contains('kv')), `${tag}: Simple did not open`);
     const s0 = await p.evaluate(() => window.__S);
-    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }); await p.waitForTimeout(800);
+    // rd3 (Noff rd2 Low): slide the pre-switch finger first, then lift
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: fr.x + 24, y: fr.y + 18, id: 7 }] }); await p.waitForTimeout(120);
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }); await p.waitForTimeout(30);
+    // rd3: right after the lift (no time window any more) Next works by keyboard and by a synthetic click (no pointer id)
+    const nx0 = await p.evaluate(() => { const n = document.querySelector('#prog .pg-step'); window.__nxSel = !!(n && n.getClientRects().length); return { vis: window.__nxSel, cur: __prog.cur, magic: __magic.state.pos }; });
+    F(nx0.vis, `${tag}: no visible Next (#prog .pg-step) on Simple`);
+    await p.evaluate(() => { window.__stale0 = Object.assign({}, window.__xLog || {}); document.querySelector('#prog .pg-step').focus(); });
+    await take(p); await p.keyboard.press('Enter'); await p.waitForTimeout(250);
+    const kNext = await take(p), nx1 = await p.evaluate(() => ({ cur: __prog.cur, magic: __magic.state.pos }));
+    F(kNext.length >= 1 && JSON.stringify(nx1) !== JSON.stringify({ cur: nx0.cur, magic: nx0.magic }), `${tag}: Next by keyboard right after the stale lift did nothing (${JSON.stringify(nx0)} -> ${JSON.stringify(nx1)}, ${kNext.length} sounds)`);
+    await p.evaluate(() => document.querySelector('#prog .pg-step').click()); await p.waitForTimeout(250);
+    const cNext = await take(p), nx2 = await p.evaluate(() => ({ cur: __prog.cur, magic: __magic.state.pos }));
+    F(cNext.length >= 1 && JSON.stringify(nx2) !== JSON.stringify(nx1), `${tag}: Next by a synthetic click right after the stale lift did nothing (${JSON.stringify(nx1)} -> ${JSON.stringify(nx2)}, ${cNext.length} sounds)`);
+    D.staleNext = { key: kNext.length, click: cNext.length, cur: [nx0, nx1, nx2] };
+    await p.waitForTimeout(600);
     const lift = await take(p), s1 = await p.evaluate(() => window.__S);
     D.staleLift = { under: D.staleUnder, played: lift, stops: s1 - s0 };
     F(lift.length === 0, `${tag}: lifting the pre-switch finger on "${D.staleUnder}" played ${JSON.stringify(lift)}`);
     F(s1 > s0, `${tag}: the held pad was not released on lift`);
     F(!p.__errs.length, `${tag}: page errors ${p.__errs.slice(0, 3)}`); D.errs = p.__errs.slice(0, 5);
     await p.context().close();
+    // 12. rd3 (Noff rd2 Low 3): Kids Twinkle, out-of-key black keys are silent, the very first tap and every later one
+    {
+      const q = await open(b, w, h); const cq = await q.context().newCDPSession(q);
+      const tq = async (x, y) => { await cq.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] }); await q.waitForTimeout(120); await cq.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }); await q.waitForTimeout(200); };
+      const at = sel => q.evaluate(s => { const e = document.querySelector(s); if (!e || !e.getClientRects().length) return null; const r = e.getBoundingClientRect(); return [r.x + r.width / 2, r.y + r.height * 0.4]; }, sel);
+      let r0 = await at('#kv .kv-go'); if (r0) { await tq(...r0); await q.waitForTimeout(250); }
+      r0 = await at('#kv .kv-card[data-song="Kids Twinkle"]'); if (r0) { await tq(...r0); await q.waitForTimeout(400); }
+      F((await st(q)).screen === 'play', `${tag}: black keys: Twinkle did not open`);
+      await take(q); const bl = [];
+      for (const round of [0, 1]) for (const pc of [1, 3, 6, 8, 10]) { const xy = await at(`#kv .kv-bk[data-pc="${pc}"]`); if (!xy) { F(false, `${tag}: no black key ${pc}`); continue; } await tq(...xy); const L = await take(q); bl.push([pc, L.length]);
+        F(L.length === 0, `${tag}: ${round || pc !== 1 ? 'later' : 'first'} black key tap (pc ${pc}, round ${round + 1}) sounded ${JSON.stringify(L)}`); }
+      const wxy = await at('#kv .kv-wk[data-pc="0"]'); if (wxy) { await tq(...wxy); F((await take(q)).length >= 1, `${tag}: white key C after the black keys made no sound`); }
+      const xy1 = await at('#kv .kv-bk[data-pc="1"]'); if (xy1) { await tq(...xy1); F((await take(q)).length === 0, `${tag}: black key after a white key sounded`); }
+      D.blackKeys = bl; F(!q.__errs.length, `${tag}: black keys: page errors ${q.__errs.slice(0, 3)}`);
+      await q.context().close();
+    }
   }
   await b.close();
   fs.writeFileSync(path.join(OUT, 'kidsview.json'), JSON.stringify(R, null, 1));

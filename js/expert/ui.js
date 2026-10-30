@@ -48,23 +48,25 @@ export function currentMode() { return modeOf({ kv: !!shared.kidsView, style: st
 // rd2 (Noff, rd1 Low): a finger that went down before a mode switch must not act on the new screen when it lifts
 // (hold a Kids pad, switch to Simple, lift on a chip: no chord). Its own release still runs (the held sound ends as
 // before); only the click its lift would make on whatever is under it now is dropped.
-var downs = {}, stale = {}, swallow = null;
+var downs = {}, stale = {}, staleUp = {};
 function guardTouches() {
-  window.addEventListener("pointerdown", function (e) { downs[e.pointerId] = true; delete stale[e.pointerId]; }, true);
+  // rd3 (Noff rd2 Low): no time window. Only the click that belongs to a pointer which went down before the switch is
+  // dropped (same pointerId). A click with no pointer id (keyboard, switch access, element.click(), older iOS) always works.
+  window.addEventListener("pointerdown", function (e) { downs[e.pointerId] = true; delete stale[e.pointerId]; delete staleUp[e.pointerId]; }, true);
   function up(e) {
     delete downs[e.pointerId];
     if (!stale[e.pointerId]) return;
     delete stale[e.pointerId];
     stripRelease(e.pointerId); if (fingers[e.pointerId]) liftFinger(e.pointerId);   // the old screen's hold ends (no-ops when already done)
-    swallow = { id: e.pointerId, until: performance.now() + 800 };
+    staleUp[e.pointerId] = true;
     xLog.staleLift = (xLog.staleLift || 0) + 1;
   }
   window.addEventListener("pointerup", up, true); window.addEventListener("pointercancel", up, true);
   window.addEventListener("click", function (e) {
-    if (!swallow) return;
-    var hit = performance.now() < swallow.until && (e.pointerId == null || e.pointerId < 0 || e.pointerId === swallow.id);
-    swallow = null;
-    if (hit) { e.stopImmediatePropagation(); e.preventDefault(); xLog.staleClick = (xLog.staleClick || 0) + 1; }
+    var id = e.pointerId;
+    if (id == null || id < 0 || !staleUp[id]) return;
+    delete staleUp[id];
+    e.stopImmediatePropagation(); e.preventDefault(); xLog.staleClick = (xLog.staleClick || 0) + 1;
   }, true);
 }
 export function setMode(target) {
@@ -247,10 +249,9 @@ var pc12 = function (m) { return ((m % 12) + 12) % 12; };
 function soundingMidis() {
   var out = {};
   Object.keys(fingers).forEach(function (id) { (fingers[id].midis || []).forEach(function (m) { out[m] = 1; }); });
-  var pv = shared.suggestPreview && shared.suggestPreview.midis;
-  if (pv) Object.keys(pv).forEach(function (m) { if (pv[m]) out[m] = 1; });
-  var raw = shared.suggestPreview && shared.suggestPreview.raw;
-  if (raw) raw.forEach(function (m) { out[m] = 1; });
+  var sp = shared.suggestPreview, raw = sp && sp.raw, pv = sp && sp.midis;
+  if (raw) raw.forEach(function (m) { out[m] = 1; });   // the true sounding notes (pv.midis are moved onto the drawn keys)
+  else if (pv) Object.keys(pv).forEach(function (m) { if (pv[m]) out[m] = 1; });
   return Object.keys(out).map(Number).filter(isFinite);
 }
 function nextMidis() {   // the same gate as the classic next-chord hint (next.js paintNextHint)
@@ -292,6 +293,7 @@ function paintMarks() {
     var at = !p.gold && !!p.teal && (up || down); if (k.classList.contains("x-arrow-teal") !== at) k.classList.toggle("x-arrow-teal", at);
   });
 }
+if (/[?&]test=1\b/.test(location.search)) window.__xMarks = { sounding: soundingMidis, next: nextMidis, plan: markPlan, paint: paintMarks };
 var marksMo = null, marksT = 0;
 function watchMarks() {   // the classic code repaints the keys often (held / nx / window moves): repaint the marks right after
   if (marksMo || !window.MutationObserver) return;
