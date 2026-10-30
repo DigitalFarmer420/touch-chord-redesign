@@ -68,7 +68,7 @@ lines  file
    122  js/ui/lyrics.js            Two-row lyrics (uploaded songs) and Kids lyrics.
    295  js/ui/next.js              Next-chord marks: lookahead, next hint arrow, Kids gold pad / key.
    129  js/ui/nowbox.js            Now box: chord symbol and its fitting.
-   591  js/ui/pads.js              The chord keyboard: layout spec, pads / keys, pointer input, sounding fingers, haptics.
+   591  js/ui/pads.js              The chord keyboard: drawing the keys, pointer input, haptics (feeds touch.js).
    106  js/ui/palette.js           Chord types / extensions palette holds.
    220  js/ui/progbar.js           Progression picker (#prog): placement, name fitting, Play / Next wiring.
     26  js/ui/pulse.js             Tap flashes (Kids gold tap, full-mode tap pulse).
@@ -76,6 +76,7 @@ lines  file
    657  js/ui/strip.js             The chord table / scale strip: model, chips, taps, preview, fitting.
    180  js/ui/sustain.js           Sustain button and the sustain pool.
    101  js/ui/tour.js              First-launch Kids tour.
+   ~330  js/ui/touch.js             Touch-to-sound, no DOM: chord spec (computeSpec), finger tracking, soundFinger(pointerId, keyOf(...)), release / lift, held refresh. Shared by every keyboard view.
    340  js/ui/upload-dialog.js     Upload song dialog: prompt copy, paste, check, load, library list.
    160  js/ui/wire.js              Main event wiring (wire()): style row, sound tiles, sliders, controls.
      7  js/version.js              APP_VERSION (the one version constant) and the "Version x" label in the gear menu.
