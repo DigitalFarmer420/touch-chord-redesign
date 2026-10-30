@@ -48,6 +48,7 @@ import * as uiNowbox from "./ui/nowbox.js?v=112.13";
 import * as uiKeychip from "./ui/keychip.js?v=112.13";
 import * as settings from "./settings.js?v=112.13";
 import * as uiLayout from "./ui/layout.js?v=112.13";
+import * as kidsView from "./kids/view.js?v=112.13";
 // Entry point: loads every module, runs the boot steps in the v112.3 order, final boot (saved settings, first song, tour), deliberate globals, test hooks with ?test=1.
 import { wireKidKey } from "./kids.js?v=112.13";
 import { applySettings } from "./settings.js?v=112.13";
@@ -110,7 +111,8 @@ startBanner = document.getElementById("unlock");
     updateSymbol();
     shared.lastSaved = JSON.stringify(collectSettings());
     shared.persistReady = true;
-    if (shared.firstFresh && !tourDone() && (!PROG_TEST || /[?&]tour=1(&|$)/.test(location.search))) setTimeout(function () { tourStart(false); }, 700);   // v112: once, after the fresh Kids + Twinkle load (tests: only with tour=1)
+    kidsView.boot();   // Kids redesign: the Kids view (Simple) opens over the full app; Expert = the full app as before
+    if (state.state.expert !== false && shared.firstFresh && !tourDone() && (!PROG_TEST || /[?&]tour=1(&|$)/.test(location.search))) setTimeout(function () { tourStart(false); }, 700);   // v112: once, after the fresh Kids + Twinkle load (tests: only with tour=1)
   } finally {
     document.documentElement.classList.remove("tc-boot");
   }

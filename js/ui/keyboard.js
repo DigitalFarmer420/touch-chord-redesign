@@ -75,6 +75,7 @@ function kidsGoldNow() {
 export function kbWantLow(force) {
   if (state.style === "kids") {   // v111 (I): the Kids window sits on the key's tonic; it moves only as far as needed to show a gold / sounding note outside it, and goes back when they fit
     var kT = kidsTonic();
+    if (shared.kidsView) return kT;   // Kids view: the octave never scrolls (C..B on the tonic); gold notes outside it show an arrow
     if (kbFullMode()) return kbFullRange().lo;
     if (shared.kbWinLow != null && (Object.keys(fingers).length || Object.keys(kbKidsPtr).length)) return shared.kbWinLow;   // never slide the keys under a held finger (v84); kbKidsLift moves them on release
     var kS = kbLast && kbLast.length ? kbLast.slice() : [], kG = kidsGoldNow();

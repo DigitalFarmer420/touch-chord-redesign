@@ -131,6 +131,7 @@ export function octaveSpan() {
   return 1; // v38: Simple is always one octave (C..B); keys widen to fill
 }
 export function effectiveLayout() {
+  if (shared.kidsView) return "octave";   // Kids view: its piano is one octave (the hidden keyboard follows, so key taps sound the same)
   return state.simple ? "octave" : state.layout;
 }
 
@@ -226,7 +227,7 @@ export function paintPads() {
 var hapLast;
 export const hapLog = { calls: 0, skipped: 0, ms: [] };
 export var hapTest;
-function keyHaptic() {
+export function keyHaptic() {
   var t = (window.performance && performance.now) ? performance.now() : Date.now();
   if (t - hapLast < 30) { hapLog.skipped++; return; }
   hapLast = t;
