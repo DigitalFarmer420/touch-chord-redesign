@@ -78,3 +78,18 @@ e2e: kidsview (gap, iPad-portrait key height, lyric contrast, stale lift; + 820x
 Compare: /workspace/chord-touch/redesigndev/compare-rd2/
 rd2 tests (a872db7): unit 90/90; kidsview x5 (360/780/768/1024/820) PASS, kvaudio PASS, expert 344 checks PASS;
 grownup vs 351c02c 84/84 identical (menu shot now waits for the walked chord to finish); audioeq vs 351c02c 64 runs / 4268 calls, 0 differences.
+
+## rd3 (Noff rd2 report + steering a/b/c)
+1. MED Expert marks by pitch class (js/expert/ui.js markPlan/paintMarks, css/expert.css x-pclit / x-pcnx / x-up / x-down):
+   a sounding (gold) or next (teal) note outside the 12-key window lights its same-name key with a small up / down arrow
+   (hold G = G, B gold + D gold up; Jazz G7 = F gold up; next Dm7 = C teal up). Visual only; suggestPreview keeps `raw`
+   (the true sounding notes) beside the window-mapped `midis`. 7 white keys kept.
+2. LOW mode-switch guard: no time window. A pre-switch pointer's up / cancel releases its hold; only a click carrying that
+   same pointerId is dropped (cleared on the next pointerdown of that id). Clicks with no / negative pointer id always pass.
+3. LOW Kids black keys: root cause - Kids view enter() rebuilds the hidden twin pads with renderPads(), which (unlike
+   kbRebuild) does not run paintKeyChip, so the twins lack "nokey" until the first tap repaints them: the first out-of-key
+   tap read as playable (C# / Bb major). Fix: the Kids view key decides out-of-key from the key itself (keyOutOfKey).
+   351c02c Kids style: black keys painted nokey on load, all silent (first and later taps) - no bug there.
+(b) Labels: every key's label = the note name of its pitch at rest (C..B, 60-71), while a chord holds (window follows,
+   e.g. G = D4..C#5 labelled D..C, C#), after snap-back and in playback. Noff's D4-C5 = the window following the chord. No fix needed; e2e added.
+Badge v112.13-rd3. e2e: expert section 14 (8 styles), kidsview 11 (slide + keyboard / synthetic Next) and 12 (black keys).
