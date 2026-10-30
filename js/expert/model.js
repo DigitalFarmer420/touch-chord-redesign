@@ -30,11 +30,13 @@ export function modeOf(s) {
   //   full   = the classic full app (saved setups from before the redesign; no switch button is lit)
   if (s.kv) return "kids";
   if (s.simple) return "simple";
-  return s.on && s.style !== "kids" ? "expert" : "full";
+  return s.on ? "expert" : "full";   // rd4: a saved Expert setup with the Kids style is Expert (it falls back to Pop: expertStyleFix)
 }
 // What a tap on the mode switch changes. lastStyle = the last non-Kids style (Pop when none).
 // Returns { kv: <Kids view on>, style: <style to pick or null>, simple: <bool or null = unchanged>, on: <Expert pref> }.
 // The Kids view picks the Kids style itself (kids/view.js enter), so "kids" leaves style and Simple alone.
+// rd4: Expert has no Kids style; a saved Expert setup with style Kids loads as Pop (null = nothing to fix)
+export function expertStyleFix(s) { return !s.kv && !s.simple && s.on && s.style === "kids" ? "pop" : null; }
 export function modeTarget(cur, target, lastStyle) {
   var back = lastStyle && lastStyle !== "kids" ? lastStyle : "pop";
   if (target === "kids") return { kv: true, style: null, simple: null, on: false };
@@ -128,8 +130,9 @@ export function lyricNow(sec, ci) {
   return { before: t.slice(0, a), word: t.slice(a, b), after: t.slice(b) };
 }
 // Style drop-down (decision 6): the nine styles with the mockup's short sound hints.
+// rd4: no Kids here - the Kids / Simple / Expert switch is the only way into Kids (the classic style chips keep Kids)
 export const STYLE_MENU = [
-  ["pop", "Pop", "bright triads"], ["kids", "Kids", "music box"], ["jazz", "Jazz", "7ths, 9ths"], ["rnb", "R&B", "smooth 9ths"],
+  ["pop", "Pop", "bright triads"], ["jazz", "Jazz", "7ths, 9ths"], ["rnb", "R&B", "smooth 9ths"],
   ["ballad", "Ballad", "slow, add9"], ["reggae", "Reggae", "off-beat"], ["funk", "Funk", "tight 9ths"], ["yogaDeep", "Yoga", "sus2 drone"],
   ["country", "Country", "I IV V7"]
 ];

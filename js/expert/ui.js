@@ -9,6 +9,7 @@ import { setKidKey } from "../kids.js?v=112.13";
 import { prog, progSet, placeBadges, setBadgeAvoid, magic } from "../songs/playback.js?v=112.13";
 import { magicQueue } from "../songs/magic.js?v=112.13";
 import { nextHintSpec } from "../ui/next.js?v=112.13";
+import { setHintAvoid } from "../ui/hints.js?v=112.13";
 import { progFeel, progSteps, progNumerals } from "../songs/presets.js?v=112.13";
 import { upSelected, upCurStep, upNextStep } from "../songs/song.js?v=112.13";
 import { state, shared, fingers } from "../state.js?v=112.13";
@@ -22,7 +23,7 @@ import { stripRelease } from "../ui/strip.js?v=112.13";
 import { fitStrip, stripLabel } from "../ui/strip.js?v=112.13";
 import { setExpert as setKidsViewOff, setModeHandler } from "../kids/view.js?v=112.13";   // redesign-dev: the Kids view (kids-build) is the switch's Kids
 import { EXPERT_STORE, parsePref, prefFromUrl, modeOf, modeTarget, typeBarInit, typeBarReduce, typeBarLabel, TYPEBAR_HOLD_MS,
-  sourceInit, sourceReduce, progDots, lyricNow, STYLE_MENU, styleName, expertWindowKeys } from "./model.js?v=112.13";
+  sourceInit, sourceReduce, progDots, lyricNow, STYLE_MENU, styleName, expertWindowKeys, expertStyleFix } from "./model.js?v=112.13";
 
 var pref, tb, src, lastStyle = "pop", active = false, built = false, lastSel = null, lastProg = 0;
 export const xLog = { mode: [], src: [], tb: [] };   // read by the e2e suite (?test=1 hooks)
@@ -87,6 +88,8 @@ export function setMode(target) {
   paintMode();
 }
 function paintMode() {
+  var fix = expertStyleFix({ kv: !!shared.kidsView, style: state.style, simple: state.simple, on: pref && pref.on });
+  if (fix) { xLog.styleFix = (xLog.styleFix || 0) + 1; click("#styles button[data-style=\"" + fix + "\"]"); }   // rd4: Kids is not an Expert style
   if (state.style !== "kids") lastStyle = state.style;
   var de = document.documentElement, on = currentMode() === "expert";
   de.classList.toggle("x-lamp", pref.look !== "day");
@@ -500,6 +503,18 @@ export function boot() {
     if (!active) return [];
     return Array.prototype.map.call(strip.querySelectorAll(".ss-chip, .ss-note"), function (n) { var q = n.getBoundingClientRect(); return { el: n, left: q.left, top: q.top, right: q.right, bottom: q.bottom }; });
   });   // the Kids view's own Kids / Simple / Expert row goes through the same switch
+  // rd4 (Uiux rd3): the play-along hint never covers an Expert block (top bar, Song | Progressions, Next / Play, the source
+  // bar with its dots, Now, the controls, the keys); inside the chord grid it sits only in empty space, clear of its border
+  setHintAvoid(function () {
+    if (!active) return [];
+    var out = [];
+    Array.prototype.forEach.call(document.querySelectorAll("#xTop, #xTog, #xGo, #xSrc, #xPList, .now-card, #xCtl, .kb-wrap, #dev-badge, .pg-badge, #xSettings, #xStyleMenu"), function (n) {
+      if (n.closest("[hidden]") || getComputedStyle(n).display === "none") return; out.push(n.getBoundingClientRect()); });
+    var g = document.querySelector(".next-card"), q = g && g.getBoundingClientRect(), B = 8;
+    if (q && q.width) out.push({ left: q.left, right: q.right, top: q.top, bottom: q.top + B, width: q.width, height: B }, { left: q.left, right: q.right, top: q.bottom - B, bottom: q.bottom, width: q.width, height: B },
+      { left: q.left, right: q.left + B, top: q.top, bottom: q.bottom, width: B, height: q.height }, { left: q.right - B, right: q.right, top: q.top, bottom: q.bottom, width: B, height: q.height });
+    return out;
+  });
   tb = typeBarInit(false);
   src = sourceInit(srcCtx());
   build();

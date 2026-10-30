@@ -69,6 +69,8 @@ function paHintShow(id, kind) {
   return true;
 }
 const PA_HINT_AVOID = "#pads .pad, #suggest button, #suggest .ss-chip, #suggest .ss-note, #suggest .ss-kidpad, #palette button, button, input, select, [role=button], #kidsLyr .sb-row";
+var hintAvoid = null;   // rd4 (Uiux rd3): extra boxes the hint must not cover (Expert's blocks); set by js/expert/ui.js, none in the classic app
+export function setHintAvoid(fn) { hintAvoid = fn; }
 function paHintPlace(el) {   // v112.3: as high as possible (top area or empty space), every style, Simple and Full
   var vw = window.innerWidth, vh = window.innerHeight, av = [];
   function add(r) { if (r && r.width > 0 && r.height > 0) av.push(r); }
@@ -80,6 +82,7 @@ function paHintPlace(el) {   // v112.3: as high as possible (top area or empty s
     if (!row.getBoundingClientRect().width) return;
     try { var rg = document.createRange(); rg.selectNodeContents(row); Array.prototype.forEach.call(rg.getClientRects(), add); } catch (e) { add(row.getBoundingClientRect()); }
   });
+  if (hintAvoid) { try { (hintAvoid() || []).forEach(add); } catch (e) {} }
   var cfgs = [[0, 0], [0, 240], [0, 200], [1, 0], [1, 200], [1, 160], [1, 130], [1, 110]], best = null;
   for (var c = 0; c < cfgs.length; c++) {
     el.classList.toggle("compact", !!cfgs[c][0]);

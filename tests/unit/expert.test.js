@@ -138,7 +138,13 @@ test('Source helpers: step dots (gold now, dashed next) and the lyric word on go
 // ---------- mode switch (decision 11) and prefs ----------
 test('Mode: Kids view = Kids, Simple switch = Simple, else Expert when on (not the Kids style), else classic Full', () => {
   assert.equal(M.modeOf({ kv: true, style: 'kids', simple: true, on: true }), 'kids');
-  assert.equal(M.modeOf({ kv: false, style: 'kids', simple: false, on: true }), 'full');   // classic Kids style in the full app
+  assert.equal(M.modeOf({ kv: false, style: 'kids', simple: false, on: true }), 'expert');   // rd4: a saved Expert setup with Kids = Expert (falls back to Pop)
+  assert.equal(M.modeOf({ kv: false, style: 'kids', simple: false, on: false }), 'full');   // classic Kids style in the full app
+  assert.equal(M.expertStyleFix({ kv: false, style: 'kids', simple: false, on: true }), 'pop');
+  assert.equal(M.expertStyleFix({ kv: true, style: 'kids', simple: false, on: false }), null);
+  assert.equal(M.expertStyleFix({ kv: false, style: 'kids', simple: false, on: false }), null);
+  assert.equal(M.expertStyleFix({ kv: false, style: 'kids', simple: true, on: true }), null);
+  assert.equal(M.expertStyleFix({ kv: false, style: 'jazz', simple: false, on: true }), null);
   assert.equal(M.modeOf({ kv: false, style: 'jazz', simple: true, on: true }), 'simple');
   assert.equal(M.modeOf({ kv: false, style: 'jazz', simple: false, on: true }), 'expert');
   assert.equal(M.modeOf({ kv: false, style: 'jazz', simple: false, on: false }), 'full');
@@ -159,5 +165,5 @@ test('Expert pref: Lamplight default, own store key, ?expert=1/0', () => {
   assert.equal(M.expertWindowKeys('octave'), 12); assert.equal(M.expertWindowKeys('full'), 0);
 });
 test('Style drop-down lists the nine styles in the live order', () => {
-  assert.deepEqual(M.STYLE_MENU.map(s => s[0]), ['pop', 'kids', 'jazz', 'rnb', 'ballad', 'reggae', 'funk', 'yogaDeep', 'country']);
+  assert.deepEqual(M.STYLE_MENU.map(s => s[0]), ['pop', 'jazz', 'rnb', 'ballad', 'reggae', 'funk', 'yogaDeep', 'country']);
 });

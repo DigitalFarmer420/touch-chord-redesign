@@ -117,7 +117,10 @@ const SUS = { '360x780': [108, 52], '820x1180': [230, 72], '1180x820': [206, 84]
     await p.evaluate(() => { document.getElementById('uploadPick').hidden = true; });
     // 9. decision 6: Style drop-down
     await p.click('#xStyle'); await p.waitForTimeout(150);
-    F(await p.evaluate(() => document.querySelectorAll('#xStyleMenu .x-mi').length === 9 && !document.getElementById('xStyleMenu').hidden), "'Pop' opens a 9-item style list");
+    F(await p.evaluate(() => document.querySelectorAll('#xStyleMenu .x-mi').length === 8 && !document.getElementById('xStyleMenu').hidden), "'Pop' opens an 8-item style list");
+    // rd4: no Kids in Expert's Style list (the Kids / Simple / Expert switch is the only way into Kids)
+    F(await p.evaluate(() => !document.querySelector('#xStyleMenu [data-style="kids"]') && ![...document.querySelectorAll('#xStyleMenu .x-mi')].some(b => /kids/i.test(b.textContent))), 'Expert Style list has no Kids');
+    F(await p.evaluate(() => !!document.querySelector('#styles button[data-style="kids"]')), 'the classic style chips keep Kids');
     await shot('style');
     await p.click('#xStyleMenu [data-style=jazz]'); await p.waitForTimeout(250);
     F(await p.evaluate(() => document.querySelector('#styles .on').dataset.style === 'jazz' && document.querySelector('#xStyle .x-sl').textContent === 'Jazz' && document.getElementById('xStyleMenu').hidden), 'picking Jazz sets the style and folds the list');
@@ -163,6 +166,38 @@ const SUS = { '360x780': [108, 52], '820x1180': [230, 72], '1180x820': [206, 84]
     const cl = await p2.evaluate(() => ({ expert: document.documentElement.classList.contains('expert'), keys: document.querySelectorAll('#pads .pad').length, top: getComputedStyle(document.querySelector('header.topbar')).display, xtop: getComputedStyle(document.getElementById('xTop')).display }));
     F(!cl.expert && cl.keys === 13 && cl.top !== 'none' && cl.xtop === 'none', 'without Expert: the classic Full screen (13-key window, classic top bar) ' + JSON.stringify(cl));
     await c2.close();
+    // 15. rd4: a saved Expert setup with the Kids style loads as Pop in Expert (no crash), with and without ?expert=1
+    for (const q of ['', 'expert=1']) {
+      const c4 = await b.newContext({ viewport: { width: w, height: h } });
+      await c4.addInitScript(`try{if(!sessionStorage.getItem('x')){sessionStorage.setItem('x',1);localStorage.clear();localStorage.setItem('touchChord.tour.v1','done');localStorage.setItem('touchChord.expert.v1',JSON.stringify({on:true}));localStorage.setItem('touchChord.settings.v1',JSON.stringify({v:1,settings:{style:'kids',simple:false,playAlong:true,lockKey:{pc:0,mode:'major'}}}));}}catch(e){}`);
+      const p4 = await c4.newPage(); const e4 = []; p4.on('pageerror', e => e4.push(e.message));
+      await p4.goto(URL0 + (URL0.includes('?') ? '&' : '?') + 'test=1' + (q ? '&' + q : '')); await p4.waitForTimeout(1300);
+      const k4 = await p4.evaluate(() => ({ expert: document.documentElement.classList.contains('expert'), kv: document.documentElement.classList.contains('kv'), style: document.querySelector('#styles .on') && document.querySelector('#styles .on').dataset.style, label: document.querySelector('#xStyle .x-sl').textContent, keys: document.querySelectorAll('#pads .pad').length }));
+      F(k4.expert && !k4.kv && k4.style === 'pop' && k4.label === 'Pop' && k4.keys === 12, `saved Expert + Kids style ${q || '(no ?expert)'} loads as Pop in Expert ${JSON.stringify(k4)}`);
+      await p4.evaluate(() => __progApi.next()); await p4.waitForTimeout(300);
+      F(!e4.length, `saved Expert + Kids style: no page errors ${e4.join(' | ')}`); await c4.close();
+    }
+    // 16. rd4 (Uiux rd3): the play-along hint covers no Expert block, chip, badge or key
+    {
+      const c5 = await b.newContext({ viewport: { width: w, height: h } });
+      await c5.addInitScript(`try{if(!sessionStorage.getItem('x')){sessionStorage.setItem('x',1);localStorage.clear();localStorage.setItem('touchChord.tour.v1','done');localStorage.setItem('touchChord.settings.v1',JSON.stringify({v:1,settings:{style:'pop',simple:false,playAlong:true,paHints:true,lockKey:{pc:0,mode:'major'}}}));}}catch(e){}`);
+      const p5 = await c5.newPage(); const e5 = []; p5.on('pageerror', e => e5.push(e.message));
+      await p5.goto(URL0 + (URL0.includes('?') ? '&' : '?') + 'test=1&expert=1'); await p5.waitForTimeout(1300);
+      const hint = async () => p5.evaluate(() => { const hEl = document.getElementById('paHint'); if (hEl.hidden) return null; const H = hEl.getBoundingClientRect(), bad = [];
+        const ov = r => r.width > 0 && r.height > 0 && H.left < r.right && r.left < H.right && H.top < r.bottom && r.top < H.bottom;
+        document.querySelectorAll('#xTop, #xTog, #xGo, #xSrc, .now-card, #xCtl, .kb-wrap, #dev-badge, .pg-badge, #suggest .ss-chip, #suggest .ss-note, #pads .pad, .x-dots, #xSrc *').forEach(n => { if (getComputedStyle(n).display !== 'none' && ov(n.getBoundingClientRect())) bad.push((n.id || n.className || n.tagName) + ''); });
+        const g = document.querySelector('.next-card').getBoundingClientRect(); const inG = H.left >= g.left + 4 && H.right <= g.right - 4 && H.top >= g.top + 4 && H.bottom <= g.bottom - 4; if (ov(g) && !inG) bad.push('grid border');
+        return { text: hEl.textContent, r: [H.left, H.top, H.width, H.height].map(Math.round), bad, inView: H.left >= 0 && H.top >= 0 && H.right <= innerWidth && H.bottom <= innerHeight }; });
+      const tap = async (sel, ms) => p5.evaluate(([sel, ms]) => new Promise(res => { const c = [...document.querySelectorAll(sel)].find(x => x.getClientRects().length && getComputedStyle(x).visibility !== 'hidden'); if (!c) return res(false); window.__pd(c, 7); setTimeout(() => { window.__pd(c, 7, 'pointerup'); res(true); }, ms); }), [sel, ms]);
+      await p5.evaluate(() => { window.__pd = (el, id, t) => { const r = el.getBoundingClientRect(); el.dispatchEvent(new PointerEvent(t || 'pointerdown', { pointerId: id, button: 0, bubbles: true, cancelable: true, pointerType: 'touch', isPrimary: true, clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 })); }; });
+      // a wrong chip (G while C is next) -> "Tap the dot chord next"; a wrong key -> "Try the marked key next"
+      await p5.evaluate(() => { const c = [...document.querySelectorAll('#suggest .ss-chip')].find(x => x.getClientRects().length && /^G(?=[ivxIVX]|$)/.test(x.textContent.trim())); window.__pd(c, 7); });
+      await p5.waitForTimeout(350); const h1 = await hint(); D.hintChip = h1;
+      F(h1 && h1.inView && !h1.bad.length, `hint after a wrong chip covers nothing ${JSON.stringify(h1)}`);
+      if (SHOTS) await p5.screenshot({ path: path.join(SHOTS, `${tag}-hint.png`) });
+      await p5.evaluate(() => { const c = [...document.querySelectorAll('#suggest .ss-chip')].find(x => x.getClientRects().length && /^G(?=[ivxIVX]|$)/.test(x.textContent.trim())); window.__pd(c, 7, 'pointerup'); });
+      F(!e5.length, `hint: no page errors ${e5.join(' | ')}`); await c5.close();
+    }
     // 14. rd3 (Noff rd2 MED + steering a/b): the 7-white-key window marks every pitch class of the sounding chord (gold) and of
     // the next chord (teal) - a note outside the window lights its same-name key with a small up / down arrow - across the 8
     // styles (Next steps, held chips, Play song); and every key's label is the note name of the pitch it plays (window start,
