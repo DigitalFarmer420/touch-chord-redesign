@@ -17,12 +17,22 @@ Spec: /workspace/touchchord-review/redesign/expert-v9-*.png, expert-ipad-v2-*.pn
 - [x] model.js + unit tests (tests/unit/expert.test.js: 17 tests; unit total 87/87)
 - [x] ui.js + expert.css: phone portrait, iPad portrait, iPad landscape, phone landscape
 - [x] e2e tests/e2e/expert.cjs (4 sizes, 324 checks, 0 fails) + added to run.cjs
-- [ ] full e2e suite run (PORT=8291, log ../e2e-full.log)
-- [ ] compare screenshots in ../compare
-- [ ] mirror to fork
+- [x] grid marks in Expert colours (sounding chord = gold, next = dashed teal; Play along off still hides next marks)
+- [x] compare screenshots in /workspace/chord-touch/expertredesign/compare (build-<size>/ scenes + compare-*.png mockup vs build composites)
+- [ ] full e2e suite run at ca944e7 (worktree ../e2e-wt, PORT=8291, log ../e2e-full.log, per-suite logs e2e-wt/tests/e2e/out/*.log). Node 24.22.1: 15/22 PASS so far (howto112 … kbaccept-780-octave); remaining kbaccept-780-full, kidsascend, kidsgold, playoff, upload13, expert
+- [ ] mirror to fork (/workspace/touch-chord-redesign-fork, remote expertsrc, branch expert-build only)
+
+## Box restore (2026-10-30 ~02:55 PT)
+- Node is now v24.22.1. The node_modules symlink target (v13/repo/node_modules) was gone, so `npm ci` was run here (real node_modules, git-ignored).
+- Node 24: `node --test tests/unit/` (the package.json test:unit script) fails because a directory is not a test file; run
+  `node --test tests/unit/*.test.js` instead (87/87 pass). package.json left unchanged (pre-existing, also on main).
 
 ## Notes / deviations (for the report)
 - Type bar at rest reads "Auto" (a key plays its own chord in the key: kb-fix rule); the mockup says "Major".
 - The key window still follows a played chip / Next chord and snaps back to the key's tonic (classic kb-fix behaviour), so it rests at C..B in C major, G..F# in G major.
 - Expert is opt-in (mode switch or ?expert=1); the classic Full screen stays the default for "not Kids, not Simple" so the existing suites run unchanged.
 - Sound sheet keeps the app's 6 voices and the 5-step voicing slider (mockup: 8 voices, 4 voicing buttons) - no audio change.
+- Hold-peek on the Type bar opens the table while held; playing a type needs a second finger (no slide-onto-type gesture).
+- Picking Kids in the style drop-down switches to Kids mode. No Auto-key toggle in the key sheet. Phone landscape (780x360) has no mockup: own layout.
+- No version bump (still v112.13) to keep the diff small.
+- Likely merge conflicts with kids-build: js/ui/pads.js (renderKeys + setWinKeys), js/main.js (import/boot), index.html (css link), tests/e2e/run.cjs (suite list). gear.js / settings.js are NOT edited (the gear mode switch is injected by js/expert/ui.js).
