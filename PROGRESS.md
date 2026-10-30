@@ -65,3 +65,14 @@ https://digitalfarmer420.github.io/touch-chord-redesign/ . Never touch-chord (pr
       walked Am chord is still lit when the gear menu opens - timing under load, the set changes run to run);
       reruns at quiet load: 1024x768 21/21, 768x1024 21/21 (360x780 and 780x360 were 42/42 in the first run)
 - [x] new repo DigitalFarmer420/touch-chord-redesign (public, default branch redesign-dev, Pages from redesign-dev /): https://digitalfarmer420.github.io/touch-chord-redesign/ serves REDESIGN DEV · v112.13-rd1; headless 360x780 (DPR 3, mobile): first visit = Kids view, ?expert=1 = Expert, 0 console errors, 0 failed requests
+
+## rd2 (Uiux rd1 review + Noff rd1 Low) - local until the suites pass
+1. Kids iPad portrait: piano fills down from Play / Next (820x1180: gap 268 -> 16px, white keys 107x660; 768x1024 gap 112 -> 16).
+2. Kids lyrics: current line dark ink, upcoming words #6E5A46 (6.5:1), next line muted (4.7:1), no see-through opacity; current word on gold.
+3. Expert step badges keep off other chips (playback.js setBadgeAvoid hook, only set by Expert; classic placement unchanged).
+4. Expert Sound caption 10px (phone landscape / iPad); dropped on phone portrait (does not fit at 10px).
+5. Expert keys: one mark each - solid gold = sounding, teal dashed = next and not sounding; classic copper next-box off in Expert.
+6. Dev badge: tiny bottom-right pill in landscape (phone + iPad); v112.13-rd2.
+7. Noff: a finger down before a mode switch does not act on the new screen on lift (its click is dropped, the old hold still released).
+e2e: kidsview (gap, iPad-portrait key height, lyric contrast, stale lift; + 820x1180), expert (key marks, 344 checks).
+Compare: /workspace/chord-touch/redesigndev/compare-rd2/
