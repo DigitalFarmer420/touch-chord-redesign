@@ -119,6 +119,7 @@ function build() {
   els.rnext = btn("kv-next kv-rnext", "", "Next song"); els.rnext.addEventListener("click", function () { unlock(); hideReward(); pickSong((prog.idx + 1) % prog.list.length, true); });
   rb.appendChild(again); rb.appendChild(els.rnext); els.reward.appendChild(rb);
   play.appendChild(els.reward);
+  hello.hidden = songs.hidden = play.hidden = true;   // rd5.1: no Kids screen shows until show() picks exactly one
   root.appendChild(hello); root.appendChild(songs); root.appendChild(play);
   els.hello = hello; els.songs = songs; els.playScr = play;
   buildSettings();
@@ -257,24 +258,29 @@ export function setExpert(on) {
   scheduleSave(0);
 }
 function enter(boot) {
+  var walked = false;   // rd5.1: a Kids song was being played in the mode we come from
   kv.on = true; shared.kidsView = true;
   document.documentElement.classList.add("kv");
   paHintHide();
   if (state.style !== "kids") {
     var w = progWalkAt(), kb = document.querySelector('#styles button[data-style="kids"]');
-    if (w && /^Kids /.test(w.name)) kv.resume = w;   // (else: the place saved when Simple was left)
+    if (w && /^Kids /.test(w.name)) { kv.resume = w; walked = true; }   // (else: the place saved when Simple was left)
     if (kb) kb.click();   // the style row's own Kids pick (sound preset, C major, Twinkle)
   } else if (!boot) kv.resume = null;   // still in Kids in Expert: the song is where Expert left it
-  var want = kv.resume && kv.resume.name ? kv.resume.name : (boot && state.kidsSong ? state.kidsSong : null), ix = -1;
+  var want = kv.resume && kv.resume.name ? kv.resume.name : (state.kidsSong || null), ix = -1;   // rd5.1: a switch also reopens the saved Kids song (was boot-only)
   if (want) prog.list.forEach(function (p, i) { if (p.name === want) ix = i; });
   if (ix >= 0 && ix !== prog.idx) progSet(ix);
+  var kept = ix >= 0 && (walked || !!state.kidsSong);   // rd5.1: a song the child played (or was playing in Simple) is kept
   if (kv.resume && ix >= 0) progWalkTo(kv.resume);   // mode switch: the song picks up where it left off
   kv.resume = null;
   var sk = KIDS_SONG_KEY[songName()], ak = activeKey();
   if (sk && (!ak || ak.pc !== 0 || ak.mode !== "major")) applySongKey(sk[0], sk[1]);   // the Kids piano is C..B: the song's own key
   renderPads();   // the hidden keyboard follows the Kids view rules (one octave on the tonic)
   root.hidden = false;
-  if (boot) show("hello");
+  // rd5.1 (Uiux): every entry goes through show(). Opening the app = Hello; a mode switch = the kept song's play screen
+  // (song, key and step kept), else the song list. Never Hello on a switch. (rd5: only boot called show(), so a switch
+  // in a page that loaded in Expert / Simple left Hello, Songs and Play all showing, with a blank chip and lyrics.)
+  show(boot ? "hello" : kept ? "play" : "songs");
   startPaint();
 }
 function leave() {
@@ -288,12 +294,15 @@ function leave() {
   renderPads();
 }
 export function show(scr) {
-  kv.screen = scr;
+  if (scr === "play" && !KV_SONGS[songName()]) scr = "songs";   // rd5.1 guard: no Kids song loaded = the song list, never a blank play screen
+  kv.screen = scr; kv.sig = "";
   root.dataset.screen = scr;
   [["hello", els.hello], ["songs", els.songs], ["play", els.playScr]].forEach(function (x) { x[1].hidden = x[0] !== scr; });
   if (scr === "songs") buildCards();
   kv.log.push("screen:" + scr);
-  paint(true);
+  if (scr !== "play") { paint(true); return; }
+  try { paint(true); } catch (err) { kv.log.push("play-failed"); show("songs"); return; }   // rd5.1 guard: finish the play screen or go back to the list
+  if (!els.chip.textContent.trim()) { kv.log.push("play-blank"); show("songs"); }
 }
 
 // ---------- input ----------

@@ -114,3 +114,17 @@ iPad unchanged (all 8 rows). e2e: expert "style list" block at 780x360, 844x390 
 Key window untouched. Badge v112.13-rd5.
 Tests: unit 90/90; kidsview x5 PASS; kvaudio PASS; expert 1552 / 0 fails; grownup 84/84 (768x1024 screenshot timeout and a
 1024x768 one-chip pixel diff under box load in the parallel run; both re-run alone 21/21); audioeq 64 runs / 4268 calls / 0 diffs.
+
+## rd5.1 (user bug: Expert / Simple -> Kids shows leftovers)
+Trigger: a page that loaded or reloaded in Expert or Simple, then switched to Kids. Hello, Songs and Play were all visible
+and stacked (3 gears, Hello's play disc / title / notes behind the pads, blank song chip and lyrics, no gold key).
+Root cause (js/kids/view.js): build() made the three .kv-scr sections without `hidden`, and only show() hides them; enter()
+called show() only at boot (`if (boot) show("hello")`), so a mode-switch entry in a page that never booted in Kids never
+picked a screen; kv.screen stayed "hello" and paint() returned before filling the chip / lyrics / gold. Present since the
+Kids view landed (779eec9); the e2e reloaded right after switching, so it never looked at that state.
+Fix: the screens start hidden; every entry goes through show(): opening the app = Hello; a mode switch (Uiux rule) = the
+kept song's play screen (song, key and step kept), else the song list, never Hello. The saved Kids song is kept on a switch
+too (was boot-only, so it fell back to Twinkle). Guard in show(): play with no Kids song, a paint error or a blank chip goes
+back to the song list. New e2e tests/e2e/modeswitch.cjs (360x780, 412x915, 780x360): reload in Kids / Expert / Simple, with
+and without a song in progress, every ordered pair of switches; one Kids screen, one gear, landing rule, chip + lyrics +
+one gold key on play, Kids view hidden in Expert / Simple. rd5 d1a3fef fails it (28 fails at 360x780). Badge v112.13-rd5.1.

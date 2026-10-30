@@ -22,7 +22,8 @@ const SUITE = [   // [name, file, args]  (both phone sizes each: the tests loop 
   ['kidsview-360', 'kidsview.cjs', ['360x780']], ['kidsview-780', 'kidsview.cjs', ['780x360']],   // Kids redesign: the Kids view (Simple) at the four sizes
   ['kidsview-768', 'kidsview.cjs', ['768x1024']], ['kidsview-1024', 'kidsview.cjs', ['1024x768']], ['kidsview-820', 'kidsview.cjs', ['820x1180']],   // rd2: + iPad Air portrait
   ['kvaudio', 'kvaudio.cjs', []],   // Kids redesign: the Kids view's pads / keys / Next / Play sound exactly like the Kids style
-  ['expert', 'expert.cjs', []],   // Expert redesign: html.expert screen set (decisions 1-11), 360x780 + 780x360 + 820x1180 + 1180x820
+  ['expert', 'expert.cjs', []],
+  ['modeswitch-360', 'modeswitch.cjs', ['360x780']], ['modeswitch-412', 'modeswitch.cjs', ['412x915']], ['modeswitch-780', 'modeswitch.cjs', ['780x360']],   // rd5.1: every mode switch (after a reload in each mode) leaves one Kids screen, one gear   // Expert redesign: html.expert screen set (decisions 1-11), 360x780 + 780x360 + 820x1180 + 1180x820
 ];
 const only = process.env.ONLY ? process.env.ONLY.split(',') : null;
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.webp': 'image/webp', '.json': 'application/json', '.png': 'image/png' };
