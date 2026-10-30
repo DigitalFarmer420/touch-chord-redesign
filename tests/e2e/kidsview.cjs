@@ -175,6 +175,23 @@ const st = p => p.evaluate(() => { const rc = e => { const r = e.getBoundingClie
     F(await p.evaluate(() => JSON.parse(localStorage.getItem('touchChord.settings.v1')).settings.expert === true), `${tag}: expert not saved`);
     await tapEl('#configBtn'); await p.waitForTimeout(250); await tapEl('#modeRow button[data-mode="kids"]'); await p.waitForTimeout(400); await p.reload(); await p.waitForTimeout(1300); s = await st(p);
     F(s.on && s.app === 'none', `${tag}: Simple lost on reload`);
+    // 11. rd2 (Noff rd1 Low): hold a pad, switch to Simple with another finger, lift on the new screen: no chord from the
+    // lift (351c02c: silent), and the held pad's own release still runs
+    await p.evaluate(() => { const g = document.querySelector('#kv .kv-go'); if (g && g.getClientRects().length) g.click(); }); await p.waitForTimeout(400);
+    if ((await st(p)).screen !== 'play') { await p.evaluate(() => __kv.show('play')); await p.waitForTimeout(300); }
+    await rec(p); await p.evaluate(() => { const A = window.ChordAudio; window.__S = 0; if (A.__kvs) return; A.__kvs = 1; const sc = A.stopChord.bind(A); A.stopChord = function () { window.__S++; return sc.apply(null, arguments); }; });
+    const fr = await p.evaluate(() => { const e = [...document.querySelectorAll('#kv .kv-pad')].find(x => x.textContent.trim().startsWith('F')); const q = e.getBoundingClientRect(); return { x: q.x + q.width / 2, y: q.y + q.height / 2 }; });
+    await take(p); await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: fr.x, y: fr.y, id: 7 }] }); await p.waitForTimeout(300);
+    const held = await take(p); F(held.length >= 1, `${tag}: holding F made no sound`);
+    await p.evaluate(() => document.querySelector('#kvMode [data-v="simple"]').click()); await p.waitForTimeout(500);
+    D.staleUnder = await p.evaluate(([x, y]) => { const e = document.elementFromPoint(x, y); return e ? (e.closest('.ss-chip, .ss-note, button') || e).textContent.trim().slice(0, 12) : null; }, [fr.x, fr.y]);
+    F(await p.evaluate(() => document.documentElement.classList.contains('simple') && !document.documentElement.classList.contains('kv')), `${tag}: Simple did not open`);
+    const s0 = await p.evaluate(() => window.__S);
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }); await p.waitForTimeout(800);
+    const lift = await take(p), s1 = await p.evaluate(() => window.__S);
+    D.staleLift = { under: D.staleUnder, played: lift, stops: s1 - s0 };
+    F(lift.length === 0, `${tag}: lifting the pre-switch finger on "${D.staleUnder}" played ${JSON.stringify(lift)}`);
+    F(s1 > s0, `${tag}: the held pad was not released on lift`);
     F(!p.__errs.length, `${tag}: page errors ${p.__errs.slice(0, 3)}`); D.errs = p.__errs.slice(0, 5);
     await p.context().close();
   }

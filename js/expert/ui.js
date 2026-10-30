@@ -15,6 +15,8 @@ import { Theory } from "../theory/index.js?v=112.13";
 import { paintKeyChip, keyLabel } from "../ui/keychip.js?v=112.13";
 import { fitNowSymbol } from "../ui/nowbox.js?v=112.13";
 import { computeSpec, renderPads, refreshHeld, setWinKeys } from "../ui/pads.js?v=112.13";
+import { liftFinger } from "../ui/touch.js?v=112.13";
+import { stripRelease } from "../ui/strip.js?v=112.13";
 import { fitStrip, stripLabel } from "../ui/strip.js?v=112.13";
 import { setExpert as setKidsViewOff, setModeHandler } from "../kids/view.js?v=112.13";   // redesign-dev: the Kids view (kids-build) is the switch's Kids
 import { EXPERT_STORE, parsePref, prefFromUrl, modeOf, modeTarget, typeBarInit, typeBarReduce, typeBarLabel, TYPEBAR_HOLD_MS,
@@ -41,7 +43,30 @@ function click(sel) { var b = typeof sel === "string" ? document.querySelector(s
 // ---------- mode ----------
 export function expertActive() { return active; }
 export function currentMode() { return modeOf({ kv: !!shared.kidsView, style: state.style, simple: state.simple, on: pref.on }); }
+// rd2 (Noff, rd1 Low): a finger that went down before a mode switch must not act on the new screen when it lifts
+// (hold a Kids pad, switch to Simple, lift on a chip: no chord). Its own release still runs (the held sound ends as
+// before); only the click its lift would make on whatever is under it now is dropped.
+var downs = {}, stale = {}, swallow = null;
+function guardTouches() {
+  window.addEventListener("pointerdown", function (e) { downs[e.pointerId] = true; delete stale[e.pointerId]; }, true);
+  function up(e) {
+    delete downs[e.pointerId];
+    if (!stale[e.pointerId]) return;
+    delete stale[e.pointerId];
+    stripRelease(e.pointerId); if (fingers[e.pointerId]) liftFinger(e.pointerId);   // the old screen's hold ends (no-ops when already done)
+    swallow = { id: e.pointerId, until: performance.now() + 800 };
+    xLog.staleLift = (xLog.staleLift || 0) + 1;
+  }
+  window.addEventListener("pointerup", up, true); window.addEventListener("pointercancel", up, true);
+  window.addEventListener("click", function (e) {
+    if (!swallow) return;
+    var hit = performance.now() < swallow.until && (e.pointerId == null || e.pointerId < 0 || e.pointerId === swallow.id);
+    swallow = null;
+    if (hit) { e.stopImmediatePropagation(); e.preventDefault(); xLog.staleClick = (xLog.staleClick || 0) + 1; }
+  }, true);
+}
 export function setMode(target) {
+  Object.keys(downs).forEach(function (id) { stale[id] = true; });   // fingers down now belong to the old screen
   var t = modeTarget({ style: state.style, simple: state.simple }, target, lastStyle);
   xLog.mode.push(target);
   closeAll();
@@ -405,6 +430,7 @@ export function boot() {
   pref = prefFromUrl(location.search, loadPref());
   var urlOn = /[?&]expert=1(&|$)/.test(location.search);
   if (/[?&]expert=[01](&|$)/.test(location.search)) savePref();
+  guardTouches();
   setModeHandler(setMode);
   // rd2 (Uiux #3): in Expert a step badge keeps off the other chips' tiles (e.g. the 3 on Am no longer sits on A / vi)
   setBadgeAvoid(function (strip) {
