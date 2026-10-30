@@ -4,7 +4,7 @@ const APPV=require('fs').readFileSync(require('path').resolve(__dirname,'../../j
 // Escape = Skip, saved settings = no tour, both sizes. Screenshots of every step.
 const { chromium } = require('playwright-core');const fs=require('fs');
 const U=(process.env.BASE||'http://localhost:8080/index.html');const J=JSON.stringify;
-const TXT=["Hi! Let's play Twinkle Twinkle Little Star.","Tap the gold pad to play the next chord.","Or tap the gold key on the piano. This works too.","The words light up as you go.","Tap Play to hear the whole song.","Pick another song here. There are 11!"];
+const TXT=["Hi! Let's play Twinkle Twinkle Little Star.","Tap the gold pad to play the next chord.","Or tap the gold key on the piano. This works too.","The words light up as you go.","Tap Play to hear the whole song.","Pick another song here. There are 6!"];
 const SEL=[null,'#suggest .ss-kidpad.nx-root','#pads .pad.nx-root','#kidsLyr','#prog .pg-song','#prog .pg-sel'];
 const R={fails:[],count:{}};const F=(c,m)=>{R.count[c?'ok':'FAIL']=(R.count[c?'ok':'FAIL']||0)+1;if(!c)R.fails.push(m)};
 (async()=>{const b=await chromium.launch({executablePath:process.env.CHROME||undefined,});
@@ -50,7 +50,7 @@ for(const [W,H] of [[360,780],[780,360]]){const sz=W+'x'+H;
  // 3) saved settings, tour never done: no tour (only the fresh first load runs it)
  {const {ctx,p}=await mk();await p.goto(U+'?test=1');await p.evaluate(()=>{localStorage.setItem('touchChord.settings.v1',JSON.stringify({v:1,settings:{simple:false,style:'pop'}}));localStorage.removeItem('touchChord.tour.v1')});
   await p.goto(U+'?test=1&tour=1');await p.waitForTimeout(1600);const s=await st(p);F(!s.open,`${sz} saved settings: tour opened`);F(!s.done,`${sz} saved settings: marked done`);await ctx.close();}
- // 4) without ?test=1 (the real app) a fresh load runs it too
- {const {ctx,p}=await mk();await p.goto(U);await p.waitForTimeout(1600);F(await p.evaluate(()=>!document.getElementById('tour').hidden),`${sz} real fresh load: no tour`);await ctx.close();}
+ // 4) without ?test=1 (the real app) a fresh load opens the Kids view (Kids redesign: Simple), where the full-app tour does not run
+ {const {ctx,p}=await mk();await p.goto(U);await p.waitForTimeout(1600);F(await p.evaluate(()=>document.documentElement.classList.contains('kv')&&document.getElementById('tour').hidden),`${sz} real fresh load: not the Kids view, or the tour opened over it`);await ctx.close();}
 }
 await b.close();fs.writeFileSync((process.env.OUT||__dirname)+'/tour112.json',J(R,null,1));console.log(J({count:R.count,fails:R.fails.slice(0,20)}));})().catch(e=>{console.error(e);process.exit(1)});
