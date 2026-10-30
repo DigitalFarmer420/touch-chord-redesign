@@ -19,16 +19,16 @@ const R = { fails: [], data: { same: 0, compared: 0, expertRow: [] } };
 async function shots(b, base, w, h, s) {
   const ctx = await b.newContext({ viewport: { width: w, height: h } });
   await ctx.addInitScript(`try{if(!sessionStorage.getItem('x')){sessionStorage.setItem('x',1);localStorage.clear();localStorage.setItem('touchChord.tour.v1','done');localStorage.setItem('touchChord.settings.v1',JSON.stringify({v:1,settings:${JSON.stringify(s)}}));}}catch(e){}`);
-  await ctx.addInitScript(() => { const st = document.createElement('style'); st.textContent = '*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}'; document.addEventListener('DOMContentLoaded', () => document.head.appendChild(st)); });
+  await ctx.addInitScript(() => { const st = document.createElement('style'); st.textContent = '*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important} #dev-badge{display:none!important}'; document.addEventListener('DOMContentLoaded', () => document.head.appendChild(st)); });
   const p = await ctx.newPage(); const errs = []; p.on('pageerror', e => errs.push('' + e));
   await p.goto(base + '?test=1'); await p.waitForTimeout(1500);
   const out = {}; const snap = async n => { await p.waitForTimeout(400); out[n] = await p.screenshot(); };
   out.kv = await p.evaluate(() => document.documentElement.classList.contains('kv') || !!(document.getElementById('kv') && !document.getElementById('kv').hidden));
   await snap('main');
   await p.evaluate(() => { for (let i = 0; i < 3; i++) window.__progApi && __progApi.next(); }); await p.waitForTimeout(900); await snap('walk3');
-  out.expertRow = await p.evaluate(() => !!document.getElementById('expertBtn'));
-  await p.evaluate(() => { const e = document.getElementById('expertBtn'); if (e) e.style.display = 'none'; document.getElementById('configBtn').click(); }); await snap('menu');
-  await p.evaluate(() => { const e = document.getElementById('expertBtn'); if (e) e.style.display = ''; }); out.menuWithRow = await p.screenshot();
+  out.expertRow = await p.evaluate(() => !!document.getElementById('modeRow'));   // redesign-dev: the one Kids / Simple / Expert row
+  await p.evaluate(() => { const e = document.getElementById('modeRow'); if (e) e.style.display = 'none'; document.getElementById('configBtn').click(); }); await snap('menu');
+  await p.evaluate(() => { const e = document.getElementById('modeRow'); if (e) e.style.display = ''; }); out.menuWithRow = await p.screenshot();
   await p.evaluate(() => document.getElementById('configBtn').click()); await p.waitForTimeout(200);
   out.errs = errs; await ctx.close(); return out;
 }
@@ -37,7 +37,7 @@ async function shots(b, base, w, h, s) {
   for (const [w, h] of SIZES) for (const [name, s] of SETUPS) { const tag = `${w}x${h}-${name}`;
     const a = await shots(b, A, w, h, s), c = await shots(b, B, w, h, s);
     if (c.kv) R.fails.push(`${tag}: B opened the Kids view for an existing Expert setup`);
-    if (!c.expertRow) R.fails.push(`${tag}: B has no Expert mode row`); else R.data.expertRow.push(tag);
+    if (!c.expertRow) R.fails.push(`${tag}: B has no Kids / Simple / Expert mode row`); else R.data.expertRow.push(tag);
     if (c.errs.length) R.fails.push(`${tag}: B page errors ${c.errs.slice(0, 2)}`);
     for (const n of ['main', 'walk3', 'menu']) { R.data.compared++;
       if (Buffer.compare(a[n], c[n]) === 0) { R.data.same++; continue; }

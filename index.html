@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Touch Chord</title>
+<title>REDESIGN DEV · Touch Chord</title>
   <link rel="icon" href="data:,">
   <link rel="apple-touch-icon" href="data:,">
 <script src="js/boot-early.js?v=112.13"></script>
@@ -24,6 +24,8 @@
 <link rel="stylesheet" href="css/fit.css?v=112.13">
 <link rel="stylesheet" href="css/kids.css?v=112.13">
 <link rel="stylesheet" href="css/expert.css?v=112.13">
+<meta name="robots" content="noindex,nofollow">
+<style id="dev-badge-style">#dev-badge{position:fixed;top:calc(env(safe-area-inset-top,0px) + 2px);left:50%;transform:translateX(-50%);z-index:2147483647;pointer-events:none;background:#7b3fe4;color:#fff;font:700 9px/1 -apple-system,system-ui,sans-serif;letter-spacing:.08em;padding:3px 7px;border-radius:999px;opacity:.85;box-shadow:0 1px 3px rgba(0,0,0,.4);white-space:nowrap}</style>
 </head>
 <body>
 <div id="app">
@@ -39,7 +41,6 @@
         <div class="cfg-pa"><button id="playAlongBtn" type="button" role="menuitemcheckbox" aria-checked="true" class="cfg-toggle on"><span>Play along enable</span><span class="tgl" aria-hidden="true"></span></button><button id="playAlongQ" type="button" class="cfg-q" aria-label="What is Play along?" title="What is Play along?" aria-expanded="false" aria-controls="playAlongTip">?</button></div>
         <p id="playAlongTip" class="cfg-tip" hidden>When on, tap the marked next chord, or in Full mode its root key in any octave, and the song moves on like Next. In Kids, tap the gold pad or the gold key in any octave. Not during Play. When off, taps only play sound.</p>
         <button id="paHintsBtn" type="button" role="menuitemcheckbox" aria-checked="true" class="cfg-toggle cfg-sub on"><span>Show hints</span><span class="tgl" aria-hidden="true"></span></button>
-        <button id="expertBtn" type="button" role="menuitemcheckbox" aria-checked="true" class="cfg-toggle on"><span>Expert mode</span><span class="tgl" aria-hidden="true"></span></button>
         <div class="cfg-help"><span class="cfg-lbl">Help</span><button id="tourBtn" type="button" role="menuitem">Tour</button></div>
         <button id="factoryReset" type="button" role="menuitem" class="danger">Factory reset</button>
         <div id="appVersion" class="app-version" aria-live="off"></div>
@@ -676,5 +677,6 @@
   <div class="tour-dim"></div><div class="tour-hole"></div><div class="tour-num"></div>
   <div class="tour-card"><p class="tour-text" id="tourText"></p><div class="tour-foot"><span class="tour-step"></span><button type="button" class="tour-btn tour-skip">Skip</button><button type="button" class="tour-btn pri tour-next">Next</button></div></div>
 </div>
+<div id="dev-badge" aria-hidden="true">REDESIGN DEV · v112.13-rd1</div>
 </body>
 </html>

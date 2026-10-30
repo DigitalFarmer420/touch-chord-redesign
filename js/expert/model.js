@@ -23,17 +23,23 @@ export function prefFromUrl(search, pref) {
 // The screen the app shows: Kids style = Kids; Simple switch on = Simple; else Expert when the pref is on;
 // else the classic Full screen (kept for the existing suites and for anyone who never picks Expert).
 export function modeOf(s) {
-  if (s.style === "kids") return "kids";
+  // One Kids / Simple / Expert switch for the merged build (redesign-dev):
+  //   kids   = the Kids view (kids-build: settings expert === false, html.kv)
+  //   simple = the classic app in Simple
+  //   expert = the Expert screen set (html.expert; pref on, not Simple, not the Kids style)
+  //   full   = the classic full app (saved setups from before the redesign; no switch button is lit)
+  if (s.kv) return "kids";
   if (s.simple) return "simple";
-  return s.on ? "expert" : "full";
+  return s.on && s.style !== "kids" ? "expert" : "full";
 }
 // What a tap on the mode switch changes. lastStyle = the last non-Kids style (Pop when none).
-// Returns { style: <style to pick or null>, simple: <bool>, on: <bool> }.
+// Returns { kv: <Kids view on>, style: <style to pick or null>, simple: <bool or null = unchanged>, on: <Expert pref> }.
+// The Kids view picks the Kids style itself (kids/view.js enter), so "kids" leaves style and Simple alone.
 export function modeTarget(cur, target, lastStyle) {
   var back = lastStyle && lastStyle !== "kids" ? lastStyle : "pop";
-  if (target === "kids") return { style: cur.style === "kids" ? null : "kids", simple: false, on: false };
-  if (target === "simple") return { style: cur.style === "kids" ? back : null, simple: true, on: false };
-  return { style: cur.style === "kids" ? back : null, simple: false, on: true };   // expert
+  if (target === "kids") return { kv: true, style: null, simple: null, on: false };
+  if (target === "simple") return { kv: false, style: cur.style === "kids" ? back : null, simple: true, on: false };
+  return { kv: false, style: cur.style === "kids" ? back : null, simple: false, on: true };   // expert
 }
 
 // ---- Type bar (decision 2: no Fold button; one tap opens / folds the 4x2 table) ----

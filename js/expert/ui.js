@@ -16,6 +16,7 @@ import { paintKeyChip, keyLabel } from "../ui/keychip.js?v=112.13";
 import { fitNowSymbol } from "../ui/nowbox.js?v=112.13";
 import { computeSpec, renderPads, refreshHeld, setWinKeys } from "../ui/pads.js?v=112.13";
 import { fitStrip, stripLabel } from "../ui/strip.js?v=112.13";
+import { setExpert as setKidsViewOff, setModeHandler } from "../kids/view.js?v=112.13";   // redesign-dev: the Kids view (kids-build) is the switch's Kids
 import { EXPERT_STORE, parsePref, prefFromUrl, modeOf, modeTarget, typeBarInit, typeBarReduce, typeBarLabel, TYPEBAR_HOLD_MS,
   sourceInit, sourceReduce, progDots, lyricNow, STYLE_MENU, styleName, expertWindowKeys } from "./model.js?v=112.13";
 
@@ -39,14 +40,21 @@ function click(sel) { var b = typeof sel === "string" ? document.querySelector(s
 
 // ---------- mode ----------
 export function expertActive() { return active; }
-export function currentMode() { return modeOf({ style: state.style, simple: state.simple, on: pref.on }); }
+export function currentMode() { return modeOf({ kv: !!shared.kidsView, style: state.style, simple: state.simple, on: pref.on }); }
 export function setMode(target) {
   var t = modeTarget({ style: state.style, simple: state.simple }, target, lastStyle);
   xLog.mode.push(target);
-  pref.on = t.on; savePref();
-  if (t.style) click("#styles button[data-style=\"" + t.style + "\"]");
-  if (!!state.simple !== t.simple) click("#simpleBtn");
   closeAll();
+  pref.on = t.on; savePref();
+  if (t.kv) {   // Kids = the Kids view: leave the Expert screen first, then the Kids view takes over (it picks the Kids style)
+    paintMode();
+    setKidsViewOff(false);
+    paintMode();
+    return;
+  }
+  if (shared.kidsView) setKidsViewOff(true);   // back to the full app (the Kids view keeps its place in the song)
+  if (t.style) click("#styles button[data-style=\"" + t.style + "\"]");
+  if (t.simple !== null && !!state.simple !== t.simple) click("#simpleBtn");
   paintMode();
 }
 function paintMode() {
@@ -119,7 +127,7 @@ function build() {
   var vol = el("label", "x-volrow", "<span>Vol</span><input id=\"xVol\" type=\"range\" min=\"0\" max=\"100\" step=\"1\" aria-label=\"Volume\"><b id=\"xVolVal\"></b>");
   $("paneSound").appendChild(vol);
   // Decision 11: the mode switch also lives in the gear menu (Kids / Simple / classic Full screens).
-  var gm = el("div", "x-gearmode", "<span class=\"cfg-lbl\">Mode</span><span class=\"x-seg x-mode\" role=\"radiogroup\" aria-label=\"Mode\"><button type=\"button\" role=\"radio\" data-mode=\"kids\">Kids</button><button type=\"button\" role=\"radio\" data-mode=\"simple\">Simple</button><button type=\"button\" role=\"radio\" data-mode=\"expert\">Expert</button></span>");
+  var gm = el("div", "x-gearmode", "<span class=\"cfg-lbl\">Mode</span><span class=\"x-seg x-mode\" role=\"radiogroup\" aria-label=\"Mode\"><button type=\"button\" role=\"radio\" data-mode=\"kids\">Kids</button><button type=\"button\" role=\"radio\" data-mode=\"simple\">Simple</button><button type=\"button\" role=\"radio\" data-mode=\"expert\">Expert</button></span>", { id: "modeRow" });
   $("configMenu").insertBefore(gm, $("configMenu").firstChild);
   built = true;
 }
@@ -372,7 +380,9 @@ function wireAll() {
   // Gear-menu mode switch (classic screens)
   document.querySelector(".x-gearmode").addEventListener("click", function (e) {
     var b = e.target.closest("button[data-mode]"); if (!b) return;
-    e.stopPropagation(); setMode(b.dataset.mode);
+    e.stopPropagation();
+    var m = $("configMenu"); if (m) m.hidden = true; var c = $("configBtn"); if (c) c.setAttribute("aria-expanded", "false");
+    setMode(b.dataset.mode);
   });
   $("xVol").addEventListener("input", function () { var v = $("volume"); v.value = $("xVol").value; v.dispatchEvent(new Event("input", { bubbles: true })); $("xVolVal").textContent = v.value; });
   $("xVol").addEventListener("change", function () { var v = $("volume"); v.value = $("xVol").value; v.dispatchEvent(new Event("change", { bubbles: true })); });
@@ -393,12 +403,15 @@ function wireAll() {
 // Boot (from main.js, after the app's own boot: saved settings applied, first song set).
 export function boot() {
   pref = prefFromUrl(location.search, loadPref());
+  var urlOn = /[?&]expert=1(&|$)/.test(location.search);
   if (/[?&]expert=[01](&|$)/.test(location.search)) savePref();
+  setModeHandler(setMode);   // the Kids view's own Kids / Simple / Expert row goes through the same switch
   tb = typeBarInit(false);
   src = sourceInit(srcCtx());
   build();
   wireAll();
   placeTog();
+  if (urlOn && currentMode() !== "expert") setMode("expert");   // ?expert=1 opens Expert, also on a first visit (else the Kids view)
   paintMode();
   setTimeout(function () { if (active) { placeTog(); placeSheets(); fitStrip(); placeBadges(); fitNowSymbol(); } }, 60);
 }

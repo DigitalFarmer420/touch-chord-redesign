@@ -43,6 +43,6 @@ try {
   if (tcEnv && tcEnv.settings && tcEnv.settings.simple === true) document.documentElement.classList.add("simple");   // v107: Full unless saved Simple
   /* Kids redesign: the Kids view before first paint (a first visit, or saved Simple); its Lamplight look. */
   var tcFirst = !tcRaw && !(/[?&]test=1(&|$)/.test(location.search) && !/[?&]kv=1(&|$)/.test(location.search));   /* tests: a fresh ?test=1 opens the full app as before; ?test=1&kv=1 = a real first visit */
-  if (tcFirst || (tcEnv && tcEnv.settings && tcEnv.settings.expert === false)) document.documentElement.classList.add("kv");
+  if ((tcFirst || (tcEnv && tcEnv.settings && tcEnv.settings.expert === false)) && !/[?&]expert=1(&|$)/.test(location.search)) document.documentElement.classList.add("kv");   /* redesign-dev: ?expert=1 opens Expert */
   if (tcEnv && tcEnv.settings && tcEnv.settings.theme === "lamp") document.documentElement.classList.add("kv-lamp");
 } catch (err) { /* ignore */ }

@@ -136,17 +136,18 @@ test('Source helpers: step dots (gold now, dashed next) and the lyric word on go
 });
 
 // ---------- mode switch (decision 11) and prefs ----------
-test('Mode: Kids style = Kids, Simple switch = Simple, else Expert when on, else classic Full', () => {
-  assert.equal(M.modeOf({ style: 'kids', simple: true, on: true }), 'kids');
-  assert.equal(M.modeOf({ style: 'jazz', simple: true, on: true }), 'simple');
-  assert.equal(M.modeOf({ style: 'jazz', simple: false, on: true }), 'expert');
-  assert.equal(M.modeOf({ style: 'jazz', simple: false, on: false }), 'full');
+test('Mode: Kids view = Kids, Simple switch = Simple, else Expert when on (not the Kids style), else classic Full', () => {
+  assert.equal(M.modeOf({ kv: true, style: 'kids', simple: true, on: true }), 'kids');
+  assert.equal(M.modeOf({ kv: false, style: 'kids', simple: false, on: true }), 'full');   // classic Kids style in the full app
+  assert.equal(M.modeOf({ kv: false, style: 'jazz', simple: true, on: true }), 'simple');
+  assert.equal(M.modeOf({ kv: false, style: 'jazz', simple: false, on: true }), 'expert');
+  assert.equal(M.modeOf({ kv: false, style: 'jazz', simple: false, on: false }), 'full');
 });
-test('Mode switch targets: leaving Kids goes back to the last style; Expert turns Simple off', () => {
-  assert.deepEqual(M.modeTarget({ style: 'kids', simple: false }, 'expert', 'jazz'), { style: 'jazz', simple: false, on: true });
-  assert.deepEqual(M.modeTarget({ style: 'pop', simple: true }, 'expert', 'pop'), { style: null, simple: false, on: true });
-  assert.deepEqual(M.modeTarget({ style: 'rnb', simple: false }, 'kids', 'rnb'), { style: 'kids', simple: false, on: false });
-  assert.deepEqual(M.modeTarget({ style: 'kids', simple: false }, 'simple', null), { style: 'pop', simple: true, on: false });
+test('Mode switch targets: Kids opens the Kids view; leaving Kids goes back to the last style; Expert turns Simple off', () => {
+  assert.deepEqual(M.modeTarget({ style: 'kids', simple: false }, 'expert', 'jazz'), { kv: false, style: 'jazz', simple: false, on: true });
+  assert.deepEqual(M.modeTarget({ style: 'pop', simple: true }, 'expert', 'pop'), { kv: false, style: null, simple: false, on: true });
+  assert.deepEqual(M.modeTarget({ style: 'rnb', simple: false }, 'kids', 'rnb'), { kv: true, style: null, simple: null, on: false });
+  assert.deepEqual(M.modeTarget({ style: 'kids', simple: false }, 'simple', null), { kv: false, style: 'pop', simple: true, on: false });
 });
 test('Expert pref: Lamplight default, own store key, ?expert=1/0', () => {
   assert.equal(M.EXPERT_STORE, 'touchChord.expert.v1');

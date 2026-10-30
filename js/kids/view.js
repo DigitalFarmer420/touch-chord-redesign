@@ -177,13 +177,13 @@ function buildSettings() {
   nu.addEventListener("click", function () { document.getElementById("progNumsBtn").click(); paintSettings(); });
   var look = seg("kvLook", [["day", "\u2600 Day"], ["lamp", "\u263E Lamp"]], "Look");
   look.addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; setTheme(b.dataset.v); });
-  var mode = seg("kvMode", [["simple", "Simple"], ["expert", "Expert"]], "Simple or Expert");
-  mode.addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; if (b.dataset.v === "expert") { openSettings(false); setExpert(true); } });
+  var mode = seg("kvMode", [["kids", "Kids"], ["simple", "Simple"], ["expert", "Expert"]], "Kids, Simple or Expert");   // redesign-dev: the one mode switch
+  mode.addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b || b.dataset.v === "kids") return; openSettings(false); if (modeHandler) modeHandler(b.dataset.v); else setExpert(true); });
   els.rowPA = row("Play along", "Off: songs still play, guide marks hide", pa, "On: tap the gold pad or the gold key to play the next note of the song. Off: Next and Play song still move the song on; only the gold marks hide.");
   els.rowHi = row("Show hints", "", hi, "A short tip shows when a tap misses the gold note.");
   els.rowNu = row("Numbers on chords", "", nu, "Shows step numbers on the song's chords in Expert mode.");
   els.rowLook = row("Look", "Day is the default", look);
-  els.rowMode = row("Mode", "Expert: styles, sound, upload, all chords", mode, "Simple is this Kids screen. Expert opens the full app with styles, sound, keyboard layouts, upload and the chord table. Settings there has an Expert switch to come back.");
+  els.rowMode = row("Mode", "Simple and Expert: styles, sound, upload", mode, "Kids is this screen. Simple opens the app with fewer controls. Expert opens the full chord grid with styles, sound, keyboard layouts, upload and the chord types. The gear menu and Expert settings have the same Kids / Simple / Expert switch to come back.");
   var reset = btn("kv-set kv-reset", "<span class=\"kv-st\"><span class=\"kv-sl\">Start over</span><small>Reset all settings</small></span><span class=\"kv-chev\">\u203A</span>");
   reset.addEventListener("click", function () { openConfirm(true); });
   [els.rowPA, els.rowHi, els.rowNu, els.rowLook, els.rowMode].forEach(function (r) { body.appendChild(r); if (r.tipEl) body.appendChild(r.tipEl); });
@@ -236,7 +236,7 @@ function paintSettings() {
   if (!els.rowHi.querySelector("small")) { var sm = document.createElement("small"); sm.textContent = paOff ? "Turn on Play along to use hints" : ""; els.rowHi.querySelector(".kv-st").appendChild(sm); }
   setTg(document.getElementById("kvNums"), !!state.progNums);
   setSeg(document.getElementById("kvLook"), state.theme === "lamp" ? "lamp" : "day");
-  setSeg(document.getElementById("kvMode"), state.expert ? "expert" : "simple");
+  setSeg(document.getElementById("kvMode"), "kids");
 }
 export function setTheme(t) {
   state.theme = t === "lamp" ? "lamp" : "day";
@@ -245,7 +245,10 @@ export function setTheme(t) {
   scheduleSave(0);
 }
 
-// ---------- mode switch (Simple = Kids view, Expert = the full app) ----------
+// ---------- mode switch (redesign-dev: one Kids / Simple / Expert switch; js/expert/ui.js setMode drives it) ----------
+var modeHandler = null;   // set by js/expert/ui.js (setModeHandler(setMode)); kept as a hook so this module does not import the Expert view
+export function setModeHandler(fn) { modeHandler = fn; }
+// setExpert(false) = open the Kids view, setExpert(true) = leave it for the full app (settings key "expert" kept from kids-build)
 export function setExpert(on) {
   on = !!on;
   if (on === !!state.expert && kv.on === !on) return;
