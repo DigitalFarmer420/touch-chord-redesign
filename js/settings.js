@@ -28,6 +28,10 @@ export function applySettings(s) {
   paintProgNumsBtn();
   state.playAlong = s.playAlong !== false;   // v108
   state.paHints = s.paHints !== false;   // v112
+  state.expert = s.expert !== false;   // Kids redesign: Simple (Kids view) / Expert
+  state.theme = s.theme === "lamp" ? "lamp" : "day";
+  state.kidsSong = s.kidsSong || null;
+  document.documentElement.classList.toggle("kv-lamp", state.theme === "lamp");
   paintPlayAlongBtn();
   state.layout = s.layout;
   state.sound = s.sound;

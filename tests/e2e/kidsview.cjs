@@ -1,0 +1,169 @@
+// Kids redesign: the Kids view (Simple). At each size (default 360x780, 780x360, 768x1024, 1024x768; phone emulation
+// via -r emulate.cjs): a real first visit (?test=1&kv=1) opens Hello with the full app hidden; Hello -> the six songs in
+// order (Twinkle first, the default); the play screen has 7 root-position pads C..B rising in reading order and one
+// 7-white-key piano C4..B4 rising left to right; every step of every song: the octave never moves (same keys, same
+// rects, same pitches), exactly one gold key and it is on screen, the gold key is the melody note's letter with an up /
+// down arrow for notes outside C..B, and a tap on it sounds the real pitch (60 + the preset's @note); the reward shows
+// after the last gold tap, after Next on the last step and after Play song's last step (Play stops); Happy / Sad pads;
+// Simple -> Expert -> Simple keeps the song and the step; Play along off hides the gold marks while Next and Play song
+// still move the song on; Daylight / Lamplight and Simple / Expert survive a reload. No page errors.
+// node -r ./emulate.cjs kidsview.cjs [WxH]   env BASE, OUT, KV_SHOTS (dir: a screenshot per screen)
+const { chromium } = require('playwright-core'); const fs = require('fs'); const path = require('path');
+const URL = process.env.URL || process.env.BASE || 'http://localhost:8080/index.html';
+const OUT = process.env.OUT || path.join(__dirname, 'out'); fs.mkdirSync(OUT, { recursive: true });
+const SHOTS = process.env.KV_SHOTS || ''; if (SHOTS) fs.mkdirSync(SHOTS, { recursive: true });
+const SIZES = process.argv[2] ? [process.argv[2].split('x').map(Number)] : [[360, 780], [780, 360], [768, 1024], [1024, 768]];
+const w12 = n => ((n % 12) + 12) % 12;
+const SIX = ['Kids Twinkle', 'Kids Old MacDonald', 'Kids Itsy Bitsy Spider', 'Kids Row Your Boat', 'Kids Head Shoulders Knees and Toes', "Kids Mary's Lamb"];
+const SRC = fs.readFileSync(path.join(__dirname, '../../js/songs/presets.js'), 'utf8');
+const MEL = {}; for (const m of SRC.matchAll(/P\("(Kids [^"]+)", "([^"]+)"\)/g)) MEL[m[1]] = m[2].split('|').map(s => +s.match(/@(-?\d+)$/)[1]);
+const R = { fails: [], data: {} }; const F = (c, m) => { if (!c) R.fails.push(m); };
+const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+async function open(b, w, h, fresh) {
+  const ctx = await b.newContext({ viewport: { width: w, height: h } });
+  await ctx.addInitScript(`try{if(!sessionStorage.getItem('x')){sessionStorage.setItem('x',1);localStorage.clear();localStorage.setItem('touchChord.tour.v1','done');}}catch(e){}`);
+  const p = await ctx.newPage(); p.__errs = [];
+  p.on('pageerror', e => p.__errs.push('' + e)); p.on('console', m => { if (m.type() === 'error') p.__errs.push(m.text()); });
+  await p.goto(URL + '?test=1&kv=1'); await p.waitForTimeout(1200); await rec(p);
+  return p;
+}
+const rec = p => p.evaluate(() => { const A = window.ChordAudio; window.__L = []; if (A.__kvw) return; A.__kvw = 1; const pc = A.playChord.bind(A);
+  A.playChord = function (g, m, o) { window.__L.push({ g, m: (m || []).filter(isFinite).map(Number).sort((a, b) => a - b) }); return pc(g, m, o); }; });
+const take = p => p.evaluate(() => { const l = window.__L; window.__L = []; return l; });
+const vis = (r, W, H) => r && r.w > 0 && r.h > 0 && r.x >= -0.5 && r.y >= -0.5 && r.x + r.w <= W + 0.5 && r.y + r.h <= H + 0.5;
+const st = p => p.evaluate(() => { const rc = e => { const r = e.getBoundingClientRect(); return { x: +r.x.toFixed(1), y: +r.y.toFixed(1), w: +r.width.toFixed(1), h: +r.height.toFixed(1) }; };
+  const kv = document.getElementById('kv'), wk = [...kv.querySelectorAll('.kv-wk')], bk = [...kv.querySelectorAll('.kv-bk')], keys = wk.concat(bk);
+  const gold = keys.filter(k => k.classList.contains('gold'));
+  return { on: document.documentElement.classList.contains('kv'), app: getComputedStyle(document.getElementById('app')).display, screen: kv.dataset.screen,
+    song: __prog.list[__prog.idx] && __prog.list[__prog.idx].name, cur: __prog.cur, pos: __magic.state.pos, playing: !!__prog.playing, n: __prog.steps.length,
+    wk: wk.map(k => ({ pc: +k.dataset.pc, m: +k.dataset.midi, r: rc(k) })), bk: bk.map(k => ({ pc: +k.dataset.pc, m: +k.dataset.midi, r: rc(k) })),
+    gold: gold.map(k => ({ pc: +k.dataset.pc, m: +k.dataset.midi, up: k.classList.contains('oct-up'), down: k.classList.contains('oct-down'), arrow: k.querySelector('.kv-oct').textContent,
+      star: getComputedStyle(k, '::before').display !== 'none' && getComputedStyle(k, '::before').content !== 'none', arrowShown: getComputedStyle(k.querySelector('.kv-oct')).display !== 'none', r: rc(k) })),
+    pads: [...kv.querySelectorAll('.kv-pad')].map(e => ({ pc: +e.dataset.pc, l: e.dataset.letter, gold: e.classList.contains('gold'), r: rc(e) })),
+    reward: !kv.querySelector('.kv-reward').hidden, lyr: kv.querySelector('.kv-lyr').textContent, paOff: kv.classList.contains('pa-off'),
+    lamp: document.documentElement.classList.contains('kv-lamp'), bg: getComputedStyle(kv).backgroundColor, kbWin: __kbWin().lo }; });
+(async () => {
+  const b = await chromium.launch({ executablePath: process.env.CHROME || undefined, args: ['--autoplay-policy=no-user-gesture-required'] });
+  for (const [w, h] of SIZES) { const tag = `${w}x${h}`, D = R.data[tag] = {};
+    const p = await open(b, w, h); const cdp = await p.context().newCDPSession(p);
+    const touch = async (x, y, ms = 90) => { await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] }); await p.waitForTimeout(ms); await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }); await p.waitForTimeout(40); };
+    const tapEl = async (sel, fy = 0.5) => { const r = await p.evaluate(s => { const e = document.querySelector(s); if (!e || !e.getClientRects().length) return null; if (e.closest('.kv-sheet')) e.scrollIntoView({ block: 'center' }); const q = e.getBoundingClientRect(); return { x: q.x, y: q.y, w: q.width, h: q.height }; }, sel); if (!r) { R.fails.push(`${tag}: no ${sel}`); return; } await touch(r.x + r.w / 2, r.y + r.h * fy); };
+    const shot = async n => { if (SHOTS) await p.screenshot({ path: path.join(SHOTS, `${tag}-${n}.png`) }); };
+    // 1. first visit: Hello over a hidden full app
+    let s = await st(p); F(s.on && s.app === 'none' && s.screen === 'hello', `${tag}: first visit is not the Kids Hello (on ${s.on}, #app ${s.app}, screen ${s.screen})`); await shot('hello');
+    F(s.song === 'Kids Twinkle', `${tag}: default song ${s.song}`);
+    // 2. song picker: six, in order, Twinkle marked
+    await tapEl('#kv .kv-go'); await p.waitForTimeout(250);
+    const cards = await p.evaluate(() => [...document.querySelectorAll('#kv .kv-card')].map(c => { const r = c.getBoundingClientRect(); return { s: c.dataset.song, last: c.classList.contains('last'), x: r.x, y: r.y, w: r.width, h: r.height }; }));
+    F(same(cards.map(c => c.s), SIX), `${tag}: song cards ${cards.map(c => c.s)}`); F(cards[0] && cards[0].last && cards.filter(c => c.last).length === 1, `${tag}: Twinkle not the marked default`);
+    F(cards.every(c => vis(c, w, h)), `${tag}: a song card is off screen`); F(same(await p.evaluate(() => __kv.songs()), SIX), `${tag}: prog.list is not the six`);
+    for (let i = 1; i < cards.length; i++) F(cards[i].y > cards[i - 1].y + 1 || (Math.abs(cards[i].y - cards[i - 1].y) <= 1 && cards[i].x > cards[i - 1].x), `${tag}: card ${i} out of reading order`);
+    await shot('songs');
+    // 3. play screen geometry
+    await tapEl('#kv .kv-card[data-song="Kids Twinkle"]'); await p.waitForTimeout(300); s = await st(p); await shot('play');
+    F(s.screen === 'play' && s.song === 'Kids Twinkle', `${tag}: Twinkle card did not open play (${s.screen} ${s.song})`);
+    F(same(s.pads.map(q => q.l), ['C', 'D', 'E', 'F', 'G', 'A', 'B']), `${tag}: pads ${s.pads.map(q => q.l)}`);
+    for (let i = 1; i < 7; i++) { const a = s.pads[i - 1].r, c = s.pads[i].r; F(c.y > a.y + 1 || (Math.abs(c.y - a.y) <= 1 && c.x > a.x), `${tag}: pad ${s.pads[i].l} not after ${s.pads[i - 1].l} in reading order`); }
+    F(s.pads.every(q => vis(q.r, w, h)), `${tag}: a pad is off screen`);
+    F(s.wk.length === 7 && s.bk.length === 5, `${tag}: piano has ${s.wk.length} white / ${s.bk.length} black keys`);
+    F(same(s.wk.map(k => k.m), [60, 62, 64, 65, 67, 69, 71]) && same(s.bk.map(k => k.m), [61, 63, 66, 68, 70]), `${tag}: key pitches ${s.wk.map(k => k.m)} / ${s.bk.map(k => k.m)}`);
+    for (let i = 1; i < 7; i++) F(s.wk[i].r.x > s.wk[i - 1].r.x, `${tag}: white keys not rising left to right`);
+    for (const k of s.bk) { const L = s.wk.filter(q => q.m < k.m).pop(), Rr = s.wk.find(q => q.m > k.m); F(k.r.x > L.r.x && k.r.x + k.r.w < Rr.r.x + Rr.r.w, `${tag}: black ${k.m} not between its whites`); }
+    F(s.wk.concat(s.bk).every(k => vis(k.r, w, h)), `${tag}: a key is off screen`);
+    D.whiteKey = { w: s.wk[0].r.w, h: s.wk[0].r.h }; D.blackKey = { w: s.bk[0].r.w, h: s.bk[0].r.h };
+    const keyRects = JSON.stringify(s.wk.concat(s.bk).map(k => k.r)), kbWin0 = s.kbWin;
+    // 4. pads: root position, root lowest; Happy = major, Sad = minor
+    const padSnd = {};
+    for (const mood of ['happy', 'sad']) { await tapEl(`#kv .kv-md-${mood}`); await p.waitForTimeout(120); await take(p);
+      for (const q of s.pads) { const pos0 = (await st(p)).pos; await touch(q.r.x + q.r.w / 2, q.r.y + q.r.h / 2, 150); await p.waitForTimeout(250); const L = await take(p); const m = (L.find(x => x.m.length >= 3) || {}).m || [];
+        if ((await st(p)).pos !== pos0) { padSnd[mood + q.l] = 'gold'; continue; }   // the gold pad plays the song's next note (Kids style), not a free chord
+        padSnd[mood + q.l] = m; const rel = m.map(x => x - m[0]);
+        F(m.length >= 3 && w12(m[0]) === q.pc, `${tag}: ${mood} pad ${q.l} lowest note ${m[0]} (pc ${w12(m[0])}), want the root ${q.pc}`);
+        if (mood === 'happy' && ['C', 'F', 'G'].includes(q.l)) F(rel.includes(4) && rel.includes(7), `${tag}: happy ${q.l} not major root position ${m}`);
+        if (mood === 'sad') F(rel.includes(3) && rel.includes(7) && !rel.includes(4), `${tag}: sad ${q.l} not minor root position ${m}`); } }
+    D.pads = padSnd; await tapEl('#kv .kv-md-happy');
+    // 5. reload Twinkle fresh, then every song: gold walk
+    D.songs = {};
+    for (const name of SIX) {
+      if ((await st(p)).reward) await tapEl('#kv .kv-again');
+      await p.evaluate(n => { const i = __prog.list.findIndex(q => q.name === n); __progApi.set(i); __kv.show('play'); }, name); await p.waitForTimeout(350); await take(p);
+      const mel = MEL[name], E = D.songs[name] = { steps: mel.length, arrows: [], soundFails: 0 };
+      for (let i = 0; i < mel.length; i++) {
+        s = await st(p);
+        F(JSON.stringify(s.wk.concat(s.bk).map(k => k.r)) === keyRects, `${tag} ${name} step ${i}: the piano moved`);
+        F(same(s.wk.map(k => k.m), [60, 62, 64, 65, 67, 69, 71]), `${tag} ${name} step ${i}: key pitches changed`);
+        F(s.kbWin === kbWin0, `${tag} ${name} step ${i}: hidden keyboard window moved ${kbWin0} -> ${s.kbWin}`);
+        F(s.gold.length === 1, `${tag} ${name} step ${i}: ${s.gold.length} gold keys`);
+        const g = s.gold[0]; if (!g) continue;
+        F(vis(g.r, w, h) && g.star, `${tag} ${name} step ${i}: gold key not visible`);
+        F(g.pc === w12(mel[i]), `${tag} ${name} step ${i}: gold key pc ${g.pc}, melody @${mel[i]}`);
+        const want = mel[i] > 11 ? 'up' : mel[i] < 0 ? 'down' : '';
+        F((g.up ? 'up' : g.down ? 'down' : '') === want && (!want || (g.arrowShown && g.arrow === (want === 'up' ? '▲' : '▼'))), `${tag} ${name} step ${i}: arrow ${g.up ? 'up' : g.down ? 'down' : '-'} (${g.arrow}), want ${want || '-'} for @${mel[i]}`);
+        if (want) { E.arrows.push([i, mel[i], want]); if (SHOTS && E.arrows.length === 1) await shot('arrow-' + name.replace(/\W+/g, '')); }
+        await touch(g.r.x + g.r.w / 2, g.r.y + g.r.h * (s.wk.some(k => k.m === g.m) ? 0.85 : 0.5), 120); await p.waitForTimeout(140);
+        const L = await take(p), hit = L.some(x => x.m.includes(60 + mel[i]));
+        if (!hit) { E.soundFails++; R.fails.push(`${tag} ${name} step ${i}: gold tap did not sound ${60 + mel[i]} (heard ${JSON.stringify(L.map(x => x.m))})`); }
+        if (i < mel.length - 1) { const s2 = await st(p); F(!s2.reward, `${tag} ${name} step ${i}: reward too early`); }
+      }
+      await p.waitForTimeout(1100); s = await st(p); F(s.reward, `${tag} ${name}: no reward after the last gold tap`);
+      if (name === 'Kids Twinkle') await shot('reward');
+      if (/Itsy|Head/.test(name)) F(E.arrows.length > 0, `${tag} ${name}: no out-of-octave arrow seen`);
+      else F(!E.arrows.length, `${tag} ${name}: unexpected arrows ${JSON.stringify(E.arrows)}`);
+    }
+    // 6. reward after Next on the last step, and after Play song's last step
+    if ((await st(p)).reward) await tapEl('#kv .kv-again');
+    await p.evaluate(() => { __progApi.set(__prog.list.findIndex(q => q.name === "Kids Mary's Lamb")); __kv.show('play'); }); await p.waitForTimeout(300);
+    s = await st(p); for (let i = 0; i < s.n - 1; i++) await p.evaluate(() => document.querySelector('#kv .kv-next').click());
+    F(!(await st(p)).reward, `${tag}: reward before the last Next`);
+    await tapEl('#kv .kv-ctl .kv-next'); await p.waitForTimeout(1100); F((await st(p)).reward, `${tag}: no reward after Next on the last step`);
+    await tapEl('#kv .kv-again'); await p.waitForTimeout(250); s = await st(p); F(!s.reward && s.pos === 0, `${tag}: Again did not restart (reward ${s.reward}, pos ${s.pos})`);
+    for (let i = 0; i < s.n - 3; i++) await p.evaluate(() => document.querySelector('#kv .kv-next').click());
+    await tapEl('#kv .kv-playbtn'); await p.waitForTimeout(200); F((await st(p)).playing, `${tag}: Play song did not start`);
+    let t0 = Date.now(); while (Date.now() - t0 < 9000 && !(await st(p)).reward) await p.waitForTimeout(100);
+    s = await st(p); F(s.reward && !s.playing, `${tag}: Play song end: reward ${s.reward}, still playing ${s.playing}`); D.playEndMs = Date.now() - t0;
+    await tapEl('#kv .kv-again'); await p.waitForTimeout(200);
+    // 7. Simple -> Expert -> Simple resume
+    await p.evaluate(() => { __progApi.set(__prog.list.findIndex(q => q.name === 'Kids Old MacDonald')); __kv.show('play'); }); await p.waitForTimeout(250);
+    for (let i = 0; i < 7; i++) await p.evaluate(() => document.querySelector('#kv .kv-next').click());
+    await p.waitForTimeout(300); const before = await st(p);
+    await tapEl('#kv .kv-play .kv-gear'); await p.waitForTimeout(250); await shot('settings');
+    await tapEl('#kvMode button[data-v="expert"]'); await p.waitForTimeout(500); s = await st(p);
+    F(!s.on && s.app !== 'none', `${tag}: Expert did not open the full app`);
+    const ex = await p.evaluate(() => ({ style: document.querySelector('#styles button[data-style].on, #styles button[data-style][aria-pressed="true"]')?.dataset.style || null, song: __prog.list[__prog.idx].name, pos: __magic.state.pos }));
+    F(ex.song === before.song && ex.pos === before.pos, `${tag}: Expert lost the place (${ex.song} @${ex.pos} vs ${before.song} @${before.pos})`);
+    await p.evaluate(() => __progApi.next()); await p.waitForTimeout(200); const exPos = await p.evaluate(() => __magic.state.pos);
+    await tapEl('#configBtn'); await p.waitForTimeout(250); await tapEl('#expertBtn'); await p.waitForTimeout(500); s = await st(p);
+    F(s.on && s.app === 'none' && s.screen === 'play' && s.song === before.song && s.pos === exPos, `${tag}: back to Simple: on ${s.on} screen ${s.screen} ${s.song} @${s.pos} (want @${exPos})`);
+    // 8. Play along off: gold marks hide, Next / Play song still move on
+    await tapEl('#kv .kv-play .kv-gear'); await p.waitForTimeout(200); await tapEl('#kvPlayAlong'); await p.waitForTimeout(250); await tapEl('#kvSettings .kv-x'); await p.waitForTimeout(200);
+    s = await st(p); F(s.paOff && await p.evaluate(() => document.documentElement.classList.contains('pa-off')), `${tag}: Play along off not set (kv ${s.paOff})`);
+    F(s.gold.every(g => !g.star && !g.arrowShown) && !(await p.evaluate(() => [...document.querySelectorAll('#kv .kv-pad.gold')].some(e => getComputedStyle(e).outlineStyle !== 'none' && parseFloat(getComputedStyle(e).outlineWidth) > 0))), `${tag}: gold marks still shown with Play along off`);
+    await shot('pa-off');
+    const p0 = s.pos; await tapEl('#kv .kv-ctl .kv-next'); await p.waitForTimeout(250); F((await st(p)).pos === p0 + 1, `${tag}: Next did not advance with Play along off`);
+    await take(p); await tapEl('#kv .kv-playbtn'); await p.waitForTimeout(1500); s = await st(p); const pl = await take(p);
+    F(s.playing && pl.length > 0, `${tag}: Play song did not play with Play along off`); await tapEl('#kv .kv-playbtn'); await p.waitForTimeout(250);
+    await tapEl('#kv .kv-play .kv-gear'); await p.waitForTimeout(200); await tapEl('#kvPlayAlong'); await p.waitForTimeout(200); await tapEl('#kvSettings .kv-x'); await p.waitForTimeout(200);
+    F(!(await st(p)).paOff, `${tag}: Play along did not come back on`);
+    // 9. theme persists
+    const dayBg = (await st(p)).bg;
+    await tapEl('#kv .kv-play .kv-gear'); await p.waitForTimeout(200); await tapEl('#kvLook button[data-v="lamp"]'); await p.waitForTimeout(300); await tapEl('#kvSettings .kv-x');
+    await p.reload(); await p.waitForTimeout(1300); await rec(p); s = await st(p);
+    F(s.lamp && s.on && s.bg !== dayBg, `${tag}: Lamplight lost on reload (lamp ${s.lamp}, bg ${s.bg} vs ${dayBg})`);
+    F(s.screen === 'hello', `${tag}: reload did not start at Hello`);
+    await tapEl('#kv .kv-go'); await p.waitForTimeout(300); s = await st(p); F(s.screen === 'play' && s.song === 'Kids Old MacDonald', `${tag}: Hello after reload did not resume the last song (${s.screen} ${s.song})`);
+    await shot('lamp');
+    await tapEl('#kv .kv-play .kv-gear'); await p.waitForTimeout(200); await tapEl('#kvLook button[data-v="day"]'); await p.waitForTimeout(300); await tapEl('#kvSettings .kv-x');
+    await p.reload(); await p.waitForTimeout(1300); s = await st(p); F(!s.lamp && s.bg === dayBg, `${tag}: Daylight lost on reload`);
+    // 10. Simple / Expert persists
+    await p.evaluate(() => __kv.setExpert(true)); await p.waitForTimeout(400); await p.reload(); await p.waitForTimeout(1300); s = await st(p);
+    F(!s.on && s.app !== 'none' && !(await p.evaluate(() => document.documentElement.classList.contains('kv'))), `${tag}: Expert lost on reload`);
+    F(await p.evaluate(() => JSON.parse(localStorage.getItem('touchChord.settings.v1')).settings.expert === true), `${tag}: expert not saved`);
+    await tapEl('#configBtn'); await p.waitForTimeout(250); await tapEl('#expertBtn'); await p.waitForTimeout(400); await p.reload(); await p.waitForTimeout(1300); s = await st(p);
+    F(s.on && s.app === 'none', `${tag}: Simple lost on reload`);
+    F(!p.__errs.length, `${tag}: page errors ${p.__errs.slice(0, 3)}`); D.errs = p.__errs.slice(0, 5);
+    await p.context().close();
+  }
+  await b.close();
+  fs.writeFileSync(path.join(OUT, 'kidsview.json'), JSON.stringify(R, null, 1));
+  console.log(R.fails.length ? 'FAIL ' + R.fails.length + '\n' + R.fails.slice(0, 40).join('\n') : 'PASS', JSON.stringify(Object.fromEntries(Object.entries(R.data).map(([k, v]) => [k, { white: v.whiteKey, black: v.blackKey, playEndMs: v.playEndMs }]))));
+})();

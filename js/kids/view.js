@@ -1,0 +1,482 @@
+// Kids view (the Kids redesign, "Simple" mode): its own screens on top of the shared logic.
+//   Hello (its tap unlocks audio) -> Song picker (6 picture cards) -> Play (lyrics, 7 chord pads, Happy / Sad, Play song,
+//   Next, a fixed one-octave C..B piano) -> Reward when a song is finished. Settings sheet (no grown-up gate: the
+//   Simple / Expert switch is in it), Daylight / Lamplight looks.
+// Nothing here makes sound itself: a pad press goes through strip.js stripPress (the Kids pad path, with its hidden twin
+// pad in #suggest), a piano key through touch.js soundFinger / liftFinger, a gold tap through next.js kidsGoldGo,
+// Next / Play song through magic.js progNext / playback.js progPlay. So sound and timing are those of the Kids style.
+import { unlock } from "../audio/unlock.js?v=112.13";
+import { activeKey } from "../keys.js?v=112.13";
+import { KIDS_SONG_KEY } from "../songs/kids-songs.js?v=112.13";
+import { KIDS_LYRICS } from "../songs/kids-songs.js?v=112.13";
+import { magicQueue, progNext } from "../songs/magic.js?v=112.13";
+import { magic, prog, progSet, progPlay, progStop, applySongKey, progWalkAt, progWalkTo } from "../songs/playback.js?v=112.13";
+import { progLoopBar } from "../songs/song.js?v=112.13";
+import { state, fingers, shared, scheduleSave } from "../state.js?v=112.13";
+import { wrap12 } from "../theory/quality.js?v=112.13";
+import { APP_VERSION } from "../version.js?v=112.13";
+import { playAlongKeyOk, paHintMiss, paHintHide } from "../ui/hints.js?v=112.13";
+import { kidsTonic } from "../ui/keyboard.js?v=112.13";
+import { kidsHintItem, kidsGoldStep, kidsGoldGo, kidsGoldPad } from "../ui/next.js?v=112.13";
+import { renderPads, keyHaptic, padKey } from "../ui/pads.js?v=112.13";
+import { stripPress, stripRelease } from "../ui/strip.js?v=112.13";
+import { keyOf, soundFinger, liftFinger, resoundHeldFinger } from "../ui/touch.js?v=112.13";
+import { api as ChordAudio } from "../audio/index.js?v=112.13";
+
+// The six Kids songs (presets.js order): picture, title for parents, short chip name.
+export const KV_SONGS = {
+  "Kids Twinkle": { pic: "\u2B50", title: "Twinkle Twinkle Little Star", chip: "Twinkle" },
+  "Kids Old MacDonald": { pic: "\uD83D\uDC04", title: "Old MacDonald", chip: "Old MacDonald" },
+  "Kids Itsy Bitsy Spider": { pic: "\uD83D\uDD77\uFE0F", title: "Itsy Bitsy Spider", chip: "Itsy Bitsy" },
+  "Kids Row Your Boat": { pic: "\uD83D\uDEA3", title: "Row Your Boat", chip: "Row Your Boat" },
+  "Kids Head Shoulders Knees and Toes": { pic: "\uD83D\uDE46", title: "Head, Shoulders, Knees & Toes", chip: "Head Shoulders" },
+  "Kids Mary's Lamb": { pic: "\uD83D\uDC11", title: "Mary's Lamb", chip: "Mary's Lamb" }
+};
+const LETTERS = ["C", "D", "E", "F", "G", "A", "B"];
+const WHITE_PC = [0, 2, 4, 5, 7, 9, 11];
+const BLACKS = [{ pc: 1, after: 1 }, { pc: 3, after: 2 }, { pc: 6, after: 4 }, { pc: 8, after: 5 }, { pc: 10, after: 6 }];   // after = white keys to its left
+const HAPPY = "\uD83D\uDE0A", SAD = "\uD83D\uDE22";
+const TEST = /[?&]test=1(&|$)/.test(location.search);
+
+export const kv = { on: false, screen: "hello", mood: "happy", reward: false, endT: 0, rewardT: 0, sig: "", timer: 0, resume: null, log: [], tip: null };
+var root, els = {};
+
+function h(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+function btn(cls, html, label) { var b = h("button", cls, html); b.type = "button"; if (label) b.setAttribute("aria-label", label); return b; }
+function emo(s) { return "<span class=\"kv-emo\" aria-hidden=\"true\">" + s + "</span>"; }
+function songName() { var p = prog.list[prog.idx]; return p ? p.name : null; }
+function meta(name) { return KV_SONGS[name] || { pic: "\uD83C\uDFB5", title: String(name || "").replace(/^Kids\s+/, ""), chip: String(name || "").replace(/^Kids\s+/, "") }; }
+function gearBtn() {
+  var g = btn("kv-gear", "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M19.4 13a7.5 7.5 0 0 0 0-2l2-1.6-2-3.4-2.4 1a7.6 7.6 0 0 0-1.7-1L15 3.5h-4l-.4 2.5a7.6 7.6 0 0 0-1.7 1l-2.4-1-2 3.4L6.6 11a7.5 7.5 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a7.6 7.6 0 0 0 1.7 1l.4 2.5h4l.4-2.5a7.6 7.6 0 0 0 1.7-1l2.4 1 2-3.4zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z\" transform=\"translate(-1 0)\"/></svg>", "Settings");
+  g.addEventListener("click", function () { openSettings(true); });
+  return g;
+}
+
+// ---------- build ----------
+function build() {
+  root = h("div", "kv"); root.id = "kv"; root.hidden = true;
+  // a. Hello
+  var hello = h("section", "kv-scr kv-hello"); hello.setAttribute("aria-label", "Hello");
+  hello.appendChild(gearBtn());
+  hello.appendChild(h("h1", "kv-title", "Touch&nbsp;Chord"));
+  hello.appendChild(h("div", "kv-notes", emo("\uD83C\uDFB5\uD83C\uDFB9\uD83C\uDFB5")));
+  var go = btn("kv-go", "<span class=\"kv-tri\"></span>", "Start");
+  go.addEventListener("click", function () { unlock(); kv.log.push("hello"); show(state.kidsSong && KV_SONGS[state.kidsSong] && songName() === state.kidsSong ? "play" : "songs"); });
+  hello.appendChild(go);
+  hello.appendChild(h("div", "kv-tip", emo("\uD83D\uDD08") + "<span>No sound? Turn the volume up. Touch Chord plays even with the iPhone silent switch on.</span>"));
+  // b. Songs
+  var songs = h("section", "kv-scr kv-songs"); songs.setAttribute("aria-label", "Songs");
+  var sh = h("div", "kv-shead"); sh.appendChild(h("h2", "kv-h", emo("\uD83C\uDFB6") + " Songs")); sh.appendChild(gearBtn()); songs.appendChild(sh);
+  els.cards = h("div", "kv-cards"); els.cards.setAttribute("role", "list"); songs.appendChild(els.cards);
+  // c. Play
+  var play = h("section", "kv-scr kv-play"); play.setAttribute("aria-label", "Play");
+  var top = h("div", "kv-top");
+  var home = btn("kv-home", emo("\uD83C\uDFE0"), "Songs"); home.addEventListener("click", function () { if (prog.playing) progStop(); hideReward(); show("songs"); });
+  els.chip = h("div", "kv-chip");
+  els.lyr = h("div", "kv-lyr"); els.lyr.setAttribute("aria-live", "off");
+  els.mood = h("div", "kv-mood"); els.mood.setAttribute("role", "radiogroup"); els.mood.setAttribute("aria-label", "Happy or sad chords");
+  [["happy", HAPPY, "Happy chords"], ["sad", SAD, "Sad chords"]].forEach(function (m) {
+    var b = btn("kv-md kv-md-" + m[0], emo(m[1]), m[2]); b.setAttribute("role", "radio"); b.dataset.mood = m[0];
+    b.addEventListener("click", function () { kv.mood = m[0]; paint(true); });
+    els.mood.appendChild(b);
+  });
+  top.appendChild(home); top.appendChild(els.chip); top.appendChild(h("span", "kv-sp")); top.appendChild(gearBtn());
+  els.top = top; play.appendChild(top); play.appendChild(els.lyr);
+  var mid = h("div", "kv-mid");
+  els.pads = h("div", "kv-pads"); els.pads.setAttribute("role", "group"); els.pads.setAttribute("aria-label", "Seven chords");
+  LETTERS.forEach(function (L, i) {
+    var p = btn("kv-pad kv-c" + L, "<span class=\"kv-n\">" + L + "</span><span class=\"kv-f\">" + emo(HAPPY) + "</span>", L);
+    p.dataset.pc = String(WHITE_PC[i]); p.dataset.letter = L;
+    wirePad(p);
+    els.pads.appendChild(p);
+  });
+  var ctl = h("div", "kv-ctl");
+  els.play = btn("kv-playbtn", "<span class=\"kv-tri\"></span>", "Play song");
+  els.play.addEventListener("click", function () { unlock(); hideReward(); progPlay(); kv.log.push("play"); paint(true); });
+  els.next = btn("kv-next", "<span class=\"kv-arrow\" aria-hidden=\"true\">\u279C</span>", "Next");
+  els.next.addEventListener("click", onNext);
+  ctl.appendChild(els.mood); ctl.appendChild(els.play); ctl.appendChild(els.next);
+  els.ctl = ctl; mid.appendChild(els.pads); mid.appendChild(ctl); play.appendChild(mid);
+  els.piano = h("div", "kv-piano"); els.piano.setAttribute("aria-label", "Piano, C to B");
+  var whites = h("div", "kv-whites");
+  WHITE_PC.forEach(function (pc, i) {
+    var k = btn("kv-wk kv-c" + LETTERS[i], "<i aria-hidden=\"true\"></i><span class=\"kv-kl\">" + LETTERS[i] + "</span><b class=\"kv-oct\" aria-hidden=\"true\"></b>", LETTERS[i]);
+    k.dataset.pc = String(pc); k.dataset.ix = String(i); wireKey(k); whites.appendChild(k);
+  });
+  els.piano.appendChild(whites);
+  BLACKS.forEach(function (bk) {
+    var k = btn("kv-bk", "<b class=\"kv-oct\" aria-hidden=\"true\"></b>", ["C sharp", "D sharp", "F sharp", "G sharp", "A sharp"][BLACKS.indexOf(bk)]);
+    k.dataset.pc = String(bk.pc); k.style.left = "calc(var(--kpad) + (100% - 2 * var(--kpad)) * " + (bk.after / 7) + " - var(--bkw) / 2)";
+    wireKey(k); els.piano.appendChild(k);
+  });
+  play.appendChild(els.piano);
+  // f. Reward
+  els.reward = h("div", "kv-reward"); els.reward.hidden = true;
+  els.reward.appendChild(h("div", "kv-glow"));
+  els.reward.appendChild(h("div", "kv-star", "\u2605"));
+  var rb = h("div", "kv-rbtns");
+  var again = btn("kv-again", "\u21BB", "Again"); again.addEventListener("click", function () { unlock(); hideReward(); progSet(prog.idx); paint(true); });
+  els.rnext = btn("kv-next kv-rnext", "", "Next song"); els.rnext.addEventListener("click", function () { unlock(); hideReward(); pickSong((prog.idx + 1) % prog.list.length, true); });
+  rb.appendChild(again); rb.appendChild(els.rnext); els.reward.appendChild(rb);
+  play.appendChild(els.reward);
+  root.appendChild(hello); root.appendChild(songs); root.appendChild(play);
+  els.hello = hello; els.songs = songs; els.playScr = play;
+  buildSettings();
+  document.body.appendChild(root);
+}
+
+function buildCards() {
+  els.cards.innerHTML = "";
+  prog.list.forEach(function (p, i) {
+    var m = meta(p.name), last = state.kidsSong ? state.kidsSong === p.name : i === 0;
+    var c = btn("kv-card" + (last ? " last" : ""), "<span class=\"kv-pic\">" + m.pic + "</span><span class=\"kv-ct\">" + m.title + "</span>" + (last ? "<span class=\"kv-last\">\u25B6 last</span>" : ""), m.title);
+    c.setAttribute("role", "listitem"); c.dataset.song = p.name;
+    c.addEventListener("click", function () { unlock(); pickSong(i, false); });
+    els.cards.appendChild(c);
+  });
+}
+function pickSong(i, fresh) {
+  hideReward();
+  if (fresh || i !== prog.idx) progSet(i);
+  state.kidsSong = songName(); scheduleSave();
+  kv.log.push("song:" + state.kidsSong);
+  show("play");
+}
+
+// ---------- settings ----------
+function row(label, sub, ctrl, tip, cls) {
+  var r = h("div", "kv-set" + (cls ? " " + cls : ""));
+  var st = h("div", "kv-st", "<span class=\"kv-sl\">" + label + "</span>" + (sub ? "<small>" + sub + "</small>" : ""));
+  r.appendChild(st);
+  if (tip) {
+    var q = btn("kv-q", "?", label + ": what is this?"); q.setAttribute("aria-expanded", "false");
+    var t = h("p", "kv-tiptxt", tip); t.hidden = true;
+    q.addEventListener("click", function () { t.hidden = !t.hidden; q.setAttribute("aria-expanded", t.hidden ? "false" : "true"); });
+    r.appendChild(q); r.tipEl = t;
+  }
+  if (ctrl) r.appendChild(ctrl);
+  return r;
+}
+function tg(id, label) { var b = btn("kv-tg", "", label); b.id = id; b.setAttribute("role", "switch"); b.setAttribute("aria-checked", "false"); return b; }
+function seg(id, opts, label) {
+  var s = h("div", "kv-seg"); s.id = id; s.setAttribute("role", "radiogroup"); s.setAttribute("aria-label", label);
+  opts.forEach(function (o) { var b = btn("", o[1]); b.dataset.v = o[0]; b.setAttribute("role", "radio"); s.appendChild(b); });
+  return s;
+}
+function buildSettings() {
+  var wrap = h("div", "kv-sheetwrap"); wrap.hidden = true; wrap.id = "kvSettings";
+  var dim = h("div", "kv-dim"); dim.addEventListener("click", function () { openSettings(false); });
+  var sh = h("div", "kv-sheet"); sh.setAttribute("role", "dialog"); sh.setAttribute("aria-label", "Settings"); sh.setAttribute("aria-modal", "true");
+  sh.appendChild(h("div", "kv-grab"));
+  var hd = h("div", "kv-shd"); hd.appendChild(h("h3", "", "Settings"));
+  var x = btn("kv-x", "\u2715", "Close"); x.addEventListener("click", function () { openSettings(false); }); hd.appendChild(x); sh.appendChild(hd);
+  var body = h("div", "kv-sbody");
+  var pa = tg("kvPlayAlong", "Play along"), hi = tg("kvHints", "Show hints"), nu = tg("kvNums", "Numbers on chords");
+  pa.addEventListener("click", function () { document.getElementById("playAlongBtn").click(); paintSettings(); paint(true); });
+  hi.addEventListener("click", function () { if (state.playAlong === false) return; document.getElementById("paHintsBtn").click(); paintSettings(); });
+  nu.addEventListener("click", function () { document.getElementById("progNumsBtn").click(); paintSettings(); });
+  var look = seg("kvLook", [["day", "\u2600 Day"], ["lamp", "\u263E Lamp"]], "Look");
+  look.addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; setTheme(b.dataset.v); });
+  var mode = seg("kvMode", [["simple", "Simple"], ["expert", "Expert"]], "Simple or Expert");
+  mode.addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; if (b.dataset.v === "expert") { openSettings(false); setExpert(true); } });
+  els.rowPA = row("Play along", "Off: songs still play, guide marks hide", pa, "On: tap the gold pad or the gold key to play the next note of the song. Off: Next and Play song still move the song on; only the gold marks hide.");
+  els.rowHi = row("Show hints", "", hi, "A short tip shows when a tap misses the gold note.");
+  els.rowNu = row("Numbers on chords", "", nu, "Shows step numbers on the song's chords in Expert mode.");
+  els.rowLook = row("Look", "Day is the default", look);
+  els.rowMode = row("Mode", "Expert: styles, sound, upload, all chords", mode, "Simple is this Kids screen. Expert opens the full app with styles, sound, keyboard layouts, upload and the chord table. Settings there has an Expert switch to come back.");
+  var reset = btn("kv-set kv-reset", "<span class=\"kv-st\"><span class=\"kv-sl\">Start over</span><small>Reset all settings</small></span><span class=\"kv-chev\">\u203A</span>");
+  reset.addEventListener("click", function () { openConfirm(true); });
+  [els.rowPA, els.rowHi, els.rowNu, els.rowLook, els.rowMode].forEach(function (r) { body.appendChild(r); if (r.tipEl) body.appendChild(r.tipEl); });
+  body.appendChild(reset);
+  body.appendChild(h("div", "kv-ver", "Touch Chord " + APP_VERSION));
+  sh.appendChild(body);
+  wrap.appendChild(dim); wrap.appendChild(sh);
+  // g3. Start over (confirm; erase needs a 2 s hold)
+  var cf = h("div", "kv-confirm"); cf.hidden = true; cf.id = "kvConfirm";
+  var card = h("div", "kv-ccard"); card.setAttribute("role", "alertdialog"); card.setAttribute("aria-label", "Start over?");
+  card.innerHTML = "<div class=\"kv-broom\">" + emo("\uD83E\uDDF9") + "</div><div class=\"kv-ch\">Start over?</div><div class=\"kv-cs\">This resets all settings. It can't be undone. Your saved songs stay.</div>";
+  var keep = btn("kv-keep", "Keep everything"); keep.addEventListener("click", function () { openConfirm(false); });
+  var er = btn("kv-erase", "<span class=\"kv-fill\"></span><span class=\"kv-et\">Hold 2 s to erase</span>"); wireHold(er);
+  card.appendChild(keep); card.appendChild(er); cf.appendChild(h("div", "kv-dim")); cf.appendChild(card);
+  root.appendChild(wrap); root.appendChild(cf);
+  els.settings = wrap; els.confirm = cf;
+}
+function wireHold(b) {
+  var t = 0, fill = b.querySelector(".kv-fill");
+  function stop() { clearTimeout(t); t = 0; b.classList.remove("holding"); fill.style.transition = "none"; fill.style.width = "0"; }
+  b.addEventListener("pointerdown", function (e) {
+    e.preventDefault(); try { b.setPointerCapture(e.pointerId); } catch (err) {}
+    b.classList.add("holding"); void fill.offsetWidth; fill.style.transition = "width 2s linear"; fill.style.width = "100%";
+    t = setTimeout(function () { t = 0; stop(); startOver(); }, 2000);
+  });
+  b.addEventListener("pointerup", stop); b.addEventListener("pointercancel", stop); b.addEventListener("pointerleave", function () { if (t) stop(); });
+}
+function startOver() {
+  openConfirm(false); openSettings(false);
+  document.getElementById("factoryReset").click();   // the grown-up factory reset (settings to defaults)
+  state.expert = false; state.theme = "day"; state.kidsSong = null; kv.mood = "happy";
+  enter(true);
+  scheduleSave(0);
+  show("hello");
+}
+export function openSettings(open) {
+  if (open) paintSettings();
+  els.settings.hidden = !open;
+  if (open) { var c = els.settings.querySelector(".kv-x"); if (c) c.focus({ preventScroll: true }); }
+}
+function openConfirm(open) { els.confirm.hidden = !open; }
+function setTg(b, on, dis) { b.setAttribute("aria-checked", on ? "true" : "false"); b.classList.toggle("on", !!on); b.disabled = !!dis; b.classList.toggle("dis", !!dis); }
+function setSeg(s, v) { Array.prototype.forEach.call(s.querySelectorAll("button"), function (b) { var on = b.dataset.v === v; b.classList.toggle("on", on); b.setAttribute("aria-checked", on ? "true" : "false"); }); }
+function paintSettings() {
+  var paOff = state.playAlong === false;
+  setTg(document.getElementById("kvPlayAlong"), !paOff);
+  setTg(document.getElementById("kvHints"), !paOff && state.paHints !== false, paOff);
+  els.rowHi.classList.toggle("dis", paOff);
+  els.rowHi.querySelector("small") ? (els.rowHi.querySelector("small").textContent = paOff ? "Turn on Play along to use hints" : "") : null;
+  if (!els.rowHi.querySelector("small")) { var sm = document.createElement("small"); sm.textContent = paOff ? "Turn on Play along to use hints" : ""; els.rowHi.querySelector(".kv-st").appendChild(sm); }
+  setTg(document.getElementById("kvNums"), !!state.progNums);
+  setSeg(document.getElementById("kvLook"), state.theme === "lamp" ? "lamp" : "day");
+  setSeg(document.getElementById("kvMode"), state.expert ? "expert" : "simple");
+}
+export function setTheme(t) {
+  state.theme = t === "lamp" ? "lamp" : "day";
+  document.documentElement.classList.toggle("kv-lamp", state.theme === "lamp");
+  if (els.settings) paintSettings();
+  scheduleSave(0);
+}
+
+// ---------- mode switch (Simple = Kids view, Expert = the full app) ----------
+export function setExpert(on) {
+  on = !!on;
+  if (on === !!state.expert && kv.on === !on) return;
+  state.expert = on;
+  if (on) leave(); else enter(false);
+  var eb = document.getElementById("expertBtn");
+  if (eb) { eb.setAttribute("aria-checked", on ? "true" : "false"); eb.classList.toggle("on", on); }
+  scheduleSave(0);
+}
+function enter(boot) {
+  kv.on = true; shared.kidsView = true;
+  document.documentElement.classList.add("kv");
+  paHintHide();
+  if (state.style !== "kids") {
+    var w = progWalkAt(), kb = document.querySelector('#styles button[data-style="kids"]');
+    if (w && /^Kids /.test(w.name)) kv.resume = w;   // (else: the place saved when Simple was left)
+    if (kb) kb.click();   // the style row's own Kids pick (sound preset, C major, Twinkle)
+  } else if (!boot) kv.resume = null;   // still in Kids in Expert: the song is where Expert left it
+  var want = kv.resume && kv.resume.name ? kv.resume.name : (boot && state.kidsSong ? state.kidsSong : null), ix = -1;
+  if (want) prog.list.forEach(function (p, i) { if (p.name === want) ix = i; });
+  if (ix >= 0 && ix !== prog.idx) progSet(ix);
+  if (kv.resume && ix >= 0) progWalkTo(kv.resume);   // mode switch: the song picks up where it left off
+  kv.resume = null;
+  var sk = KIDS_SONG_KEY[songName()], ak = activeKey();
+  if (sk && (!ak || ak.pc !== 0 || ak.mode !== "major")) applySongKey(sk[0], sk[1]);   // the Kids piano is C..B: the song's own key
+  renderPads();   // the hidden keyboard follows the Kids view rules (one octave on the tonic)
+  root.hidden = false;
+  if (boot) show("hello");
+  startPaint();
+}
+function leave() {
+  if (kv.on && state.style === "kids") kv.resume = progWalkAt();
+  kv.on = false; shared.kidsView = false;
+  hideReward();
+  openSettings(false); openConfirm(false);
+  document.documentElement.classList.remove("kv");
+  root.hidden = true;
+  stopPaint();
+  renderPads();
+}
+export function show(scr) {
+  kv.screen = scr;
+  root.dataset.screen = scr;
+  [["hello", els.hello], ["songs", els.songs], ["play", els.playScr]].forEach(function (x) { x[1].hidden = x[0] !== scr; });
+  if (scr === "songs") buildCards();
+  kv.log.push("screen:" + scr);
+  paint(true);
+}
+
+// ---------- input ----------
+function twinPad(pc) {
+  var pads = document.querySelectorAll("#suggest .ss-kidpad");
+  for (var i = 0; i < pads.length; i++) if (pads[i]._tc && wrap12(pads[i]._tc.item.rootPc) === wrap12(pc)) return pads[i];
+  return null;
+}
+function moodItem(it) {
+  if (kv.mood !== "sad") return it;
+  var t = {}, k; for (k in it) t[k] = it[k];
+  t.type = "minor"; t.extensions = {}; t.rootSpell = null; t.degree = null;
+  return t;
+}
+function lastStepNext() { var d = !prog.playing && prog.steps.length ? magicQueue() : null; return !!(d && d.step === prog.steps.length - 1); }
+function wirePad(p) {
+  p.addEventListener("pointerdown", function (e) {
+    if (e.button != null && e.button !== 0) return;
+    e.preventDefault();
+    var tw = twinPad(Number(p.dataset.pc));
+    if (!tw) return;
+    try { p.setPointerCapture(e.pointerId); } catch (err) {}
+    p.classList.add("down");
+    var fin = kidsGoldPad(tw) && lastStepNext();
+    stripPress(tw, moodItem(tw._tc.item), e);
+    if (fin) rewardSoon();
+    paint(true);
+  });
+  function up(e) { p.classList.remove("down"); stripRelease(e.pointerId); paint(true); }
+  p.addEventListener("pointerup", up); p.addEventListener("pointercancel", up);
+  p.addEventListener("contextmenu", function (e) { e.preventDefault(); });
+}
+function goldMidi() {
+  var it = kidsHintItem();
+  if (!it) return null;
+  var ak = activeKey(), k = ak ? ak.pc : 0;
+  return kidsTonic() + (it.mel != null ? it.mel : wrap12(it.rootPc - k));   // the song pitch (keyboard.js kidsNatural; Octave kidsPlace = itself)
+}
+function keyMidi(pc) { return kidsTonic() + wrap12(pc - wrap12(kidsTonic())); }   // C..B on the Kids tonic octave (C major: C4..B4)
+function wireKey(k) {
+  k.dataset.midi = String(keyMidi(Number(k.dataset.pc)));
+  k.dataset.id = "kv" + k.dataset.pc;
+  k.addEventListener("pointerdown", function (e) {
+    if (e.button != null && e.button !== 0) return;
+    e.preventDefault();
+    keyHaptic();
+    k.dataset.midi = String(keyMidi(Number(k.dataset.pc)));
+    var g = kidsGoldStep() ? goldMidi() : null;
+    if (g != null && wrap12(g) === wrap12(Number(k.dataset.pc))) {   // the gold note's key (any octave: the arrow shows where it really is)
+      var fin = lastStepNext();
+      shared.kbKeyGo = true; shared.kbKeyStay = true;   // as a gold key tap on the grown-up keyboard
+      try { kidsGoldGo(k, "key"); } finally { shared.kbKeyGo = false; }
+      if (fin) rewardSoon();
+      paint(true);
+      return;
+    }
+    shared.paEvT = e.timeStamp || performance.now();
+    if (!playAlongKeyOk(k)) paHintMiss("key", k);
+    var needReplay = !(ChordAudio.ctx && ChordAudio.ctx.state === "running");
+    var pending = unlock();
+    try { k.setPointerCapture(e.pointerId); } catch (err) {}
+    var twin = document.querySelector('#pads .pad[data-midi="' + k.dataset.midi + '"]');   // the hidden Kids keyboard's own key (same id, degree, in-key rule: out-of-key black keys stay silent as in the Kids style)
+    soundFinger(e.pointerId, twin ? padKey(twin) : keyOf(k.dataset.id, k.dataset.pc, k.dataset.midi, null, false, false));
+    if (needReplay && pending && typeof pending.then === "function") pending.then(function () { resoundHeldFinger(e.pointerId); });
+    paint(true);
+  });
+  function up(e) { if (fingers[e.pointerId]) liftFinger(e.pointerId); paint(true); }   // (pads.js also lifts on window pointerup)
+  k.addEventListener("pointerup", up); k.addEventListener("pointercancel", up);
+  k.addEventListener("contextmenu", function (e) { e.preventDefault(); });
+}
+function onNext() {
+  unlock();
+  var fin = lastStepNext();
+  hideReward();
+  progNext();
+  kv.log.push("next");
+  if (fin) rewardSoon();
+  paint(true);
+}
+
+// ---------- reward ----------
+function rewardSoon() {
+  clearTimeout(kv.rewardT);
+  var st = prog.steps[prog.steps.length - 1], ms = Math.min(900, Math.max(250, (st ? st.bars : 0.5) * progLoopBar() * 1000 * 0.6));
+  kv.rewardT = setTimeout(showReward, ms);
+}
+export function showReward() {
+  kv.rewardT = 0;
+  if (!kv.on) return;
+  var n = prog.list.length, nx = n ? prog.list[(prog.idx + 1) % n] : null;
+  els.rnext.innerHTML = emo(nx ? meta(nx.name).pic : "") + "<span class=\"kv-arrow\" aria-hidden=\"true\">\u279C</span>";
+  els.rnext.setAttribute("aria-label", "Next song: " + (nx ? meta(nx.name).title : ""));
+  kv.reward = true; els.reward.hidden = false; els.playScr.classList.add("rewarding");
+  els.reward.classList.remove("pop"); void els.reward.offsetWidth; els.reward.classList.add("pop");
+  kv.log.push("reward:" + songName());
+}
+function hideReward() {
+  clearTimeout(kv.rewardT); kv.rewardT = 0; clearTimeout(kv.endT); kv.endT = 0;
+  if (!kv.reward) return;
+  kv.reward = false; els.reward.hidden = true; els.playScr.classList.remove("rewarding");
+}
+
+// ---------- paint ----------
+function lyrHtml() {
+  var L = KIDS_LYRICS[songName()];
+  if (!L || !L.length) return "";
+  var cur = prog.cur >= 0 ? prog.cur : (magic ? magic.pos - 1 : -1), li = 0;
+  if (cur >= prog.steps.length) cur = prog.steps.length - 1;
+  if (cur >= 0) L.forEach(function (ln, i) { if (ln.markers.some(function (m) { return m.chordIndex <= cur; })) li = i; });
+  function esc(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
+  function line(ln) {   // sung words solid, the current word (whole word, even when the note is its 2nd syllable) on gold, the rest faint
+    var t = ln.text, mk = ln.markers, m = null;
+    mk.forEach(function (x) { if (x.chordIndex === cur) m = x; });
+    if (!m) return "<span class=\"" + (cur >= mk[mk.length - 1].chordIndex ? "done" : "w") + "\">" + esc(t) + "</span>";
+    var L = /[A-Za-z\u00C0-\u024F'\u2019-]/, ws = m.charIndex, we = m.charIndex;
+    while (ws > 0 && L.test(t.charAt(ws - 1)) && t.charAt(ws - 1) !== "-") ws--;
+    while (we < t.length && L.test(t.charAt(we)) && t.charAt(we) !== "-") we++;
+    return "<span class=\"done\">" + esc(t.slice(0, ws)) + "</span><span class=\"now\">" + esc(t.slice(ws, we)) + "</span><span class=\"w\">" + esc(t.slice(we)) + "</span>";
+  }
+  return "<div class=\"kv-l1\">" + line(L[li]) + "</div><div class=\"kv-l2\">" + (L[li + 1] ? esc(L[li + 1].text) : "&nbsp;") + "</div>";
+}
+function layoutSlots() {   // phone landscape: the lyric line and Happy / Sad move into the top bar; iPad: Happy / Sad up top
+  var de = document.documentElement, land = de.classList.contains("lay-phone-land"), pad = de.classList.contains("lay-pad-land") || de.classList.contains("lay-pad-port");
+  var sp = els.top.querySelector(".kv-sp"), gear = els.top.querySelector(".kv-gear");
+  if (land) { if (els.lyr.parentNode !== els.top) els.top.insertBefore(els.lyr, sp); }
+  else if (els.lyr.parentNode !== els.playScr) els.playScr.insertBefore(els.lyr, els.top.nextSibling);
+  if (land || pad) { if (els.mood.parentNode !== els.top) els.top.insertBefore(els.mood, gear); }
+  else if (els.mood.parentNode !== els.ctl) els.ctl.insertBefore(els.mood, els.ctl.firstChild);
+}
+export function paint(force) {
+  if (!kv.on || !root) return;
+  layoutSlots();
+  // Play song: one pass in the Kids view, then the reward (stops where the next pass would begin)
+  if (prog.playing && kv.screen === "play" && prog.cur === prog.steps.length - 1 && !kv.endT && prog.steps.length) {
+    var st = prog.steps[prog.cur];
+    kv.endT = setTimeout(function () { kv.endT = 0; if (prog.playing) progStop(); showReward(); }, Math.max(0, st.bars * progLoopBar() * 1000 - 30));
+  } else if (!prog.playing && kv.endT) { clearTimeout(kv.endT); kv.endT = 0; }
+  var g = goldMidi(), lo = keyMidi(0), paOff = state.playAlong === false;
+  var gi = kidsHintItem(), goldPad = gi ? wrap12(gi.rootPc) : null;
+  var lit = {};
+  Object.keys(fingers).forEach(function (id) { (fingers[id].midis || []).forEach(function (m) { lit[m] = 1; }); });
+  if (shared.suggestPreview && shared.suggestPreview.midis) Object.keys(shared.suggestPreview.midis).forEach(function (m) { lit[m] = 1; });
+  var name = songName();
+  if (kv.screen === "play" && name && KV_SONGS[name] && state.kidsSong !== name) { state.kidsSong = name; scheduleSave(); }   // Hello opens the last song played
+  var sig = [kv.screen, name, prog.cur, magic ? magic.pos : -1, prog.playing, g, goldPad, kv.mood, paOff, Object.keys(lit).join(","), state.theme, kv.reward].join("|");
+  if (!force && sig === kv.sig) return;
+  kv.sig = sig;
+  root.classList.toggle("pa-off", paOff);
+  if (kv.screen !== "play") return;
+  var m = meta(name);
+  els.chip.innerHTML = "<span class=\"kv-pic\">" + m.pic + "</span><span class=\"kv-cn\">" + m.chip + "</span>";
+  var lh = lyrHtml(); if (els.lyr._h !== lh) { els.lyr.innerHTML = lh; els.lyr._h = lh; }
+  Array.prototype.forEach.call(els.mood.querySelectorAll("button"), function (b) { var on = b.dataset.mood === kv.mood; b.classList.toggle("on", on); b.setAttribute("aria-checked", on ? "true" : "false"); });
+  Array.prototype.forEach.call(els.pads.children, function (p) {
+    var gold = goldPad != null && Number(p.dataset.pc) === goldPad;
+    p.classList.toggle("gold", gold);
+    p.querySelector(".kv-f").innerHTML = emo(kv.mood === "sad" ? SAD : HAPPY);
+    p.setAttribute("aria-label", p.dataset.letter + (kv.mood === "sad" ? " sad" : " happy") + (gold && !paOff ? ", next" : ""));
+  });
+  Array.prototype.forEach.call(els.piano.querySelectorAll(".kv-wk, .kv-bk"), function (k) {
+    var midi = keyMidi(Number(k.dataset.pc)), gold = g != null && wrap12(g) === wrap12(midi);
+    k.dataset.midi = String(midi);
+    k.classList.toggle("gold", gold);
+    var dir = gold ? (g > lo + 11 ? "up" : g < lo ? "down" : "") : "";
+    k.classList.toggle("oct-up", dir === "up"); k.classList.toggle("oct-down", dir === "down");
+    k.querySelector(".kv-oct").textContent = dir === "up" ? "\u25B2" : dir === "down" ? "\u25BC" : "";
+    k.classList.toggle("lit", !!lit[midi]);
+  });
+  els.play.classList.toggle("on", !!prog.playing);
+  els.play.setAttribute("aria-label", prog.playing ? "Stop" : "Play song");
+}
+function startPaint() { if (!kv.timer) kv.timer = setInterval(function () { paint(false); }, 50); }
+function stopPaint() { if (kv.timer) { clearInterval(kv.timer); kv.timer = 0; } }
+
+// Boot: after the saved settings and the first render (main.js boot).
+export function boot() {
+  build();
+  setTheme(state.theme);
+  var eb = document.getElementById("expertBtn");
+  if (eb) {
+    eb.setAttribute("aria-checked", state.expert ? "true" : "false"); eb.classList.toggle("on", !!state.expert);
+    eb.addEventListener("click", function () { var m = document.getElementById("configMenu"); if (m) m.hidden = true; var c = document.getElementById("configBtn"); if (c) c.setAttribute("aria-expanded", "false"); setExpert(!state.expert); });
+  }
+  window.addEventListener("resize", function () { paint(true); });
+  if (!state.expert) enter(true);
+  if (TEST) window.__kv = { kv: kv, show: show, setExpert: setExpert, setTheme: setTheme, paint: paint, reward: showReward, gold: goldMidi, songs: function () { return prog.list.map(function (p) { return p.name; }); } };
+}
