@@ -204,9 +204,30 @@ function placeSheets() {
   var sb = $("xStyle").getBoundingClientRect();
   $("xStyleMenu").style.left = Math.round(sb.left) + "px";
   $("xStyleMenu").style.top = Math.round(sb.bottom + 6) + "px";
+  fitStyleMenu(sb.bottom + 6);
   var s = $("xSrc").getBoundingClientRect();
   $("xPList").style.top = Math.round(s.bottom + 6) + "px";
   document.documentElement.style.setProperty("--x-pl-top", Math.round(s.bottom + 6) + "px");
+}
+// rd5 (Uiux, landscape phone): the open Style list grows into the space below (8px safe margin) so it shows every row that
+// fits; when it still scrolls, it stops half way through a row and fades at the bottom, so the scroll is obvious.
+// Portrait and iPad keep the CSS max-height.
+function fitStyleMenu(top) {
+  var m = $("xStyleMenu"); if (!m) return;
+  if (!document.documentElement.classList.contains("lay-phone-land")) { m.style.maxHeight = ""; m.classList.remove("x-more"); return; }
+  var rows = m.querySelectorAll(".x-mi"), cs = getComputedStyle(m);
+  var pad = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth);
+  var rowH = rows.length ? (rows[0].offsetHeight || 46) : 46, full = pad + rowH * rows.length;
+  var avail = Math.floor(window.innerHeight - top - 8);
+  if (full <= avail) { m.style.maxHeight = Math.ceil(full) + "px"; m.classList.remove("x-more"); return; }
+  var head = parseFloat(cs.paddingTop) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth);   // the cut row reaches the bottom edge
+  var n = Math.max(1, Math.floor((avail - head - rowH / 2) / rowH));
+  m.style.maxHeight = Math.floor(head + rowH * n + rowH / 2) + "px";
+  paintStyleMore();
+}
+function paintStyleMore() {
+  var m = $("xStyleMenu"); if (!m) return;
+  m.classList.toggle("x-more", m.scrollHeight - m.clientHeight - m.scrollTop > 4);
 }
 function placeTog() {   // landscape: the Song | Progressions toggle sits in the top bar's free middle (iPad landscape mockup)
   var tog = $("xTog"), slot = document.querySelector("#xTop .x-slot");
@@ -400,6 +421,7 @@ export function expertPaintNow() { paintMode(); }
 function wireAll() {
   $("xKey").addEventListener("click", function () { openOnly("xKeySheet"); paint(); });
   $("xStyle").addEventListener("click", function () { if ($("xStyleMenu").hidden) openOnly("xStyleMenu"); else closeAll(); });
+  $("xStyleMenu").addEventListener("scroll", paintStyleMore, { passive: true });
   $("xStyleMenu").addEventListener("click", function (e) {
     var b = e.target.closest("button[data-style]"); if (!b) return;
     unlock(); closeAll(); click("#styles button[data-style=\"" + b.dataset.style + "\"]"); schedule();

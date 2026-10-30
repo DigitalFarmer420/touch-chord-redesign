@@ -10,12 +10,12 @@ const OUT = process.env.OUT || path.join(__dirname, 'out'); fs.mkdirSync(OUT, { 
 const SHOTS = process.env.X_SHOTS || ''; if (SHOTS) fs.mkdirSync(SHOTS, { recursive: true });
 const SIZES = process.argv[2] ? [process.argv[2].split('x').map(Number)] : [[360, 780], [780, 360], [820, 1180], [1180, 820]];
 const SONG = fs.readFileSync(path.join(__dirname, '../fixtures/upload/expert-song.json'), 'utf8');
-const R = { fails: [], passes: 0, data: {} }; let tag = '';
+const R = { fails: [], passes: 0, data: {} }; let tag = '', D0 = null;
 const F = (c, m) => { if (c) R.passes++; else R.fails.push(tag + ': ' + m); };
 const SUS = { '360x780': [108, 52], '820x1180': [230, 72], '1180x820': [206, 84] };
 (async () => {
   const b = await chromium.launch({ executablePath: process.env.CHROME || undefined });
-  for (const [w, h] of SIZES) {
+  for (const [w, h] of (process.env.X_ONLY_STYLELIST ? [] : SIZES)) {
     tag = `${w}x${h}`; const land = w > h; const D = R.data[tag] = {};
     const ctx = await b.newContext({ viewport: { width: w, height: h } });
     await ctx.addInitScript(`try{if(!sessionStorage.getItem('x')){sessionStorage.setItem('x',1);localStorage.clear();localStorage.setItem('touchChord.tour.v1','done');localStorage.setItem('touchChord.settings.v1',JSON.stringify({v:1,settings:{style:'pop',simple:false,playAlong:true,paHints:false,lockKey:{pc:0,mode:'major'}}}));}}catch(e){}`);
@@ -263,6 +263,37 @@ const SUS = { '360x780': [108, 52], '820x1180': [230, 72], '1180x820': [206, 84]
       if (g) { await p3.waitForTimeout(300); await p3.screenshot({ path: path.join(SHOTS, `${tag}-holdG.png`) }); await p3.evaluate(() => window.__pd(window.__chip, 99, 'pointerup')); } }
     F(!errs3.length, 'marks: no page errors ' + errs3.join(' | ')); await c3.close();
     console.log(`${tag}: ${R.fails.filter(f => f.startsWith(tag)).length} fails`);
+  }
+  // rd5 (Uiux, landscape phone): the open Style list shows every row that fits; if it still scrolls, the last visible row is
+  // cut part way (and fades) and the list scrolls to the 8th. Portrait / iPad: all 8 rows fully visible.
+  for (const [w, h] of (process.argv[2] ? SIZES.concat([[844, 390]]) : [[780, 360], [844, 390], [390, 844], [360, 780], [820, 1180], [1180, 820]])) {
+    tag = `${w}x${h} style list`; const ctx = await b.newContext({ viewport: { width: w, height: h } });
+    await ctx.addInitScript(`try{if(!sessionStorage.getItem('x')){sessionStorage.setItem('x',1);localStorage.clear();localStorage.setItem('touchChord.tour.v1','done');}}catch(e){}`);
+    const p = await ctx.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
+    await p.goto(URL0 + (URL0.includes('?') ? '&' : '?') + 'test=1&expert=1'); await p.waitForTimeout(1300);
+    await p.click('#xStyle'); await p.waitForTimeout(300);
+    const look = () => p.evaluate(() => { const m = document.getElementById('xStyleMenu'), M = m.getBoundingClientRect(), cs = getComputedStyle(m);
+      const iT = M.top + parseFloat(cs.borderTopWidth), iB = M.bottom - parseFloat(cs.borderBottomWidth);
+      return { top: M.top, bottom: M.bottom, vh: innerHeight, sh: m.scrollHeight, ch: m.clientHeight, st: m.scrollTop, more: m.classList.contains('x-more'),
+        rows: [...m.querySelectorAll('.x-mi')].map(b => { const q = b.getBoundingClientRect(); return { s: b.dataset.style, h: q.height, vis: Math.max(0, Math.min(q.bottom, iB) - Math.max(q.top, iT)) }; }) }; });
+    const L = await look(); D0 = R.data[tag] = { open: L };
+    F(L.rows.length === 8, `8 styles in the list (${L.rows.length})`);
+    F(L.bottom <= L.vh - 4, `the list stays on screen with a margin (bottom ${L.bottom} of ${L.vh})`);
+    const full = L.rows.filter(r => r.vis >= r.h - 0.5).length, cut = L.rows.filter(r => r.vis > 0.5 && r.vis < r.h - 0.5);
+    if (full === 8) F(!L.more, 'all 8 rows fully visible, no fade');
+    else {
+      F(w > h && h <= 500, `only a landscape phone may scroll the list (${full}/8 rows fully visible)`);
+      F(full >= 5, `the list grows into the space below: ${full} full rows (rd4: 4)`);
+      F(cut.length === 1 && L.rows.indexOf(cut[0]) === full && cut[0].vis >= cut[0].h * 0.3 && cut[0].vis <= cut[0].h * 0.7, `the last visible row is cut about in half ${JSON.stringify(cut)}`);
+      F(L.more && L.sh > L.ch, 'the list scrolls and shows the bottom fade');
+      await p.evaluate(() => { const m = document.getElementById('xStyleMenu'); m.scrollTop = m.scrollHeight; }); await p.waitForTimeout(200);
+      const L2 = await look(); D0.end = L2; const last = L2.rows[7];
+      F(last.s === 'country' && last.vis >= last.h - 0.5, `scrolled to the end: the 8th row (Country) fully visible ${JSON.stringify(last)}`);
+      F(!L2.more, 'no fade at the end of the list');
+      await p.click('#xStyleMenu [data-style="country"]'); await p.waitForTimeout(300);
+      F(await p.evaluate(() => document.querySelector('#styles .on').dataset.style === 'country'), 'the 8th style can be picked');
+    }
+    F(!errs.length, 'no page errors ' + errs.join(' | ')); await ctx.close();
   }
   await b.close();
   fs.writeFileSync(path.join(OUT, 'expert.json'), JSON.stringify(R, null, 1));

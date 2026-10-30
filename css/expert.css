@@ -327,3 +327,6 @@ html.expert .kb.piano .pad.x-down::after { content: "\2193"; }
 html.expert .kb.piano .pad.black.x-up::after, html.expert .kb.piano .pad.black.x-down::after { bottom: 12px; width: 16px; height: 16px; font-size: 10px; line-height: 16px; }
 html.expert .kb.piano .pad.x-arrow-teal::after { background: var(--x-next); color: #fff; }
 html.expert.pa-off .kb.piano .pad.x-arrow-teal::after { display: none !important; }
+
+/* rd5 (Uiux): landscape phone Style list - more rows below; a cut last row + bottom fade while more rows are below */
+html.expert .x-menu.x-more { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), rgba(0,0,0,.3)); mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), rgba(0,0,0,.3)); }
