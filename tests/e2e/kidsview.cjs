@@ -5,7 +5,7 @@
 // rects, same pitches), exactly one gold key and it is on screen, the gold key is the melody note's letter with an up /
 // down arrow for notes outside C..B, and a tap on it sounds the real pitch (60 + the preset's @note); the reward shows
 // after the last gold tap, after Next on the last step and after Play song's last step (Play stops); Happy / Sad pads;
-// Simple -> Expert -> Simple keeps the song and the step; Play along off hides the gold marks while Next and Play song
+// Kids -> Expert -> Kids keeps the song and the step; Play along off hides the gold marks while Next and Play song
 // still move the song on; Daylight / Lamplight and Simple / Expert survive a reload. No page errors.
 // node -r ./emulate.cjs kidsview.cjs [WxH]   env BASE, OUT, KV_SHOTS (dir: a screenshot per screen)
 const { chromium } = require('playwright-core'); const fs = require('fs'); const path = require('path');
@@ -127,13 +127,14 @@ const st = p => p.evaluate(() => { const rc = e => { const r = e.getBoundingClie
     for (let i = 0; i < 7; i++) await p.evaluate(() => document.querySelector('#kv .kv-next').click());
     await p.waitForTimeout(300); const before = await st(p);
     await tapEl('#kv .kv-play .kv-gear'); await p.waitForTimeout(250); await shot('settings');
+    // redesign-dev: one Kids / Simple / Expert switch. Expert = the Expert screen (it plays the grown-up styles, so it
+    // leaves the Kids style); Kids from the Expert settings comes back to the Kids song at the same step.
+    F(await p.evaluate(() => document.querySelectorAll('#kvMode button').length === 3), `${tag}: Kids view mode switch is not Kids / Simple / Expert`);
     await tapEl('#kvMode button[data-v="expert"]'); await p.waitForTimeout(500); s = await st(p);
-    F(!s.on && s.app !== 'none', `${tag}: Expert did not open the full app`);
-    const ex = await p.evaluate(() => ({ style: document.querySelector('#styles button[data-style].on, #styles button[data-style][aria-pressed="true"]')?.dataset.style || null, song: __prog.list[__prog.idx].name, pos: __magic.state.pos }));
-    F(ex.song === before.song && ex.pos === before.pos, `${tag}: Expert lost the place (${ex.song} @${ex.pos} vs ${before.song} @${before.pos})`);
-    await p.evaluate(() => __progApi.next()); await p.waitForTimeout(200); const exPos = await p.evaluate(() => __magic.state.pos);
-    await tapEl('#configBtn'); await p.waitForTimeout(250); await tapEl('#expertBtn'); await p.waitForTimeout(500); s = await st(p);
-    F(s.on && s.app === 'none' && s.screen === 'play' && s.song === before.song && s.pos === exPos, `${tag}: back to Simple: on ${s.on} screen ${s.screen} ${s.song} @${s.pos} (want @${exPos})`);
+    F(!s.on && s.app !== 'none' && await p.evaluate(() => document.documentElement.classList.contains('expert')), `${tag}: Expert did not open the Expert screen`);
+    await p.evaluate(() => __progApi.next()); await p.waitForTimeout(200);
+    await tapEl('#xBadge'); await p.waitForTimeout(250); await tapEl('#xSettings .x-mode [data-mode="kids"]'); await p.waitForTimeout(500); s = await st(p);
+    F(s.on && s.app === 'none' && s.screen === 'play' && s.song === before.song && s.pos === before.pos, `${tag}: back to Kids: on ${s.on} screen ${s.screen} ${s.song} @${s.pos} (want ${before.song} @${before.pos})`);
     // 8. Play along off: gold marks hide, Next / Play song still move on
     await tapEl('#kv .kv-play .kv-gear'); await p.waitForTimeout(200); await tapEl('#kvPlayAlong'); await p.waitForTimeout(250); await tapEl('#kvSettings .kv-x'); await p.waitForTimeout(200);
     s = await st(p); F(s.paOff && await p.evaluate(() => document.documentElement.classList.contains('pa-off')), `${tag}: Play along off not set (kv ${s.paOff})`);
@@ -158,7 +159,7 @@ const st = p => p.evaluate(() => { const rc = e => { const r = e.getBoundingClie
     await p.evaluate(() => __kv.setExpert(true)); await p.waitForTimeout(400); await p.reload(); await p.waitForTimeout(1300); s = await st(p);
     F(!s.on && s.app !== 'none' && !(await p.evaluate(() => document.documentElement.classList.contains('kv'))), `${tag}: Expert lost on reload`);
     F(await p.evaluate(() => JSON.parse(localStorage.getItem('touchChord.settings.v1')).settings.expert === true), `${tag}: expert not saved`);
-    await tapEl('#configBtn'); await p.waitForTimeout(250); await tapEl('#expertBtn'); await p.waitForTimeout(400); await p.reload(); await p.waitForTimeout(1300); s = await st(p);
+    await tapEl('#configBtn'); await p.waitForTimeout(250); await tapEl('#modeRow button[data-mode="kids"]'); await p.waitForTimeout(400); await p.reload(); await p.waitForTimeout(1300); s = await st(p);
     F(s.on && s.app === 'none', `${tag}: Simple lost on reload`);
     F(!p.__errs.length, `${tag}: page errors ${p.__errs.slice(0, 3)}`); D.errs = p.__errs.slice(0, 5);
     await p.context().close();

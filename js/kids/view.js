@@ -254,8 +254,6 @@ export function setExpert(on) {
   if (on === !!state.expert && kv.on === !on) return;
   state.expert = on;
   if (on) leave(); else enter(false);
-  var eb = document.getElementById("expertBtn");
-  if (eb) { eb.setAttribute("aria-checked", on ? "true" : "false"); eb.classList.toggle("on", on); }
   scheduleSave(0);
 }
 function enter(boot) {
@@ -474,11 +472,6 @@ function stopPaint() { if (kv.timer) { clearInterval(kv.timer); kv.timer = 0; } 
 export function boot() {
   build();
   setTheme(state.theme);
-  var eb = document.getElementById("expertBtn");
-  if (eb) {
-    eb.setAttribute("aria-checked", state.expert ? "true" : "false"); eb.classList.toggle("on", !!state.expert);
-    eb.addEventListener("click", function () { var m = document.getElementById("configMenu"); if (m) m.hidden = true; var c = document.getElementById("configBtn"); if (c) c.setAttribute("aria-expanded", "false"); setExpert(!state.expert); });
-  }
   window.addEventListener("resize", function () { paint(true); });
   if (!state.expert) enter(true);
   if (TEST) window.__kv = { kv: kv, show: show, setExpert: setExpert, setTheme: setTheme, paint: paint, reward: showReward, gold: goldMidi, songs: function () { return prog.list.map(function (p) { return p.name; }); } };

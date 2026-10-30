@@ -139,9 +139,10 @@ const SUS = { '360x780': [108, 52], '820x1180': [230, 72], '1180x820': [206, 84]
     F(await p.evaluate(() => document.documentElement.classList.contains('simple') && !document.documentElement.classList.contains('expert')), 'Simple: the Simple screen, Expert off');
     await p.evaluate(() => { document.getElementById('configBtn').click(); }); await p.waitForTimeout(100);
     await p.evaluate(() => document.querySelector('.x-gearmode [data-mode=kids]').click()); await p.waitForTimeout(400);
-    F(await p.evaluate(() => document.querySelector('#styles .on').dataset.style === 'kids' && !document.documentElement.classList.contains('expert') && !document.documentElement.classList.contains('simple')), 'gear menu Kids: Kids style');
-    await p.evaluate(() => document.querySelector('.x-gearmode [data-mode=expert]').click()); await p.waitForTimeout(400);
-    F(await p.evaluate(() => document.documentElement.classList.contains('expert') && document.querySelector('#styles .on').dataset.style === 'jazz'), 'gear menu Expert: back to Expert in the last style (Jazz)');
+    F(await p.evaluate(() => document.querySelector('#styles .on').dataset.style === 'kids' && document.documentElement.classList.contains('kv') && !document.getElementById('kv').hidden && !document.documentElement.classList.contains('expert') && document.getElementById('configMenu').hidden), 'gear menu Kids: the Kids view (Kids style), menu closed');
+    F(await p.evaluate(() => document.querySelectorAll('#kvMode button').length === 3 && document.querySelector('#kvMode [data-v=kids]').classList.contains('on')), 'Kids view settings: the same Kids / Simple / Expert switch, Kids on');
+    await p.evaluate(() => document.querySelector('#kvMode [data-v=expert]').click()); await p.waitForTimeout(400);
+    F(await p.evaluate(() => document.documentElement.classList.contains('expert') && !document.documentElement.classList.contains('kv') && document.querySelector('#styles .on').dataset.style === 'jazz'), 'Kids view Expert: back to Expert in the last style (Jazz), Kids view closed');
     F(await p.evaluate(() => JSON.parse(localStorage.getItem('touchChord.expert.v1')).on === true), 'Expert choice saved in its own store');
     F(!errs.length, 'no page errors ' + errs.join(' | ')); D.errs = errs;
     await ctx.close();
