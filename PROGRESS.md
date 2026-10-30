@@ -93,3 +93,15 @@ grownup vs 351c02c 84/84 identical (menu shot now waits for the walked chord to 
 (b) Labels: every key's label = the note name of its pitch at rest (C..B, 60-71), while a chord holds (window follows,
    e.g. G = D4..C#5 labelled D..C, C#), after snap-back and in playback. Noff's D4-C5 = the window following the chord. No fix needed; e2e added.
 Badge v112.13-rd3. e2e: expert section 14 (8 styles), kidsview 11 (slide + keyboard / synthetic Next) and 12 (black keys).
+
+## rd4 (Noff rd3 MED + Uiux rd3 LOW; steering: remove, not route)
+1. Kids is no longer in Expert's Style list (model.js STYLE_MENU, 8 styles); the Kids / Simple / Expert switch is the only way
+   into Kids; the classic style chips keep Kids. A saved Expert setup with style Kids loads as Pop in Expert (modeOf: pref on =
+   expert; expertStyleFix -> paintMode clicks Pop). e2e: no Kids in the list, chips keep Kids, saved Kids + Expert -> Pop (with
+   and without ?expert=1), no page errors.
+2. The play-along hint (hints.js setHintAvoid hook, Expert only) keeps clear of every Expert block (top bar, toggle, Next/Play,
+   source bar + dots, Now, controls, keys, step badges); inside the chord grid only in empty space, 8px clear of its border.
+   e2e: hint after a wrong chip covers nothing, at the 4 Expert sizes. Classic placement unchanged.
+3. Key window (moving / snap-back) untouched. Badge v112.13-rd4.
+Tests: unit 90/90; kidsview x5 PASS; kvaudio PASS; expert 1516 checks / 0 fails; grownup 84/84 (768x1024 walk3 timing flake
+in the loaded run - B still showed the walked Am - re-run twice 21/21); audioeq 64 runs / 4268 calls / 0 differences.
