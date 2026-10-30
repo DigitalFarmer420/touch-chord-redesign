@@ -19,8 +19,8 @@ Spec: /workspace/touchchord-review/redesign/expert-v9-*.png, expert-ipad-v2-*.pn
 - [x] e2e tests/e2e/expert.cjs (4 sizes, 324 checks, 0 fails) + added to run.cjs
 - [x] grid marks in Expert colours (sounding chord = gold, next = dashed teal; Play along off still hides next marks)
 - [x] compare screenshots in /workspace/chord-touch/expertredesign/compare (build-<size>/ scenes + compare-*.png mockup vs build composites)
-- [ ] full e2e suite run at ca944e7 (worktree ../e2e-wt, PORT=8291, log ../e2e-full.log, per-suite logs e2e-wt/tests/e2e/out/*.log). Node 24.22.1: 15/22 PASS so far (howto112 … kbaccept-780-octave); remaining kbaccept-780-full, kidsascend, kidsgold, playoff, upload13, expert
-- [ ] mirror to fork (/workspace/touch-chord-redesign-fork, remote expertsrc, branch expert-build only)
+- [x] full e2e suite at ca944e7 on Node 24.22.1: smoke 21/21 passed in 67.9 min (CHROME=/usr/bin/google-chrome, PORT=8291). Unit 87/87.
+- [x] mirror to fork (/workspace/touch-chord-redesign-fork, remote expertsrc, branch expert-build only)
 
 ## Box restore (2026-10-30 ~02:55 PT)
 - Node is now v24.22.1. The node_modules symlink target (v13/repo/node_modules) was gone, so `npm ci` was run here (real node_modules, git-ignored).
