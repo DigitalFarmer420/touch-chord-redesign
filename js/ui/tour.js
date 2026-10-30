@@ -12,7 +12,7 @@ const TOUR = [
   { sel: "#pads .pad.nx-root", text: "Or tap the gold key on the piano. This works too." },
   { sel: "#kidsLyr", text: "The words light up as you go." },
   { sel: "#prog .pg-song", text: "Tap Play to hear the whole song." },
-  { sel: "#prog .pg-sel", text: "Pick another song here. There are 11!" }
+  { sel: "#prog .pg-sel", text: "Pick another song here. There are 6!" }
 ];
 export var tourI;
 export const tourLog = { runs: 0, done: 0, skipped: 0, steps: [] };
