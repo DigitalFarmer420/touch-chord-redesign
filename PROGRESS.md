@@ -36,3 +36,26 @@ Spec: /workspace/touchchord-review/redesign/expert-v9-*.png, expert-ipad-v2-*.pn
 - Picking Kids in the style drop-down switches to Kids mode. No Auto-key toggle in the key sheet. Phone landscape (780x360) has no mockup: own layout.
 - No version bump (still v112.13) to keep the diff small.
 - Likely merge conflicts with kids-build: js/ui/pads.js (renderKeys + setWinKeys), js/main.js (import/boot), index.html (css link), tests/e2e/run.cjs (suite list). gear.js / settings.js are NOT edited (the gear mode switch is injected by js/expert/ui.js).
+
+# redesign-dev (merge of expert-build 451134c + kids-build 744876f) - dev instance only
+Working copy /workspace/chord-touch/redesigndev/repo, branch redesign-dev (from expert-build, kids-build merged with --no-ff).
+Deploy target: NEW repo DigitalFarmer420/touch-chord-redesign (GitHub Pages from redesign-dev, root) -
+https://digitalfarmer420.github.io/touch-chord-redesign/ . Never touch-chord (production) or touch-chord-dev.
+
+## Merge conflicts and resolutions
+- index.html: both added a stylesheet after fit.css -> kids.css then expert.css (both scoped: html.kv / html.expert).
+- js/main.js: both added an import -> both kept; kidsView.boot() inside the boot (as in kids-build), expertUi.boot() at the end (as in expert-build).
+- tests/e2e/run.cjs: both extended the suite list -> upload13, kidsview x4, kvaudio, expert (kids-build's run.cjs fix, mtime >= start, kept).
+- js/ui/pads.js: merged cleanly (kids-build moved the touch path to js/ui/touch.js; the Expert setWinKeys hook in renderKeys stays).
+- Mode switch (both builds had one): ONE Kids / Simple / Expert switch. Kids = the Kids view (kids-build; settings
+  `expert: false`), Simple = the classic Simple, Expert = the Expert screen (touchChord.expert.v1 on). The classic full
+  app (old saved setups) lights no button. Same switch in the gear menu (#modeRow, replaces kids-build's #expertBtn
+  "Expert mode" row), in the Expert settings sheet and in the Kids view settings sheet; all go through js/expert/ui.js setMode
+  (the Kids view gets it through kids/view.js setModeHandler, so kids/view.js does not import the Expert code).
+- Start: first visit = the Kids view; old saved setups = the classic full app; ?expert=1 = Expert (also on a first visit; boot-early skips html.kv).
+- REDESIGN DEV badge (index.html, "REDESIGN DEV · v112.13-rd1", noindex, title prefix); grownup.cjs hides it and #modeRow for the 351c02c pixel compare.
+
+## Status
+- [x] merge + one mode switch + badge; unit 90/90 (node --test tests/unit/*.test.js)
+- [ ] full e2e (two groups in parallel, run-all.sh, logs in ../logs) + grownup (vs 351c02c) + audioeq (vs 351c02c)
+- [ ] new repo + Pages + live check
