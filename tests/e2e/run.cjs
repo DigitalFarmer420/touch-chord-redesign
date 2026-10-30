@@ -20,7 +20,7 @@ const SUITE = [   // [name, file, args]  (both phone sizes each: the tests loop 
   ['playoff', 'playoff.cjs', []],   // v112.11: Play along off = no guide (dot / chip marks hidden), MIDI, lit and layout identical ON vs OFF
   ['upload13', 'upload13.cjs', []],   // v112.12: Song Contract v1.3 upload (form order, length warning, chord tidy, JSON repair, honest messages)
   ['kidsview-360', 'kidsview.cjs', ['360x780']], ['kidsview-780', 'kidsview.cjs', ['780x360']],   // Kids redesign: the Kids view (Simple) at the four sizes
-  ['kidsview-768', 'kidsview.cjs', ['768x1024']], ['kidsview-1024', 'kidsview.cjs', ['1024x768']],
+  ['kidsview-768', 'kidsview.cjs', ['768x1024']], ['kidsview-1024', 'kidsview.cjs', ['1024x768']], ['kidsview-820', 'kidsview.cjs', ['820x1180']],   // rd2: + iPad Air portrait
   ['kvaudio', 'kvaudio.cjs', []],   // Kids redesign: the Kids view's pads / keys / Next / Play sound exactly like the Kids style
   ['expert', 'expert.cjs', []],   // Expert redesign: html.expert screen set (decisions 1-11), 360x780 + 780x360 + 820x1180 + 1180x820
 ];

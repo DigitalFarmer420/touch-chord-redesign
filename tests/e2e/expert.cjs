@@ -144,6 +144,16 @@ const SUS = { '360x780': [108, 52], '820x1180': [230, 72], '1180x820': [206, 84]
     await p.evaluate(() => document.querySelector('#kvMode [data-v=expert]').click()); await p.waitForTimeout(400);
     F(await p.evaluate(() => document.documentElement.classList.contains('expert') && !document.documentElement.classList.contains('kv') && document.querySelector('#styles .on').dataset.style === 'jazz'), 'Kids view Expert: back to Expert in the last style (Jazz), Kids view closed');
     F(await p.evaluate(() => JSON.parse(localStorage.getItem('touchChord.expert.v1')).on === true), 'Expert choice saved in its own store');
+    // rd2 (Uiux #5): one mark per key - sounding = solid gold outline, next chord = teal dashed only on keys not sounding, no copper next-box
+    const km = async () => p.evaluate(() => [...document.querySelectorAll('#pads .pad')].map(e => { const st = getComputedStyle(e), a = getComputedStyle(e, '::after');
+      return { m: +e.dataset.midi, held: e.classList.contains('held'), nx: e.classList.contains('nx'), os: st.outlineStyle, oc: st.outlineColor, box: a.content !== 'none' && a.display !== 'none' && a.boxShadow !== 'none' }; }).filter(k => k.held || k.nx));
+    let marks = await km(); D.keyMarksRest = marks;
+    F(marks.some(k => k.nx) && marks.filter(k => k.nx && !k.held).every(k => k.os === 'dashed' && !k.box), 'at rest: next-chord keys teal dashed only (no copper box)');
+    await p.evaluate(() => __progApi.next()); await p.waitForTimeout(120); marks = await km(); D.keyMarksPlay = marks;
+    F(marks.some(k => k.held), 'Next: a chord sounds on the keys');
+    F(marks.filter(k => k.held).every(k => k.os === 'solid' && k.oc === 'rgb(227, 154, 0)' && !k.box), 'sounding keys: one solid gold outline (no dashed, no copper box) ' + JSON.stringify(marks.filter(k => k.held)));
+    F(marks.filter(k => k.nx && !k.held).every(k => k.os === 'dashed' && !k.box), 'next keys not sounding: teal dashed only');
+    await p.evaluate(() => __progApi.stop && __progApi.stop()); await p.waitForTimeout(150);
     F(!errs.length, 'no page errors ' + errs.join(' | ')); D.errs = errs;
     await ctx.close();
     // 13. classic Full untouched without Expert

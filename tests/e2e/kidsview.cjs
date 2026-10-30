@@ -12,7 +12,7 @@ const { chromium } = require('playwright-core'); const fs = require('fs'); const
 const URL = process.env.URL || process.env.BASE || 'http://localhost:8080/index.html';
 const OUT = process.env.OUT || path.join(__dirname, 'out'); fs.mkdirSync(OUT, { recursive: true });
 const SHOTS = process.env.KV_SHOTS || ''; if (SHOTS) fs.mkdirSync(SHOTS, { recursive: true });
-const SIZES = process.argv[2] ? [process.argv[2].split('x').map(Number)] : [[360, 780], [780, 360], [768, 1024], [1024, 768]];
+const SIZES = process.argv[2] ? [process.argv[2].split('x').map(Number)] : [[360, 780], [780, 360], [768, 1024], [1024, 768], [820, 1180]];
 const w12 = n => ((n % 12) + 12) % 12;
 const SIX = ['Kids Twinkle', 'Kids Old MacDonald', 'Kids Itsy Bitsy Spider', 'Kids Row Your Boat', 'Kids Head Shoulders Knees and Toes', "Kids Mary's Lamb"];
 const SRC = fs.readFileSync(path.join(__dirname, '../../js/songs/presets.js'), 'utf8');
@@ -71,6 +71,20 @@ const st = p => p.evaluate(() => { const rc = e => { const r = e.getBoundingClie
     for (const k of s.bk) { const L = s.wk.filter(q => q.m < k.m).pop(), Rr = s.wk.find(q => q.m > k.m); F(k.r.x > L.r.x && k.r.x + k.r.w < Rr.r.x + Rr.r.w, `${tag}: black ${k.m} not between its whites`); }
     F(s.wk.concat(s.bk).every(k => vis(k.r, w, h)), `${tag}: a key is off screen`);
     D.whiteKey = { w: s.wk[0].r.w, h: s.wk[0].r.h }; D.blackKey = { w: s.bk[0].r.w, h: s.bk[0].r.h };
+    // rd2 (Uiux #1): the piano starts right under Play / Next (no empty band); on iPad portrait the white keys are tall (>= 262)
+    const geo = await p.evaluate(() => { const r = s => document.querySelector(s).getBoundingClientRect(); return { ctlB: r('#kv .kv-play .kv-ctl').bottom, piaT: r('#kv .kv-piano').top, piaB: r('#kv .kv-piano').bottom, port: document.documentElement.classList.contains('lay-pad-port') }; });
+    D.pianoGap = Math.round(geo.piaT - geo.ctlB); F(D.pianoGap >= 0 && D.pianoGap <= 24, `${tag}: ${D.pianoGap}px gap between Play / Next and the piano`);
+    F(geo.piaB >= h - 40, `${tag}: the piano stops ${Math.round(h - geo.piaB)}px above the bottom`);
+    if (geo.port) F(s.wk[0].r.h >= 262, `${tag}: iPad portrait white keys only ${s.wk[0].r.h}px tall`);
+    // rd2 (Uiux #2): every lyric word is readable (>= 4.5:1 on the lyric card, no see-through fade); the current word sits on gold
+    const lyr = await p.evaluate(() => { const lum = c => { const m = c.match(/[\d.]+/g).map(Number); const f = v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }; return .2126 * f(m[0]) + .7152 * f(m[1]) + .0722 * f(m[2]); };
+      const card = document.querySelector('#kv .kv-lyr'), bg = lum(getComputedStyle(card).backgroundColor);
+      return [...card.querySelectorAll('.kv-l1 span, .kv-l2')].filter(e => e.textContent.trim()).map(e => { let o = 1; for (let n = e; n && n !== card; n = n.parentElement) o *= +getComputedStyle(n).opacity;
+        const st = getComputedStyle(e), now = e.classList.contains('now'), b2 = now ? lum(st.backgroundColor) : bg, fg = lum(st.color), cr = (Math.max(fg, b2) + .05) / (Math.min(fg, b2) + .05);
+        return { t: e.textContent.trim().slice(0, 16), cls: e.className, o, cr: +cr.toFixed(2), gold: now ? st.backgroundColor : null }; }); });
+    D.lyrics = lyr; F(lyr.length > 0, `${tag}: no lyric words`);
+    for (const x of lyr) F(x.o >= 0.99 && x.cr >= 4.5, `${tag}: lyric "${x.t}" (${x.cls}) hard to read: contrast ${x.cr}, opacity ${x.o}`);
+    for (const x of lyr.filter(q => q.cls === 'now')) F(x.gold === 'rgb(255, 194, 26)', `${tag}: current word not on gold (${x.gold})`);
     const keyRects = JSON.stringify(s.wk.concat(s.bk).map(k => k.r)), kbWin0 = s.kbWin;
     // 4. pads: root position, root lowest; Happy = major, Sad = minor
     const padSnd = {};
