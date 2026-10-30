@@ -64,4 +64,4 @@ https://digitalfarmer420.github.io/touch-chord-redesign/ . Never touch-chord (pr
 - [x] grownup vs 351c02c: first run 81/84 identical (3 'menu' shots at 768x1024 / 1024x768 differ only in whether the
       walked Am chord is still lit when the gear menu opens - timing under load, the set changes run to run);
       reruns at quiet load: 1024x768 21/21, 768x1024 21/21 (360x780 and 780x360 were 42/42 in the first run)
-- [ ] new repo + Pages + live check
+- [x] new repo DigitalFarmer420/touch-chord-redesign (public, default branch redesign-dev, Pages from redesign-dev /): https://digitalfarmer420.github.io/touch-chord-redesign/ serves REDESIGN DEV · v112.13-rd1; headless 360x780 (DPR 3, mobile): first visit = Kids view, ?expert=1 = Expert, 0 console errors, 0 failed requests
