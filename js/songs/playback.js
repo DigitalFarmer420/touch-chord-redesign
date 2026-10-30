@@ -387,7 +387,7 @@ function progSchedule(i, t) {
     magic.lit = false;
     setItemState(st.item);
     kbSound(spec.midis, spec, st.item);   // v83
-    shared.suggestPreview = { type: spec.type, extensions: { six: !!state.extensions.six, min7: !!state.extensions.min7, maj7: !!state.extensions.maj7, nine: !!state.extensions.nine }, midis: highlightMidisFromSpec(spec.midis) };
+    shared.suggestPreview = { type: spec.type, extensions: { six: !!state.extensions.six, min7: !!state.extensions.min7, maj7: !!state.extensions.maj7, nine: !!state.extensions.nine }, midis: highlightMidisFromSpec(spec.midis), raw: spec.midis.slice() };   // rd3: raw = every sounding note (Expert marks)
     updateSymbol();
     paintProgActive();
     fxStepPulse();   // v93: Play song

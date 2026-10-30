@@ -289,7 +289,7 @@ html.expert .kb.piano .black.held { background: var(--x-gold-deep) !important; }
 html.expert .kb.piano .pad.nx::after { display: none !important; }
 html.expert .kb.piano .pad.nx-root::before { background: var(--x-next-l); }
 html.expert .kb.piano .pad.held { outline: 3px solid var(--x-gold-deep) !important; outline-offset: -3px !important; box-shadow: none !important; }
-html.expert:not(.pa-off) .kb.piano .pad.nx:not(.held) { outline: 2.5px dashed var(--x-next-l) !important; outline-offset: -6px !important; box-shadow: none !important; }
+html.expert:not(.pa-off) .kb.piano .pad.nx:not(.held):not(.x-pclit), html.expert:not(.pa-off) .kb.piano .pad.x-pcnx { outline: 2.5px dashed var(--x-next-l) !important; outline-offset: -6px !important; box-shadow: none !important; }
 html.expert.pa-off .kb.piano .pad.nx:not(.held) { outline: none !important; }
 html.expert .kb.piano .pad.black.nokey { opacity: 1; background: #3a3129; color: #7a6a58; border-color: #4a3c2e; }
 html.expert .kb.piano .pad.white.nokey { opacity: .45; }
@@ -316,3 +316,14 @@ html.expert:not(.pa-off) #app #suggest .nxdot.nxdot, html.expert:not(.pa-off) #a
 html.expert:not(.pa-off) #app #palette button.nxdot { outline: 3px dashed var(--x-next-l) !important; outline-offset: -1px !important; }
 /* rd2 (Uiux #4): the phone-portrait Sound button is too narrow for "FX·Layout·Loop" at 10px, so the caption is dropped there */
 html.expert:not(.lay-pad-port):not(.lay-pad-land):not(.lay-phone-land) #xCtl .x-sound small { display: none; }
+/* rd3 (Noff rd2 Med): a sounding / next note outside the 12-key window marks its same-name key inside it, gold or teal as
+   usual, plus a small arrow (up = the note is above the keys, down = below), as the Kids view arrows */
+html.expert .kb.piano .pad.x-pclit { outline: 3px solid var(--x-gold-deep) !important; outline-offset: -3px !important; box-shadow: none !important; }
+html.expert.pa-off .kb.piano .pad.x-pcnx { outline: none !important; }
+html.expert .kb.piano .pad.x-up::after, html.expert .kb.piano .pad.x-down::after { display: block !important; content: "\2191"; position: absolute; inset: auto;
+  left: 50%; bottom: 30%; transform: translateX(-50%); width: 20px; height: 20px; border-radius: 50%; box-shadow: none; animation: none;
+  background: #6B4300; color: var(--x-gold); font: 800 12px/20px system-ui, sans-serif; text-align: center; pointer-events: none; z-index: 4; }
+html.expert .kb.piano .pad.x-down::after { content: "\2193"; }
+html.expert .kb.piano .pad.black.x-up::after, html.expert .kb.piano .pad.black.x-down::after { bottom: 12px; width: 16px; height: 16px; font-size: 10px; line-height: 16px; }
+html.expert .kb.piano .pad.x-arrow-teal::after { background: var(--x-next); color: #fff; }
+html.expert.pa-off .kb.piano .pad.x-arrow-teal::after { display: none !important; }

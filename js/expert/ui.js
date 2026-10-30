@@ -6,9 +6,11 @@
 import { unlock } from "../audio/unlock.js?v=112.13";
 import { activeKey } from "../keys.js?v=112.13";
 import { setKidKey } from "../kids.js?v=112.13";
-import { prog, progSet, placeBadges, setBadgeAvoid } from "../songs/playback.js?v=112.13";
+import { prog, progSet, placeBadges, setBadgeAvoid, magic } from "../songs/playback.js?v=112.13";
+import { magicQueue } from "../songs/magic.js?v=112.13";
+import { nextHintSpec } from "../ui/next.js?v=112.13";
 import { progFeel, progSteps, progNumerals } from "../songs/presets.js?v=112.13";
-import { upSelected, upCurStep } from "../songs/song.js?v=112.13";
+import { upSelected, upCurStep, upNextStep } from "../songs/song.js?v=112.13";
 import { state, shared, fingers } from "../state.js?v=112.13";
 import { accSym } from "../theory/spelling.js?v=112.13";
 import { Theory } from "../theory/index.js?v=112.13";
@@ -232,12 +234,70 @@ function paintType() {
     var k = b.dataset.type ? "t:" + b.dataset.type : "e:" + b.dataset.ext;
     b.classList.toggle("x-held", !!held[k]);
   });
-  // Keys: light the sounding chord's pitch classes (mockup h: F A C E on the C..B keys)
-  var lit = {};
-  Object.keys(fingers).forEach(function (id) { (fingers[id].midis || []).forEach(function (m) { lit[((m % 12) + 12) % 12] = 1; }); });
-  Array.prototype.forEach.call(document.querySelectorAll("#pads .pad"), function (k) { k.classList.toggle("x-pclit", !!lit[+k.dataset.pc] && !k.classList.contains("held")); });
+  paintMarks();   // keys: the sounding chord's pitch classes (mockup h: F A C E on the C..B keys)
   // NOW box: the played-with-a-held-type cue (teal ring + \u266a))) on the notes)
   document.documentElement.classList.toggle("x-heldplay", lab.held && Object.keys(fingers).length > 0);
+}
+
+// ---------- key marks by pitch class (rd3, Noff rd2 Med) ----------
+// The Expert piano shows one 12-key window (7 white keys, decision 10). A sounding or next-chord note outside it is
+// marked on its same-name key inside the window, in its normal gold / teal, with a small up / down arrow (as the Kids
+// arrows). Visual only: nothing here changes what sounds.
+var pc12 = function (m) { return ((m % 12) + 12) % 12; };
+function soundingMidis() {
+  var out = {};
+  Object.keys(fingers).forEach(function (id) { (fingers[id].midis || []).forEach(function (m) { out[m] = 1; }); });
+  var pv = shared.suggestPreview && shared.suggestPreview.midis;
+  if (pv) Object.keys(pv).forEach(function (m) { if (pv[m]) out[m] = 1; });
+  var raw = shared.suggestPreview && shared.suggestPreview.raw;
+  if (raw) raw.forEach(function (m) { out[m] = 1; });
+  return Object.keys(out).map(Number).filter(isFinite);
+}
+function nextMidis() {   // the same gate as the classic next-chord hint (next.js paintNextHint)
+  try {
+    if (!magic || state.simple || prog.playing || state.style === "kids" || !prog.steps.length) return [];
+    var d = magicQueue(); if (!d) return [];
+    if (upSelected() && upNextStep() < 0) return [];
+    var sp = nextHintSpec(d.item); return (sp && sp.midis || []).map(Number).filter(isFinite);
+  } catch (e) { return []; }
+}
+export function markPlan(keys, sounding, next) {   // keys: [{midi, pc}] in the window; returns { midi: { gold, teal, up, down } }
+  var lo = Infinity, hi = -Infinity, byPc = {}, plan = {};
+  keys.forEach(function (k) { lo = Math.min(lo, k.midi); hi = Math.max(hi, k.midi); byPc[k.pc] = k.midi; plan[k.midi] = {}; });
+  function mark(list, kind) {
+    var inWin = {}, out = {};
+    list.forEach(function (m) { if (m >= lo && m <= hi) inWin[pc12(m)] = 1; else (out[pc12(m)] = out[pc12(m)] || []).push(m); });
+    list.forEach(function (m) { if (m >= lo && m <= hi && plan[m]) plan[m][kind] = true; });
+    Object.keys(out).forEach(function (pc) {
+      if (inWin[pc] || byPc[pc] == null) return;   // the same note name already sounds in the window
+      var k = plan[byPc[pc]]; k[kind] = true;
+      if (out[pc].some(function (m) { return m > hi; })) k[kind + "Up"] = true; else k[kind + "Down"] = true;
+    });
+  }
+  mark(sounding, "gold"); mark(next, "teal");
+  return plan;
+}
+function paintMarks() {
+  var pads = Array.prototype.slice.call(document.querySelectorAll("#pads .pad")).filter(function (k) { return isFinite(+k.dataset.midi); });
+  if (!active || !pads.length) { pads.forEach(function (k) { k.classList.remove("x-pclit", "x-pcnx", "x-up", "x-down"); }); return; }
+  var plan = markPlan(pads.map(function (k) { return { midi: +k.dataset.midi, pc: pc12(+k.dataset.midi) }; }), soundingMidis(), nextMidis());
+  pads.forEach(function (k) {
+    var p = plan[+k.dataset.midi] || {}, held = k.classList.contains("held");
+    var gold = !!p.gold && !held, teal = !!p.teal && !p.gold && !held && !k.classList.contains("nx");
+    var up = p.gold ? !!p.goldUp : (p.teal ? !!p.tealUp : false), down = p.gold ? !!p.goldDown : (p.teal ? !!p.tealDown : false);
+    if (k.classList.contains("x-pclit") !== gold) k.classList.toggle("x-pclit", gold);
+    if (k.classList.contains("x-pcnx") !== teal) k.classList.toggle("x-pcnx", teal);
+    if (k.classList.contains("x-up") !== up) k.classList.toggle("x-up", up);
+    if (k.classList.contains("x-down") !== down) k.classList.toggle("x-down", down);
+    var at = !p.gold && !!p.teal && (up || down); if (k.classList.contains("x-arrow-teal") !== at) k.classList.toggle("x-arrow-teal", at);
+  });
+}
+var marksMo = null, marksT = 0;
+function watchMarks() {   // the classic code repaints the keys often (held / nx / window moves): repaint the marks right after
+  if (marksMo || !window.MutationObserver) return;
+  marksMo = new MutationObserver(function () { if (!marksT) marksT = setTimeout(function () { marksT = 0; paintMarks(); }, 0); });
+  marksMo.observe($("pads"), { attributes: true, attributeFilter: ["class"], subtree: true, childList: true });
+  setInterval(function () { if (active) paintMarks(); }, 120);   // preview ends / playback steps that touch no key class
 }
 
 // ---------- Song | Progressions (decision 8) ----------
@@ -431,6 +491,7 @@ export function boot() {
   var urlOn = /[?&]expert=1(&|$)/.test(location.search);
   if (/[?&]expert=[01](&|$)/.test(location.search)) savePref();
   guardTouches();
+  watchMarks();
   setModeHandler(setMode);
   // rd2 (Uiux #3): in Expert a step badge keeps off the other chips' tiles (e.g. the 3 on Am no longer sits on A / vi)
   setBadgeAvoid(function (strip) {

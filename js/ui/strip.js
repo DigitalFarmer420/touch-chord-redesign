@@ -125,7 +125,8 @@ export function applySuggestion(item, hold) {
       maj7: !!state.extensions.maj7,
       nine: !!state.extensions.nine
     },
-    midis: highlightMidisFromSpec(spec.midis)
+    midis: highlightMidisFromSpec(spec.midis),
+    raw: spec.midis.slice()   // rd3: every sounding note, also outside the drawn keys (Expert marks it on its same-name key)
   };
   // Finger-held pads already morphed to this chord above; don't stack a
   // duplicate audition on top (doubles level, can clip). Sustain-pool
