@@ -261,9 +261,9 @@ function enter(boot) {
   paHintHide();
   if (state.style !== "kids") {
     var w = progWalkAt(), kb = document.querySelector('#styles button[data-style="kids"]');
-    if (w && /^Kids /.test(w.name)) kv.resume = w;
+    if (w && /^Kids /.test(w.name)) kv.resume = w;   // (else: the place saved when Simple was left)
     if (kb) kb.click();   // the style row's own Kids pick (sound preset, C major, Twinkle)
-  }
+  } else if (!boot) kv.resume = null;   // still in Kids in Expert: the song is where Expert left it
   var want = kv.resume && kv.resume.name ? kv.resume.name : (boot && state.kidsSong ? state.kidsSong : null), ix = -1;
   if (want) prog.list.forEach(function (p, i) { if (p.name === want) ix = i; });
   if (ix >= 0 && ix !== prog.idx) progSet(ix);
@@ -434,7 +434,9 @@ export function paint(force) {
   var lit = {};
   Object.keys(fingers).forEach(function (id) { (fingers[id].midis || []).forEach(function (m) { lit[m] = 1; }); });
   if (shared.suggestPreview && shared.suggestPreview.midis) Object.keys(shared.suggestPreview.midis).forEach(function (m) { lit[m] = 1; });
-  var name = songName(), sig = [kv.screen, name, prog.cur, magic ? magic.pos : -1, prog.playing, g, goldPad, kv.mood, paOff, Object.keys(lit).join(","), state.theme, kv.reward].join("|");
+  var name = songName();
+  if (kv.screen === "play" && name && KV_SONGS[name] && state.kidsSong !== name) { state.kidsSong = name; scheduleSave(); }   // Hello opens the last song played
+  var sig = [kv.screen, name, prog.cur, magic ? magic.pos : -1, prog.playing, g, goldPad, kv.mood, paOff, Object.keys(lit).join(","), state.theme, kv.reward].join("|");
   if (!force && sig === kv.sig) return;
   kv.sig = sig;
   root.classList.toggle("pa-off", paOff);
