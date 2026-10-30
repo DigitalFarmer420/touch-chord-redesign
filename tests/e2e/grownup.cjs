@@ -26,6 +26,7 @@ async function shots(b, base, w, h, s) {
   out.kv = await p.evaluate(() => document.documentElement.classList.contains('kv') || !!(document.getElementById('kv') && !document.getElementById('kv').hidden));
   await snap('main');
   await p.evaluate(() => { for (let i = 0; i < 3; i++) window.__progApi && __progApi.next(); }); await p.waitForTimeout(900); await snap('walk3');
+  await p.waitForTimeout(2500);   // rd2: let the walked chord finish ringing on both builds, so the menu shot does not race its release
   out.expertRow = await p.evaluate(() => !!document.getElementById('modeRow'));   // redesign-dev: the one Kids / Simple / Expert row
   await p.evaluate(() => { const e = document.getElementById('modeRow'); if (e) e.style.display = 'none'; document.getElementById('configBtn').click(); }); await snap('menu');
   await p.evaluate(() => { const e = document.getElementById('modeRow'); if (e) e.style.display = ''; }); out.menuWithRow = await p.screenshot();
