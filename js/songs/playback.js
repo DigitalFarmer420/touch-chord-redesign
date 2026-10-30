@@ -180,6 +180,8 @@ function badgeText(b) {
 // v56: badges sit just OUTSIDE their chip, on a corner or edge, never on any chord name,
 // numeral or note name: each badge takes the first spot (corners, then along the edges) that
 // covers no text, stays inside the panel and misses the other badges.
+var badgeAvoid = null;   // Expert redesign (rd2): extra boxes a badge should not sit on (the other chips' tiles); set by js/expert/ui.js, none in the classic app
+export function setBadgeAvoid(fn) { badgeAvoid = fn; }
 export function placeBadges() {
   var el = document.getElementById("suggest");
   if (!el || !prog.badges.length) return;
@@ -206,7 +208,8 @@ export function placeBadges() {
     var q = n.getBoundingClientRect();
     if (q.width > 0 && q.bottom > pr.top - 12 && q.top < pr.top) texts.push(q);
   });
-  var placed = [];
+  var placed = [], avoid = badgeAvoid ? badgeAvoid(el) : [];
+  function avoidSc(r, b) { var sc = 0; avoid.forEach(function (q) { if (q.el !== b.target && !q.el.contains(b.target)) sc += ov(r, q) * 20; }); return sc; }
   function ov(a, b) {
     var w = Math.min(a.right, b.right) - Math.max(a.left, b.left), h = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
     return w > 0 && h > 0 ? w * h : 0;
@@ -238,6 +241,7 @@ export function placeBadges() {
       var sc = 0;
       texts.forEach(function (q) { sc += ov(r, q) * 100; });
       placed.forEach(function (q) { sc += ov(r, q) * 50; });
+      if (avoid.length) sc += avoidSc(r, b);
       // v62: never outside the strip (no poking over the top edge any more).
       var out = Math.max(0, pr.left - r.left) + Math.max(0, r.right - pr.right) + Math.max(0, pr.top - r.top) + Math.max(0, r.bottom - pr.bottom);
       sc += out * 1e6 + ci * 0.01;
@@ -249,6 +253,7 @@ export function placeBadges() {
     best.sc = 0;
     texts.forEach(function (q) { best.sc += ov(best.r, q) * 100; });
     placed.forEach(function (q) { best.sc += ov(best.r, q) * 50; });
+    if (avoid.length) best.sc += avoidSc(best.r, b);
     best.bw = bw; best.bh = bh;
     return best;
   }

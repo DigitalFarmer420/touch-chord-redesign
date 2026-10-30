@@ -6,7 +6,7 @@
 import { unlock } from "../audio/unlock.js?v=112.13";
 import { activeKey } from "../keys.js?v=112.13";
 import { setKidKey } from "../kids.js?v=112.13";
-import { prog, progSet, placeBadges } from "../songs/playback.js?v=112.13";
+import { prog, progSet, placeBadges, setBadgeAvoid } from "../songs/playback.js?v=112.13";
 import { progFeel, progSteps, progNumerals } from "../songs/presets.js?v=112.13";
 import { upSelected, upCurStep } from "../songs/song.js?v=112.13";
 import { state, shared, fingers } from "../state.js?v=112.13";
@@ -405,7 +405,12 @@ export function boot() {
   pref = prefFromUrl(location.search, loadPref());
   var urlOn = /[?&]expert=1(&|$)/.test(location.search);
   if (/[?&]expert=[01](&|$)/.test(location.search)) savePref();
-  setModeHandler(setMode);   // the Kids view's own Kids / Simple / Expert row goes through the same switch
+  setModeHandler(setMode);
+  // rd2 (Uiux #3): in Expert a step badge keeps off the other chips' tiles (e.g. the 3 on Am no longer sits on A / vi)
+  setBadgeAvoid(function (strip) {
+    if (!active) return [];
+    return Array.prototype.map.call(strip.querySelectorAll(".ss-chip, .ss-note"), function (n) { var q = n.getBoundingClientRect(); return { el: n, left: q.left, top: q.top, right: q.right, bottom: q.bottom }; });
+  });   // the Kids view's own Kids / Simple / Expert row goes through the same switch
   tb = typeBarInit(false);
   src = sourceInit(srcCtx());
   build();

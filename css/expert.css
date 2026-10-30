@@ -192,7 +192,7 @@ html.expert.x-types-open #xCtl .x-type { border: 2px solid var(--x-gold); } html
 html.expert #xCtl .x-full { flex: 1; white-space: normal; text-align: center; font-size: 12.5px; line-height: 1.1; padding: 0 4px; }
 html.expert #xCtl .x-full.on { background: var(--x-gold); color: #3B2600; border-color: transparent; }
 html.expert #xCtl .x-sound { flex: 1; flex-direction: column; gap: 0; font-size: 13px; line-height: 1.1; padding: 0 4px; }
-html.expert #xCtl .x-sound small { font-size: 9px; color: var(--x-muted); }
+html.expert #xCtl .x-sound small { font-size: 10px; color: var(--x-muted); white-space: nowrap; letter-spacing: -.01em; }   /* rd2 (Uiux #4): >= 10px */
 html.expert #xCtl .x-sound.open { border-color: var(--x-gold); }
 html.expert.lay-pad-port #xCtl .x-type { flex-basis: 170px; } html.expert.lay-pad-port #xCtl .x-tv { font-size: 24px; }
 html.expert.lay-pad-port #xCtl .x-full, html.expert.lay-pad-port #xCtl .x-sound { font-size: 18px; } html.expert.lay-pad-port #xCtl .x-sound small { font-size: 12px; }
@@ -204,7 +204,7 @@ html.expert.lay-phone-land:not(.x-types-open) #xCtl .x-full, html.expert.lay-pho
 html.expert.lay-pad-land.x-types-open #xCtl, html.expert.lay-phone-land.x-types-open #xCtl { flex-wrap: nowrap; align-content: stretch; }
 html.expert.lay-pad-land.x-types-open #xCtl .x-type, html.expert.lay-phone-land.x-types-open #xCtl .x-type { flex: 1 1 auto; }
 html.expert.lay-phone-land #xCtl .x-type { padding: 0 8px; } html.expert.lay-phone-land #xCtl .x-tv { font-size: 15px; }
-html.expert.lay-phone-land #xCtl .x-full { font-size: 11px; } html.expert.lay-phone-land #xCtl .x-sound { font-size: 11.5px; } html.expert.lay-phone-land #xCtl .x-sound small { font-size: 8px; }
+html.expert.lay-phone-land #xCtl .x-full { font-size: 11px; } html.expert.lay-phone-land #xCtl .x-sound { font-size: 11.5px; } html.expert.lay-phone-land #xCtl .x-sound small { font-size: 10px; }
 html.expert.lay-phone-land #sustainBtn { font-size: 15px !important; }
 html.expert.lay-pad-land #xCtl .x-tv { font-size: 21px; }
 
@@ -284,7 +284,13 @@ html.expert.lay-phone-land #suggest.ss { --ss-fs: 14px; --ss-note: 14px; --ss-sm
 /* key marks in the Expert colours: sounding = gold, next chord = dashed teal (Play along marks keep their classes) */
 html.expert .kb.piano .white.held { background: #FFE7A6 !important; color: #5a3a00 !important; }
 html.expert .kb.piano .black.held { background: var(--x-gold-deep) !important; }
-html.expert .kb.piano .pad.nx { outline: 2.5px dashed var(--x-next-l) !important; outline-offset: -6px; box-shadow: none !important; }
+/* rd2 (Uiux #5): ONE mark per key. Sounding now = solid gold outline (+ gold fill); next chord = teal dashed, only on keys
+   that are not sounding. The classic copper next-box (.nx::after) is not used in Expert; the root dot turns teal. */
+html.expert .kb.piano .pad.nx::after { display: none !important; }
+html.expert .kb.piano .pad.nx-root::before { background: var(--x-next-l); }
+html.expert .kb.piano .pad.held { outline: 3px solid var(--x-gold-deep) !important; outline-offset: -3px !important; box-shadow: none !important; }
+html.expert:not(.pa-off) .kb.piano .pad.nx:not(.held) { outline: 2.5px dashed var(--x-next-l) !important; outline-offset: -6px !important; box-shadow: none !important; }
+html.expert.pa-off .kb.piano .pad.nx:not(.held) { outline: none !important; }
 html.expert .kb.piano .pad.black.nokey { opacity: 1; background: #3a3129; color: #7a6a58; border-color: #4a3c2e; }
 html.expert .kb.piano .pad.white.nokey { opacity: .45; }
 html.expert #xScrim.x-clear { background: transparent; }
@@ -308,3 +314,5 @@ html.expert .kb.piano .black.x-pclit { background: #8a6a1a !important; }
 html.expert #suggest .ss-chip.pg-on, html.expert #suggest .ss-note.pg-on { background: var(--x-gold) !important; color: #3B2600 !important; box-shadow: inset 0 0 0 3px var(--x-gold-deep) !important; filter: none; }
 html.expert:not(.pa-off) #app #suggest .nxdot.nxdot, html.expert:not(.pa-off) #app #suggest .ss-chip.nx, html.expert:not(.pa-off) #app #suggest .ss-note.nx,
 html.expert:not(.pa-off) #app #palette button.nxdot { outline: 3px dashed var(--x-next-l) !important; outline-offset: -1px !important; }
+/* rd2 (Uiux #4): the phone-portrait Sound button is too narrow for "FX·Layout·Loop" at 10px, so the caption is dropped there */
+html.expert:not(.lay-pad-port):not(.lay-pad-land):not(.lay-phone-land) #xCtl .x-sound small { display: none; }

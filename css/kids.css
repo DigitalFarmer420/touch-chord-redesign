@@ -69,10 +69,15 @@ html.kv-lamp .kv-hello { background: radial-gradient(420px 420px at 50% 42%, #4A
 .kv-lyr { flex: none; margin-top: 10px; height: 104px; background: var(--surface); border: 3px solid var(--line); border-radius: 24px; font-family: Andika, Nunito, system-ui, sans-serif; font-weight: 400;
   display: flex; flex-direction: column; justify-content: center; padding: 0 16px; font-size: 22px; white-space: nowrap; overflow: hidden; }
 .kv-lyr .kv-l1, .kv-lyr .kv-l2 { overflow: hidden; text-overflow: ellipsis; }
-.kv-lyr .w { opacity: .5; }
-.kv-lyr .done { opacity: 1; }
+/* rd2 (Uiux #2): readable lyrics. The current line is dark: sung words in full ink, the current word on gold, upcoming
+   words a softer ink (no see-through grey, >= 4.5:1 on the card); only the next line is muted. */
+.kv { --upc: #6E5A46; }
+html.kv-lamp .kv { --upc: #CDBFA8; }
+.kv-lyr .kv-l1 { color: var(--ink); }
+.kv-lyr .w { color: var(--upc); }
+.kv-lyr .done { color: var(--ink); }
 .kv-lyr .now { background: var(--gold); color: #3B2A1A; border-radius: 10px; padding: 0 6px; box-shadow: 0 3px 0 var(--gold-deep); }
-.kv-lyr .kv-l2 { opacity: .4; font-size: .62em; margin-top: 2px; }
+.kv-lyr .kv-l2 { color: var(--muted); font-size: .62em; margin-top: 2px; }
 .kv-mid { flex: none; display: flex; flex-direction: column; margin-top: 12px; }
 .kv-pads { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 98px; gap: 8px; }
 .kv-pad { position: relative; border: none; border-radius: 22px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #2E2016; padding: 0; box-shadow: inset 0 -6px 0 rgba(0,0,0,.12); }
@@ -230,7 +235,7 @@ html.lay-pad-land .kv-ctl, html.lay-pad-port .kv-ctl { justify-content: center; 
 html.lay-pad-land .kv-playbtn, html.lay-pad-port .kv-playbtn { width: 96px; height: 96px; }
 html.lay-pad-land .kv-ctl .kv-next, html.lay-pad-port .kv-ctl .kv-next { flex: 0 1 420px; height: 96px; font-size: 48px; }
 html.lay-pad-land .kv-piano, html.lay-pad-port .kv-piano { margin: 16px 0 0; --kpad: 6px; }
-html.lay-pad-port .kv-piano { flex: 0 1 auto; height: 420px; margin-top: auto; }
+html.lay-pad-port .kv-piano { flex: 1 1 auto; height: auto; min-height: 300px; margin-top: 16px; }   /* rd2 (Uiux #1): fills down from Play / Next (no gap) */
 html.lay-pad-land .kv-whites, html.lay-pad-port .kv-whites { gap: 3px; }
 html.lay-pad-land .kv-kl, html.lay-pad-port .kv-kl { font-size: 18px; }
 html.lay-pad-land .kv-wk.gold::before, html.lay-pad-port .kv-wk.gold::before { font-size: 30px; }
