@@ -39,7 +39,7 @@ srv.listen(PORT, '127.0.0.1', async () => {
     const r = await runAsync(process.execPath, ['-r', path.join(__dirname, 'emulate.cjs'), path.join(__dirname, file), ...args], { cwd: __dirname, timeout: 25 * 60e3,
       env: Object.assign({}, process.env, { BASE: `http://127.0.0.1:${PORT}/index.html`, OUT, SHOTS: process.env.SHOTS || '/tmp/tc-shots' }) });
     const log = (r.stdout || '') + (r.stderr || ''); fs.writeFileSync(path.join(OUT, name + '.log'), log);
-    const js = fs.readdirSync(OUT).filter(f => f.endsWith('.json') && fs.statSync(path.join(OUT, f)).mtimeMs >= s - 1000);
+    const js = fs.readdirSync(OUT).filter(f => f.endsWith('.json') && fs.statSync(path.join(OUT, f)).mtimeMs >= s);
     let fails = 0; for (const j of js) { try { fails += failsOf(JSON.parse(fs.readFileSync(path.join(OUT, j), 'utf8'))); } catch (e) { fails++; } }
     const crashed = r.status !== 0 || r.error || /^(TypeError|ReferenceError|Error|.*TimeoutError)/m.test(log) || !js.length;
     const ok = !crashed && fails === 0; if (!ok) bad++;
