@@ -504,12 +504,33 @@ function upFullLyrics(full, simple, bpb) {
     return o;
   });
 }
+// rd7 (Noff rd6 #3): a Full chart that covers less of the song than the easy one (a v1.2 answer with only some Full
+// sections) is filled in per section: where a Full section starts on the same bar as an easy section it is played (and
+// the easy sections it spans are skipped), everywhere else the easy section is played, so Expert is never cut short.
+// A Full chart as long as the easy one is used as it is (unchanged).
+function upSecBeats(sec) { var b = 0; sec.chords.forEach(function (c) { b += c.durationBeats || 0; }); return b * (sec.repeat || 1); }
+function upSecsBeats(L) { var b = 0; L.forEach(function (s) { b += upSecBeats(s); }); return b; }
+export function upFullSecs(full, simple, bpb) {
+  if (upSecsBeats(full) >= upSecsBeats(simple) - 1e-6) return upFullLyrics(full, simple, bpb);
+  var out = [], pair = [], at = 0, fi = 0, starts = [], t = 0;
+  full.forEach(function (f) { starts.push(t); t += upSecBeats(f); });
+  var fAt = {}; starts.forEach(function (b, i) { fAt[Math.round(b * 1000)] = i; });
+  var skipTo = -1;
+  simple.forEach(function (sec) {
+    if (at < skipTo - 1e-6) { at += upSecBeats(sec); return; }
+    var k = fAt[Math.round(at * 1000)];
+    if (k != null && full[k].chords && full[k].chords.length) { out.push(full[k]); pair.push(sec); skipTo = at + upSecBeats(full[k]); }
+    else { out.push(sec); pair.push(sec); }
+    at += upSecBeats(sec);
+  });
+  return upFullLyrics(out, pair, bpb).map(function (x, i) { return out[i] === pair[i] ? pair[i] : x; });
+}
 export function upBuild(raw, choice, reviewed, ver) {
   var two = !!(raw.sectionsFull && raw.sectionsFull.length);
   var u = { raw: raw, title: raw.song.title, artist: raw.song.artist, key: raw.song.key,
     bpm: raw.timing.bpm, ts: raw.timing.timeSignature, bpb: parseInt(raw.timing.timeSignature, 10) || 4,
     events: [], choice: choice || {}, reviewed: reviewed || {}, two: two, ver: two && ver === "full" ? "full" : "simple" };
-  u.secs = u.ver === "full" ? upFullLyrics(raw.sectionsFull, raw.sections, u.bpb) : raw.sections;
+  u.secs = u.ver === "full" ? upFullSecs(raw.sectionsFull, raw.sections, u.bpb) : raw.sections;
   u.choiceAll = { simple: {}, full: {} }; u.reviewedAll = { simple: {}, full: {} };
   u.choiceAll[u.ver] = u.choice; u.reviewedAll[u.ver] = u.reviewed;
   u.secs.forEach(function (sec, si) {

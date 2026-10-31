@@ -4,15 +4,17 @@
 // Expert-only controls below. Every new control drives the existing code (same functions or the same
 // buttons), so sound, timing and music theory are exactly the 351c02c ones.
 import { unlock } from "../audio/unlock.js?v=112.13";
+import { api as ChordAudio } from "../audio/index.js?v=112.13";
+import { stopPlayback } from "../loop.js?v=112.13";
 import { activeKey } from "../keys.js?v=112.13";
 import { setKidKey } from "../kids.js?v=112.13";
-import { prog, progSet, placeBadges, setBadgeAvoid, magic } from "../songs/playback.js?v=112.13";
+import { prog, progSet, placeBadges, setBadgeAvoid, magic, progStop, progWalkAt, progWalkTo } from "../songs/playback.js?v=112.13";
 import { magicQueue } from "../songs/magic.js?v=112.13";
 import { nextHintSpec } from "../ui/next.js?v=112.13";
 import { setHintAvoid } from "../ui/hints.js?v=112.13";
 import { progFeel, progSteps, progNumerals } from "../songs/presets.js?v=112.13";
 import { upSelected, upCurStep, upNextStep } from "../songs/song.js?v=112.13";
-import { state, shared, fingers } from "../state.js?v=112.13";
+import { state, shared, fingers, loop } from "../state.js?v=112.13";
 import { accSym } from "../theory/spelling.js?v=112.13";
 import { Theory } from "../theory/index.js?v=112.13";
 import { paintKeyChip, keyLabel } from "../ui/keychip.js?v=112.13";
@@ -124,7 +126,14 @@ function syncChart() {
   if (chartAt.id === U.id && chartAt.mode === m) return;
   chartAt = { id: U.id, mode: m };
   var want = chartFor(m, !!U.two);
-  if (want && U.ver !== want && U.id) { xLog.chart.push(m + ":" + want); try { libSetVer(U.id, want); } catch (e) { xLog.chart.push("err:" + e); } }
+  if (want && U.ver !== want && U.id) {
+    // rd7 (Noff rd6 #2): both charts share the form, so the position is kept by time: the bar the player is on (start
+    // of that bar) is found again in the other chart (as 351c02c's Simple toggle kept the step with progWalkAt / To).
+    var w = upSelected() ? progWalkAt() : null;
+    xLog.chart.push(m + ":" + want); try { libSetVer(U.id, want); } catch (e) { xLog.chart.push("err:" + e); }
+    if (w && !w.end) { w.t = Math.floor(w.t + 1e-6); progWalkTo(w); xLog.chart.push("at:" + w.t + ">" + magic.pos); }
+    else if (w && w.end) progWalkTo(w);
+  }
 }
 export function chartState() { var U = shared.U; return U ? { id: U.id, two: !!U.two, ver: U.ver, events: U.events.length } : null; }
 function paintModeSegs() {
@@ -512,6 +521,7 @@ function wireAll() {
 // reset every setting (the Expert look back to Auto) and stay in the same mode.
 function startOver(m) {
   if (m === "kids") { kidsStartOver(); return; }
+  progStop(); ChordAudio.band.hush(); if (loop.recording || loop.playing || loop.transport) stopPlayback();   // rd7 (Noff rd6 #1): Start over stops Play song and silences everything, as in Kids / Simple
   click("#factoryReset");
   pref.look = "auto"; pref.on = m === "expert"; savePref(); lookApplyNow("expert");
   if (m === "simple" && !state.simple) setSimple(true);
