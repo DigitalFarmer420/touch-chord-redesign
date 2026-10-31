@@ -35,7 +35,7 @@ const go = async (p, from, to) => {
   if (!c) return 'visible mode chip'; if (c.m !== from) return `chip ${c.m} in ${from}`;
   const cdp = p.__cdp || (p.__cdp = await p.context().newCDPSession(p));
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: c.x, y: c.y }] }); await p.waitForTimeout(from === 'kids' ? 1150 : 80);
-  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }); await p.waitForTimeout(200);
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }); await p.waitForTimeout(350);
   const r = await p.evaluate(to => { if (document.getElementById('modeSheet').hidden) return 'sheet did not open'; const b = document.querySelector(`#msMode button[data-mode="${to}"]`); if (!b) return 'no ' + to; const q = b.getBoundingClientRect(); return { x: q.x + q.width / 2, y: q.y + q.height / 2 }; }, to);
   if (typeof r === 'string') return r;
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: r.x, y: r.y }] }); await p.waitForTimeout(60);

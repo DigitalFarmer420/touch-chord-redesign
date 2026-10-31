@@ -18,6 +18,10 @@ export const msLog = { opens: [], shortTaps: 0, holds: 0, switches: [] };
 var cfg = { mode: function () { return "expert"; }, setMode: null, startOver: null, lookGet: null, lookSet: null, isDay: null };
 export function configureSheet(o) { Object.keys(o).forEach(function (k) { cfg[k] = o[k]; }); }
 var wrap = null, sheet = null, confirmEl = null, tipEl = null, tipT = 0;
+// The sheet opens under the finger that held the Kids chip: the click its lift makes must not land on the sheet
+// (the dim would close it at once, a row would act). Clicks are ignored until a moment after that finger lifts.
+var guardUntil = 0, guardHeld = false;
+function guarded() { return guardHeld || performance.now() < guardUntil; }
 function $(id) { return document.getElementById(id); }
 function h(tag, cls, html, attrs) {
   var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html;
@@ -42,7 +46,7 @@ export function wireChip(b, hold) {
   function start(e) {
     if (t) return;
     b.classList.remove("holding"); void b.offsetWidth; b.classList.add("holding");
-    t = setTimeout(function () { t = 0; pid = null; b.classList.remove("holding"); msLog.holds++; hideTip(); openModeSheet(true); }, KIDS_HOLD_MS);
+    t = setTimeout(function () { t = 0; b.classList.remove("holding"); msLog.holds++; hideTip(); guardHeld = true; openModeSheet(true); }, KIDS_HOLD_MS);
   }
   function stop(short) {
     if (!t) return;
@@ -55,12 +59,13 @@ export function wireChip(b, hold) {
     try { b.setPointerCapture(e.pointerId); } catch (err) {}
     start(e);
   });
-  b.addEventListener("pointerup", function (e) { if (pid == null || e.pointerId === pid) stop(true); });
-  b.addEventListener("pointercancel", function () { stop(false); });
-  b.addEventListener("lostpointercapture", function () { if (t) stop(true); });
+  function lift() { if (guardHeld) { guardHeld = false; guardUntil = performance.now() + 250; } pid = null; }
+  b.addEventListener("pointerup", function (e) { if (pid == null || e.pointerId === pid) { stop(true); lift(); } });
+  b.addEventListener("pointercancel", function () { stop(false); lift(); });
+  b.addEventListener("lostpointercapture", function () { if (t) stop(true); lift(); });
   b.addEventListener("click", function (e) { e.preventDefault(); });   // a tap alone never opens the grown-up settings
   b.addEventListener("keydown", function (e) { if ((e.key === "Enter" || e.key === " ") && !e.repeat) { e.preventDefault(); start(e); } });
-  b.addEventListener("keyup", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); stop(true); } });
+  b.addEventListener("keyup", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); stop(true); lift(); } });
   b.addEventListener("contextmenu", function (e) { e.preventDefault(); });
 }
 function showTip(b) {
@@ -76,7 +81,7 @@ function hideTip() { clearTimeout(tipT); if (tipEl) tipEl.hidden = true; }
 // ---------- the sheet ----------
 function build() {
   wrap = h("div", "ms-wrap", null, { id: "modeSheet" }); wrap.hidden = true;
-  var dim = h("div", "ms-dim"); dim.addEventListener("click", function () { openModeSheet(false); });
+  var dim = h("div", "ms-dim"); dim.addEventListener("click", function () { if (guarded()) return; openModeSheet(false); });
   sheet = h("div", "ms-sheet", null, { role: "dialog", "aria-modal": "true", "aria-label": "Settings" });
   var html = "<div class=\"ms-grab\"></div><div class=\"ms-head\"><h2>Settings</h2><button type=\"button\" class=\"ms-x\" aria-label=\"Close\">\u2715</button></div>"
     + "<div class=\"ms-body\">"
@@ -117,6 +122,7 @@ function wireErase(b) {
   b.addEventListener("pointerup", stop); b.addEventListener("pointercancel", stop); b.addEventListener("pointerleave", function () { if (t) stop(); });
 }
 function onClick(e) {
+  if (guarded()) { msLog.guarded = (msLog.guarded || 0) + 1; return; }
   var b = e.target.closest("button"); if (!b) return;
   if (b.classList.contains("ms-x")) { openModeSheet(false); return; }
   if (b.dataset.mode) {

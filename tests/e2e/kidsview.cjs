@@ -24,7 +24,7 @@ async function open(b, w, h, fresh) {
   await ctx.addInitScript(`try{if(!sessionStorage.getItem('x')){sessionStorage.setItem('x',1);localStorage.clear();localStorage.setItem('touchChord.tour.v1','done');}}catch(e){}`);
   const p = await ctx.newPage(); p.__errs = [];
   p.on('pageerror', e => p.__errs.push('' + e)); p.on('console', m => { if (m.type() === 'error') p.__errs.push(m.text()); });
-  await p.goto(URL + '?test=1&kv=1&hour=12');   // rd6: Auto look at noon = Day await p.waitForTimeout(1200); await rec(p);
+  await p.goto(URL + '?test=1&kv=1&hour=12'); await p.waitForTimeout(1200); await rec(p);   // rd6: hour=12 = the Auto look is Day
   return p;
 }
 const rec = p => p.evaluate(() => { const A = window.ChordAudio; window.__L = []; if (A.__kvw) return; A.__kvw = 1; const pc = A.playChord.bind(A);
@@ -48,7 +48,7 @@ const st = p => p.evaluate(() => { const rc = e => { const r = e.getBoundingClie
     const p = await open(b, w, h); const cdp = await p.context().newCDPSession(p);
     const touch = async (x, y, ms = 90) => { await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] }); await p.waitForTimeout(ms); await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }); await p.waitForTimeout(40); };
     const tapEl = async (sel, fy = 0.5, ms = 90) => { const r = await p.evaluate(s => { const e = document.querySelector(s); if (!e || !e.getClientRects().length) return null; if (e.closest('.ms-sheet')) e.scrollIntoView({ block: 'center' }); const q = e.getBoundingClientRect(); return { x: q.x, y: q.y, w: q.width, h: q.height }; }, sel); if (!r) { R.fails.push(`${tag}: no ${sel}`); return; } await touch(r.x + r.w / 2, r.y + r.h * fy, ms); };
-    const holdChip = async () => { await tapEl('#kv .kv-play .mode-chip', 0.5, 1150); await p.waitForTimeout(150); };   // rd6: the Kids chip opens Settings after a 1 s hold
+    const holdChip = async () => { await tapEl('#kv .kv-play .mode-chip', 0.5, 1150); await p.waitForTimeout(350); };   // rd6: the Kids chip opens Settings after a 1 s hold
     const shot = async n => { if (SHOTS) await p.screenshot({ path: path.join(SHOTS, `${tag}-${n}.png`) }); };
     // 1. first visit: Hello over a hidden full app
     let s = await st(p); F(s.on && s.app === 'none' && s.screen === 'hello', `${tag}: first visit is not the Kids Hello (on ${s.on}, #app ${s.app}, screen ${s.screen})`); await shot('hello');
