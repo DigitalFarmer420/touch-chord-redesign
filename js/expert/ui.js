@@ -119,7 +119,7 @@ function paintMode() {
 }
 // rd6: uploaded songs: Simple plays the easy chart, Expert the Full chart (a one-chart song plays it in both). Set on every
 // mode switch, load and song change; the per-song Simple / Full pick in My songs still works until the next one.
-var chartAt = { id: null, mode: null };
+var chartAt = { id: null, mode: null }, chartAnchor = null;
 function syncChart() {
   var U = shared.U, m = currentMode();
   if (!U || CLASSIC) return;
@@ -130,10 +130,14 @@ function syncChart() {
     // rd7 (Noff rd6 #2): both charts share the form, so the position is kept by time (as 351c02c's Simple toggle kept
     // the step with progWalkAt / To).
     var w = upSelected() ? progWalkAt() : null;
-    xLog.chart.push(m + ":" + want); try { libSetVer(U.id, want); } catch (e) { xLog.chart.push("err:" + e); }
+    // rd9 (Noff rd8 #3): a round trip comes back to the same step. When the player has not moved since the last switch,
+    // the beat they came from is used again (Abmaj7 @21.5 -> Simple Ab @21 -> Expert Abmaj7 @21.5, not Gm7 @21).
+    var an = chartAnchor;
+    if (w && !w.end && an && an.id === U.id && an.ver === U.ver && an.pos === magic.pos && !prog.playing) w.t = an.t;
     // rd8 (Noff rd7 Low): the exact beat, not the bar's start: the step that covers it in the other chart is next
     // (Bb13 at bar 3.5 -> Simple's Bb at 3.5, not Fm at 3), so the chord just played is never played again.
     if (w) { progWalkTo(w); xLog.chart.push("at:" + (w.end ? "end" : w.t) + ">" + magic.pos); }
+    chartAnchor = w && !w.end && shared.U ? { id: shared.U.id, ver: shared.U.ver, pos: magic.pos, t: w.t } : null;
   }
 }
 export function chartState() { var U = shared.U; return U ? { id: U.id, two: !!U.two, ver: U.ver, events: U.events.length } : null; }

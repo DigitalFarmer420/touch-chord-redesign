@@ -30,7 +30,7 @@ export function paintSongBar() {
     var e = shared.U.events[i];
     if (e && upFlagged(e.si, e.ci) && prog.targets[i]) prog.targets[i].classList.add("up-flag");
   });
-  var cur = upCurStep(), e0 = shared.U.events[cur >= 0 ? cur : 0], si = e0.si, sec = shared.U.secs[si];
+  var cur = upCurStep(), e0 = shared.U.events[cur >= 0 ? cur : 0] || shared.U.events[0], si = e0 ? e0.si : 0, sec = shared.U.secs[si];   // rd9: never a missing event
   var curCi = cur >= 0 ? e0.ci : -1;
   if (two) {
     paintLyr2(bar, cur);

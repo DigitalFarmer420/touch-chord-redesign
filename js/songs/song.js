@@ -125,6 +125,7 @@ var upLastStep;
 export function upCurStep() {
   if (!upSelected()) return -1;
   if (prog.cur >= 0) upLastStep = prog.cur;
+  if (upLastStep >= shared.U.events.length) upLastStep = -1;   // rd9 (Noff rd8 #2): a step of the other chart (switch at the end)
   return upLastStep;
 }
 export function upPickAlt(si, ci, sym) {
