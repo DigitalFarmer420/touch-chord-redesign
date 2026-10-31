@@ -194,7 +194,7 @@ rd6.cjs updated for 6 / 7.
    intro's chords -> the Full intro). The copy keeps the easy section's id, label, repeat and lyrics, so length and
    order never change; otherwise the easy section. Anh Da On Hon v1.2 Expert: 74 steps, Full chords all through
    (verse2a/2b/3 = Full verse, chorus2 = Full chorus, solo = Full intro), 62 bars.
-4. Simple Lamp look: NOT in rd8 (see the report). The classic Simple screen is already a dark warm theme (close to the
+4. Simple Lamp look: deferred to rd9 (decided with the user; rd8 ships items 1-3). The classic Simple screen is already a dark warm theme (close to the
    Lamp palette), so a real Auto / Day / Lamp in Simple means building a light Day theme for the classic screens
    (~170 hard-coded colours in base / topbar / strip / panels / keyboard / modes / dialogs css) plus contrast checks.
 Tests: unit rd8.test.js (+ rd7 updated); e2e tests/e2e/rd8.cjs; rd6 / rd7 updated for the new copy / place.
