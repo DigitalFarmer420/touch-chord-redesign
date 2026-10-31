@@ -176,5 +176,5 @@ one gold key on play, Kids view hidden in Expert / Simple. rd5 d1a3fef fails it 
 6. Uiux Low: no Look row in Simple's sheet (no greyed control, no roadmap copy).
 7. Uiux Low: the permanent "No more Simple on/off toggle..." footer is gone (the one-time toast already says it).
 8. Uiux Info: Expert's "?" is the classic 44px circle with the same icon as Simple's.
-Tests: unit + rd7.test.js; new e2e tests/e2e/rd7.cjs (360x780, 780x360; fails 31 checks on 38996e9, passes on rd7);
+Tests: unit + rd7.test.js; new e2e tests/e2e/rd7.cjs (360x780, 780x360; fails 30 checks on 38996e9, passes on rd7);
 rd6.cjs updated for 6 / 7.
