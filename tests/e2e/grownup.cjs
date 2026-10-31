@@ -3,6 +3,12 @@
 // 780x360, 768x1024, 1024x768 (phone emulation). Screens: Kids / Pop / Jazz / Country in Full and Simple, Octave /
 // Full / Fourths layouts, a song walked 3 steps, the gear menu open (B's one new row, "Expert mode", is hidden for the
 // compare and counted separately). Known text changes not shot here: the How-to Kids caption and the tour line list the six songs. Pixel-exact compare of the screenshots; diffs are saved to OUT.
+// rd6: RETIRED as a gate for the user-facing app and ADAPTED to what is left of the classic layout. rd6 removes the
+// dense classic Full layout for users (old Full setups open in Expert), the Simple toggle and the gear menu, so B is
+// opened with the test-only hatch ?classic=1 (the classic screens, unreachable for users) and both A and B hide the
+// classic top bar (visibility only, same box), where the Simple toggle / gear / chip differ by design. The gear-menu
+// shot is gone (the menu is gone; its settings are in the shared sheet). What is still compared pixel-exact: the
+// classic play surface (keys, chord strip, song, step walk) in every setup, i.e. the code rd6 did not mean to change.
 // node -r ./emulate.cjs grownup.cjs   env A (base URL of 351c02c), B (this build), OUT
 const { chromium } = require('playwright-core'); const fs = require('fs'); const path = require('path');
 const A = process.env.A, B = process.env.B || process.env.BASE; if (!A || !B) { console.error('need A= and B= urls'); process.exit(2); }
@@ -19,18 +25,15 @@ const R = { fails: [], data: { same: 0, compared: 0, expertRow: [] } };
 async function shots(b, base, w, h, s) {
   const ctx = await b.newContext({ viewport: { width: w, height: h } });
   await ctx.addInitScript(`try{if(!sessionStorage.getItem('x')){sessionStorage.setItem('x',1);localStorage.clear();localStorage.setItem('touchChord.tour.v1','done');localStorage.setItem('touchChord.settings.v1',JSON.stringify({v:1,settings:${JSON.stringify(s)}}));}}catch(e){}`);
-  await ctx.addInitScript(() => { const st = document.createElement('style'); st.textContent = '*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important} #dev-badge{display:none!important}'; document.addEventListener('DOMContentLoaded', () => document.head.appendChild(st)); });
+  await ctx.addInitScript(() => { const st = document.createElement('style'); st.textContent = '*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important} #dev-badge{display:none!important} header.topbar{visibility:hidden!important}'; document.addEventListener('DOMContentLoaded', () => document.head.appendChild(st)); });
   const p = await ctx.newPage(); const errs = []; p.on('pageerror', e => errs.push('' + e));
-  await p.goto(base + '?test=1'); await p.waitForTimeout(1500);
+  await p.goto(base + (base === B ? '?test=1&classic=1&hour=12' : '?test=1')); await p.waitForTimeout(1500);
   const out = {}; const snap = async n => { await p.waitForTimeout(400); out[n] = await p.screenshot(); };
   out.kv = await p.evaluate(() => document.documentElement.classList.contains('kv') || !!(document.getElementById('kv') && !document.getElementById('kv').hidden));
   await snap('main');
   await p.evaluate(() => { for (let i = 0; i < 3; i++) window.__progApi && __progApi.next(); }); await p.waitForTimeout(900); await snap('walk3');
   await p.waitForTimeout(2500);   // rd2: let the walked chord finish ringing on both builds, so the menu shot does not race its release
-  out.expertRow = await p.evaluate(() => !!document.getElementById('modeRow'));   // redesign-dev: the one Kids / Simple / Expert row
-  await p.evaluate(() => { const e = document.getElementById('modeRow'); if (e) e.style.display = 'none'; document.getElementById('configBtn').click(); }); await snap('menu');
-  await p.evaluate(() => { const e = document.getElementById('modeRow'); if (e) e.style.display = ''; }); out.menuWithRow = await p.screenshot();
-  await p.evaluate(() => document.getElementById('configBtn').click()); await p.waitForTimeout(200);
+  out.expertRow = true;   // rd6: no gear menu any more (see the header)
   out.errs = errs; await ctx.close(); return out;
 }
 (async () => {
@@ -40,11 +43,10 @@ async function shots(b, base, w, h, s) {
     if (c.kv) R.fails.push(`${tag}: B opened the Kids view for an existing Expert setup`);
     if (!c.expertRow) R.fails.push(`${tag}: B has no Kids / Simple / Expert mode row`); else R.data.expertRow.push(tag);
     if (c.errs.length) R.fails.push(`${tag}: B page errors ${c.errs.slice(0, 2)}`);
-    for (const n of ['main', 'walk3', 'menu']) { R.data.compared++;
+    for (const n of ['main', 'walk3']) { R.data.compared++;
       if (Buffer.compare(a[n], c[n]) === 0) { R.data.same++; continue; }
       fs.writeFileSync(path.join(DIFF, `${tag}-${n}-A.png`), a[n]); fs.writeFileSync(path.join(DIFF, `${tag}-${n}-B.png`), c[n]);
       R.fails.push(`${tag} ${n}: screenshot differs from 351c02c`); }
-    if (tag === '360x780-pop-octave') { fs.writeFileSync(path.join(DIFF, `menu-expert-row-B.png`), c.menuWithRow); fs.writeFileSync(path.join(DIFF, `menu-A.png`), a.menu); }
   }
   await b.close();
   fs.writeFileSync(path.join(OUT, 'grownup.json'), JSON.stringify(R, null, 1));

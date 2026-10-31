@@ -24,6 +24,7 @@ const SUITE = [   // [name, file, args]  (both phone sizes each: the tests loop 
   ['kvaudio', 'kvaudio.cjs', []],   // Kids redesign: the Kids view's pads / keys / Next / Play sound exactly like the Kids style
   ['expert', 'expert.cjs', []],
   ['modeswitch-360', 'modeswitch.cjs', ['360x780']], ['modeswitch-412', 'modeswitch.cjs', ['412x915']], ['modeswitch-780', 'modeswitch.cjs', ['780x360']],   // rd5.1: every mode switch (after a reload in each mode) leaves one Kids screen, one gear   // Expert redesign: html.expert screen set (decisions 1-11), 360x780 + 780x360 + 820x1180 + 1180x820
+  ['rd6', 'rd6.cjs', []],   // rd6: one mode chip + one Settings sheet in every mode (Kids hold), Look Auto / Day / Lamp, Style menu, Kids step after a reload, upload chart, dense-layout note (the six rd6 sizes)
 ];
 const only = process.env.ONLY ? process.env.ONLY.split(',') : null;
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.webp': 'image/webp', '.json': 'application/json', '.png': 'image/png' };
