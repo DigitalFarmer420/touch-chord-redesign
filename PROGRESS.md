@@ -157,3 +157,24 @@ one gold key on play, Kids view hidden in Expert / Simple. rd5 d1a3fef fails it 
   grownup.cjs adapted, not a gate any more: B opens with ?classic=1, the top bar is hidden on both sides and the gear-menu
   shot is dropped (the menu is gone). Remaining diffs are only the style-chip strip in the top row at 780x360 (Full) and
   1024x768 (Simple), which reflows because the Simple toggle left that row; everything below is pixel-identical.
+
+## rd7 (Noff rd6 SUMMARY.md findings + Uiux Low / Info) - badge v112.13-rd7
+1. Med, Expert Start over: stops Play song, the loop and the Band (progStop + band.hush + stopPlayback) before the reset,
+   as Kids / Simple do (Simple also gets the explicit stop: at 780x360 rd6's Simple kept playing too).
+2. Med, two-chart uploads: a switch Expert <-> Simple keeps the position by time. The bar the player is on is taken
+   before the chart changes (progWalkAt, floored to the bar) and found again in the other chart (progWalkTo), the same
+   mechanism 351c02c's Simple toggle used. Both charts share the form, so bar n is the same place in the song.
+   Anh Da On Hon v1.3: Expert step 6 (bar 3) -> Simple step 6 (bar 3); Simple step 9 -> Expert step 9.
+3. Med, v1.2 with a partial Full chart: js/songs/fullchart.js (pure, unit-tested) fills the Full version per section.
+   A Full section that starts on the same beat as an easy section is played (the easy sections it spans are skipped),
+   every other easy section is played as it is. A Full chart as long as the easy one is unchanged. Anh Da On Hon v1.2:
+   Expert 71 steps / 62 bars (was 33 / 27), Simple 68 / 62.
+4. Low, Kids: a reload in Kids still opens Hello; Start, or picking the same song card, resumes the saved step
+   (kv.bootWalk). Another song starts at the beginning.
+5. Low, the dense-layout note (Uiux spec): a toast just under the top bar, pointer-events none except its ✕, so taps
+   reach Next and the other controls; it fades on the first tap anywhere or after 6 s; ✕ closes it.
+6. Uiux Low: no Look row in Simple's sheet (no greyed control, no roadmap copy).
+7. Uiux Low: the permanent "No more Simple on/off toggle..." footer is gone (the one-time toast already says it).
+8. Uiux Info: Expert's "?" is the classic 44px circle with the same icon as Simple's.
+Tests: unit + rd7.test.js; new e2e tests/e2e/rd7.cjs (360x780, 780x360; fails 31 checks on 38996e9, passes on rd7);
+rd6.cjs updated for 6 / 7.
