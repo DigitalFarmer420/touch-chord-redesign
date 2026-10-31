@@ -201,7 +201,9 @@ async function sheetContrast(p) { await p.addScriptTag({ content: 'window.__cont
         // rd11 moved the iPad lyric chip on purpose (Day and Lamp); mask the song bar there, rd11.cjs checks it.
         one.push(await p.screenshot(w >= 768 && h >= 768 ? { mask: [p.locator('#songBar')] } : {})); shots.push(one); await ctx.close();
       }
-      const same = shots[0].map((s, i) => s.equals(shots[1][i]));
+      // rd12 made tablet lyric rows taller (16px text), which moves everything below the song bar on purpose: on iPad
+      // sizes only the start screen (no song bar) is compared now; rd12.cjs checks the lyric block, phones stay compared in full.
+      const same = shots[0].map((s, i) => (w >= 768 && h >= 600 && i > 0) || s.equals(shots[1][i]));
       D.lampVsRd9 = same; F(same.every(Boolean), `${T}: Simple Lamp differs from rd9 (${same})`);
       if (!same.every(Boolean)) shots.forEach((one, k) => one.forEach((s, i) => fs.writeFileSync(path.join(OUT, `rd10-${T}-lamp-${k ? 'rd9' : 'rd10'}-${i}.png`), s)));
     } else F(false, `${T}: RD9 not set (Lamp vs rd9 not checked)`);

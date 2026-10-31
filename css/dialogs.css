@@ -300,3 +300,9 @@ html.pa-off #app #suggest .la-play { filter: none !important; scale: none !impor
    beside the two / three rows. Day and Lamp alike (both had it); not in the test-only classic hatch (351c02c pixels). */
 html.lay-pad-port:not(.tc-classic) #songBar .sb-sec:has(~ .sb-lyr), html.lay-pad-land:not(.tc-classic) #songBar .sb-sec:has(~ .sb-lyr) {
   align-self: flex-start; margin-top: 1px; padding: 0 6px; height: var(--lr-h); line-height: var(--lr-h); box-sizing: border-box; }
+/* rd12 (Uiux Low): lyric lines readable from a music stand on tablets: 16px (was 14px on iPad, 11px on the medium
+   tablet size such as iPad mini portrait). Simple's song bar only (Expert's lyric line is already 16-26px there);
+   phones (sz-compact) and the test-only classic hatch unchanged. */
+html.lay-pad-port:not(.tc-classic) #app, html.lay-pad-land:not(.tc-classic) #app { --lr-h: 22px; }
+html.lay-pad-port:not(.tc-classic) #songBar .sb-lyr, html.lay-pad-land:not(.tc-classic) #songBar .sb-lyr { font-size: 16px; }
+html.sz-medium.simple:not(.tc-classic) #songBar { height: 26px; font-size: 16px; }

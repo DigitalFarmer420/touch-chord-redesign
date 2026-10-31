@@ -219,6 +219,17 @@ Tests: unit rd8.test.js (+ rd7 updated); e2e tests/e2e/rd8.cjs; rd6 / rd7 update
 Tests: unit rd9.test.js; e2e tests/e2e/rd9.cjs (lyrics vs beats, end of song, all round trips, banner geometry and a
 tap through it plays the chip); rd6 / rd7 / rd8 banner checks updated for no ✕.
 
+## rd12 (Uiux Low: tablet lyric size) - badge v112.13-rd12
+1. Simple's lyric rows on iPad (lay-pad-port / lay-pad-land) were 14px on 18px rows: now 16px on 22px rows (the
+   2-3 row block grows 12px, the rd11 section chip follows the row height). The medium tablet size (600-767px wide,
+   e.g. iPad mini 744x1133, laid out as phone-port) had the 11px one-line song bar: now 16px, bar 26px. Day and Lamp alike.
+2. Expert's lyric line was already 22px (pad landscape) / 26px (pad portrait) / 16px (medium) - unchanged, now tested.
+3. Song title and its truncation unchanged (rect / font / ellipsis equal to rd11). Phones (sz-compact: 360x780,
+   780x360, 412x915) pixel-identical to rd11; the ?classic=1 hatch unchanged (grownup, audioeq).
+Tests: tests/e2e/rd12.cjs (8 tablet sizes x Simple/Expert x Day/Lamp >= 16px, not clipped, title = rd11; phones x
+Simple/Expert x Day/Lamp = rd11 pixels, RD11 env). rd10.cjs / rd11.cjs: on iPad sizes the Lamp pixel check now
+compares the start screen only (the song screen moved below the taller lyric block on purpose).
+
 ## rd11 (Uiux Lows on Simple Day) - badge v112.13-rd11
 1. Look helper line in Simple: it was already there in rd10 ("Auto: Day 7:00–19:00, Lamp at night", shown only while
    Auto is picked, the one modesheet.js rule for all three sheets); the rd10 sheet shots had Day picked. Now tested in

@@ -181,7 +181,9 @@ const geo = p => p.evaluate(() => { const q = s => { const e = document.querySel
           const one = [await p.screenshot()]; await song(p);
           one.push(await p.screenshot({ mask: [p.locator('#songBar')] })); shots.push(one); await ctx.close();
         }
-        const same = shots[0].map((s, i) => s.equals(shots[1][i])); D.lampVsRd10 = same; F(same.every(Boolean), `${T}: Simple Lamp differs from rd10 outside the song bar (${same})`);
+        // rd12 made tablet lyric rows taller (16px text), which moves everything below the song bar on purpose: on iPad
+      // sizes only the start screen (no song bar) is compared now; rd12.cjs checks the lyric block, phones stay compared in full.
+      const same = shots[0].map((s, i) => (w >= 768 && h >= 600 && i > 0) || s.equals(shots[1][i])); D.lampVsRd10 = same; F(same.every(Boolean), `${T}: Simple Lamp differs from rd10 outside the song bar (${same})`);
         if (!same.every(Boolean)) shots.forEach((one, k) => one.forEach((s, i) => fs.writeFileSync(path.join(OUT, `rd11-${T}-lamp-${k ? 'rd10' : 'rd11'}-${i}.png`), s)));
       } else F(false, `${T}: RD10 not set (Lamp vs rd10 not checked)`);
     }
