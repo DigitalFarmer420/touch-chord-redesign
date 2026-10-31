@@ -296,3 +296,7 @@ html.pa-off #app #suggest .nxdot.nxdot:not(.fxtap):not(.kgtap), html.pa-off #app
 html.pa-off #app #suggest.kids1 .ss-kidpad.nx.nx:not(.kgtap), html.pa-off #app #suggest .upnx:not(.fxtap):not(.kgtap), html.pa-off #app #suggest .la-play:not(.fxtap):not(.kgtap),
 html.pa-off #app .nxb:not(.fxtap):not(.kgtap) { animation: none !important; }
 html.pa-off #app #suggest .la-play { filter: none !important; scale: none !important; }
+/* rd11 (Uiux Low): iPad lyric rows: the section chip sits on the first lyric line (top-aligned, one row tall), not centred
+   beside the two / three rows. Day and Lamp alike (both had it); not in the test-only classic hatch (351c02c pixels). */
+html.lay-pad-port:not(.tc-classic) #songBar .sb-sec:has(~ .sb-lyr), html.lay-pad-land:not(.tc-classic) #songBar .sb-sec:has(~ .sb-lyr) {
+  align-self: flex-start; margin-top: 1px; padding: 0 6px; height: var(--lr-h); line-height: var(--lr-h); box-sizing: border-box; }

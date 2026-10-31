@@ -56,3 +56,6 @@ html.s-day .tour-num, html.s-day .tour-btn.pri { color: #FFFFFF; }
 .ms-wrap[data-mode="simple"].ms-day { --ms-danger: #B5472F; --ms-tgoff: #8C7A66; }
 .ms-wrap[data-mode="simple"].ms-day .ms-mode, .ms-wrap[data-mode="simple"].ms-day .ms-seg,
 .ms-wrap[data-mode="simple"].ms-day .ms-pair button, .ms-wrap[data-mode="simple"].ms-day .ms-x { box-shadow: inset 0 0 0 1px #8C7A66; }
+/* rd11 (Uiux Low): tension chips (sus4, m7b5, 7b9) are a mid plum in Day, a step darker than the minor chips and
+   redder, white text (AA 9:1); Lamp keeps its navy. */
+html.s-day { --lk-2a1f45: #5E3A66; --lk-4a3a72: #4A2B52; --lk-e8dff8: #FFFFFF; }

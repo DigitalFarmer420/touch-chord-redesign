@@ -198,7 +198,8 @@ async function sheetContrast(p) { await p.addScriptTag({ content: 'window.__cont
         const p = await ctx.newPage(); await p.goto(base + '?test=1&hour=12'); await p.waitForTimeout(1300); await p.addStyleTag({ content: FREEZE }); await p.waitForTimeout(300);
         const one = [await p.screenshot()];
         await p.evaluate(t => __upload.load(t), V13); await p.waitForTimeout(600); await p.evaluate(() => { for (let i = 0; i < 9; i++) document.querySelector('#prog .pg-step').click(); }); await p.waitForTimeout(600);
-        one.push(await p.screenshot()); shots.push(one); await ctx.close();
+        // rd11 moved the iPad lyric chip on purpose (Day and Lamp); mask the song bar there, rd11.cjs checks it.
+        one.push(await p.screenshot(w >= 768 && h >= 768 ? { mask: [p.locator('#songBar')] } : {})); shots.push(one); await ctx.close();
       }
       const same = shots[0].map((s, i) => s.equals(shots[1][i]));
       D.lampVsRd9 = same; F(same.every(Boolean), `${T}: Simple Lamp differs from rd9 (${same})`);

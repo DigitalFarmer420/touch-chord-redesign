@@ -219,6 +219,20 @@ Tests: unit rd8.test.js (+ rd7 updated); e2e tests/e2e/rd8.cjs; rd6 / rd7 update
 Tests: unit rd9.test.js; e2e tests/e2e/rd9.cjs (lyrics vs beats, end of song, all round trips, banner geometry and a
 tap through it plays the chip); rd6 / rd7 / rd8 banner checks updated for no ✕.
 
+## rd11 (Uiux Lows on Simple Day) - badge v112.13-rd11
+1. Look helper line in Simple: it was already there in rd10 ("Auto: Day 7:00–19:00, Lamp at night", shown only while
+   Auto is picked, the one modesheet.js rule for all three sheets); the rd10 sheet shots had Day picked. Now tested in
+   all three sheets: same words, 12px / 600 / rgb(122,106,92); the face follows each sheet (Kids sheet Fredoka,
+   Simple = Expert Nunito). compare-rd11 sheet shot is at Auto.
+2. Tension chips (Bbsus4, and m7b5 / 7b9 sharing the colour) in Day: mid plum #5E3A66, edge #4A2B52, white text
+   (9.2:1). Minor in Day is #6A5A9A (lum .127 vs plum .064, hue 255 vs 289). Lamp keeps navy #2A1F45.
+3. iPad lyric rows (lay-pad-port / lay-pad-land, 2-3 rows): the section chip was centred beside the rows in Day and
+   Lamp alike, so both now top-align it to the first line (one row tall, same centre as line 1). Phone layouts and
+   the ?classic=1 hatch are unchanged. Lamp therefore differs from rd10 only in the song bar on iPad.
+4. Contrast run at 820x1180 and 1180x820 (Day: 0 below AA / 3:1). Lamp still has the inherited 351c02c failures.
+Tests: tests/e2e/rd11.cjs (helper line x3, sus chip Day / Lamp, chip alignment at 820x1180, 1180x820, 768x1024,
+1024x768 + phone unchanged, contrast, Lamp = rd10 outside the song bar); rd10.cjs masks the song bar on iPad sizes.
+
 ## rd10 (Noff rd9 SUMMARY.md Low + Simple Day look) - badge v112.13-rd10
 1. Lyrics of a repeated Full section, per pass. The v1.2 Anh file is ambiguous: its one Full verse (repeat 2) lists
    all 27 verse lines of the song (verse1a, 1b, 2a, 2b, 3) on chords 0-7 with no pass, so Expert steps 17-23 showed
