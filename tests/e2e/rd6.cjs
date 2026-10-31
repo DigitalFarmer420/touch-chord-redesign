@@ -68,8 +68,9 @@ const sheetRows = p => p.evaluate(() => { const v = e => e.getClientRects().leng
   return { rows: rows.map(e => e.dataset.row), text: rows.map(e => (e.querySelector('.ms-t') || e).childNodes[0].textContent.trim()),
     modes: [...document.querySelectorAll('#msMode button')].map(b => b.dataset.mode + (b.classList.contains('on') ? '*' : '') + ':' + b.querySelector('b').textContent + '/' + b.querySelector('small').textContent),
     looks: [...document.querySelectorAll('#msLook button')].map(b => b.textContent + (b.disabled ? '(off)' : '') + (b.classList.contains('on') ? '*' : '')),
-    lsub: document.querySelector('#modeSheet .ms-lsub').textContent, inView: (() => { const s = document.querySelector('#modeSheet .ms-sheet').getBoundingClientRect(); return s.top >= -1 && s.bottom <= innerHeight + 1; })() }; });
-const ORDER = { kids: ['mode', 'playAlong', 'hints', 'nums', 'look', 'help', 'reset'], simple: ['mode', 'playAlong', 'hints', 'nums', 'look', 'help', 'reset'], expert: ['mode', 'playAlong', 'hints', 'nums', 'look', 'upload', 'help', 'reset'] };
+    lsub: document.querySelector('#modeSheet .ms-lsub').textContent, all: document.querySelector('#modeSheet .ms-sheet').innerText, inView: (() => { const s = document.querySelector('#modeSheet .ms-sheet').getBoundingClientRect(); return s.top >= -1 && s.bottom <= innerHeight + 1; })() }; });
+const ORDER = { kids: ['mode', 'playAlong', 'hints', 'nums', 'look', 'help', 'reset'], simple: ['mode', 'playAlong', 'hints', 'nums', 'help', 'reset'],   // rd7: no Look row in Simple
+  expert: ['mode', 'playAlong', 'hints', 'nums', 'look', 'upload', 'help', 'reset'] };
 const TEXT = { mode: 'Mode', playAlong: 'Play along', hints: 'Show hints', nums: 'Chord numbers', look: 'Look', upload: 'Upload a song', help: 'How to & tour', reset: 'Start over' };
 const LABEL = { kids: 'Kids', simple: 'Simple', expert: 'Expert' };
 
@@ -108,8 +109,8 @@ const LABEL = { kids: 'Kids', simple: 'Simple', expert: 'Expert' };
       r.rows.forEach((row, i) => F(r.text[i] === TEXT[row], `${tag}: row ${row} says "${r.text[i]}"`));
       F(r.modes.length === 3 && r.modes.filter(x => x.includes('*')).length === 1 && r.modes.find(x => x.includes('*')).startsWith(mode + '*'), `${tag}: mode segments ${r.modes}`);
       F(r.modes.every(x => /:(Kids|Simple|Expert)\/\S/.test(x)), `${tag}: a mode segment has no hint ${r.modes}`);
-      F(JSON.stringify(r.looks.map(x => x.replace(/\W.*$/, '').replace(/[*(].*/, ''))) === '["Auto","Day","Lamp"]', `${tag}: Look ${r.looks}`);
-      if (mode === 'simple') F(r.looks.every(x => x.includes('(off)')) && /Lamp look is coming/.test(r.lsub), `${tag}: Simple Look not shown as coming (${r.looks} / ${r.lsub})`);
+      if (mode !== 'simple') F(JSON.stringify(r.looks.map(x => x.replace(/\W.*$/, '').replace(/[*(].*/, ''))) === '["Auto","Day","Lamp"]', `${tag}: Look ${r.looks}`);
+      if (mode === 'simple') F(!/Lamp look is coming|No more Simple/.test(r.all), `${tag}: Simple sheet still has roadmap / footer copy`);   // rd7
       else F(r.looks.filter(x => x.endsWith('*')).length === 1 && r.looks.find(x => x.endsWith('*')).startsWith('Auto'), `${tag}: new setup Look not Auto (${r.looks})`);
       await p.screenshot({ path: path.join(SHOTS, `rd6-${T}-${mode}-sheet.png`) }); if (CMP) await p.screenshot({ path: path.join(CMP, `${T}-${mode}-sheet.png`) });
       await p.evaluate(() => { const s = document.querySelector('#modeSheet .ms-sheet'); s.scrollTop = s.scrollHeight; }); await p.waitForTimeout(150);
