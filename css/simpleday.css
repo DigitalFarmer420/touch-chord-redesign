@@ -40,8 +40,19 @@ html.s-day {
   /* upload / messages (Simple's song bar and lists) */
   --lk-ffd0cc: #9E2A1E; --lk-f0c987: #85570F; --lk-f6e2bd: #4A3A28; --lk-b9dcb9: #2F6B3A; --lk-8fd18f: #2C6E31; --lk-ffffff: #2B2118;
   --lk-f08a24: #C2610A; --lk-e0605a: #B5472F;
+  /* control edges (3:1 on the cream and white surfaces) */
+  --edge: #8C7A66; --lk-423a30: #8C7A66; --lk-f5e9d2-42: #8C7A66; --lk-c9bfb0: #8C7A66;
+  --lk-c4923e: #9A6A14; --lk-7d6ea8: #6A5A9A;            /* major chip edge; minor chip a shade deeper (white text AA) */
 }
+html.s-day button { border-color: var(--edge); }
+html.s-day button.on, html.s-day button[aria-pressed="true"].toggle.on { border-color: var(--copper-b); }
+html.s-day .kk-mode.major { border: 1px solid #9A6A14; }
+html.s-day .kk-mode.minor { background: #6A5A9A; border: 1px solid #4F4180; }
 /* the mode chip in Simple's top bar */
-html.s-day header.topbar .mode-chip { background: #FFFFFF; border-color: #B8862A; color: #7A5200; }
+html.s-day header.topbar .mode-chip { background: #FFFFFF; border-color: #9A6A14; color: #7A5200; }
 /* text on the darker Day accent */
 html.s-day .tour-num, html.s-day .tour-btn.pri { color: #FFFFFF; }
+/* Simple's settings sheet in Day: AA red, and the groups / switches / buttons get a 3:1 edge */
+.ms-wrap[data-mode="simple"].ms-day { --ms-danger: #B5472F; --ms-tgoff: #8C7A66; }
+.ms-wrap[data-mode="simple"].ms-day .ms-mode, .ms-wrap[data-mode="simple"].ms-day .ms-seg,
+.ms-wrap[data-mode="simple"].ms-day .ms-pair button, .ms-wrap[data-mode="simple"].ms-day .ms-x { box-shadow: inset 0 0 0 1px #8C7A66; }
