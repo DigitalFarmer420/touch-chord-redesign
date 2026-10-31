@@ -36,7 +36,9 @@ html.kv-lamp .kv .mode-chip { color: #7fd3c5; border-color: #3f9e91; }
   box-shadow: 0 -6px 24px rgba(0,0,0,.28); -webkit-user-select: none; user-select: none; }
 .ms-wrap button { font: inherit; color: inherit; margin: 0; -webkit-appearance: none; appearance: none; cursor: pointer; touch-action: manipulation; height: auto; min-height: 0; line-height: normal; }
 .ms-grab { width: 44px; height: 5px; border-radius: 3px; margin: 0 auto 8px; background: rgba(150,140,130,.4); }
-.ms-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.ms-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;
+  position: sticky; top: -14px; z-index: 2; background: var(--ms-bg); padding: 4px 0; }   /* the close button stays in reach when the sheet scrolls (phone landscape) */
+html.lay-phone-land .ms-head { top: -8px; }
 .ms-head h2 { margin: 0; font-size: 22px; font-weight: 800; }
 .ms-x { width: 44px; height: 44px !important; border-radius: 22px; border: 1.5px solid rgba(136,136,136,.35); background: transparent; font-size: 16px; display: grid; place-items: center; padding: 0; }
 .ms-lbl { font-size: 11px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; color: var(--ms-muted); margin: 10px 0 6px; }
