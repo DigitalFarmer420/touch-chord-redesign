@@ -160,7 +160,7 @@ one gold key on play, Kids view hidden in Expert / Simple. rd5 d1a3fef fails it 
 
 ## rd7 (Noff rd6 SUMMARY.md findings + Uiux Low / Info) - badge v112.13-rd7
 1. Med, Expert Start over: stops Play song, the loop and the Band (progStop + band.hush + stopPlayback) before the reset,
-   as Kids / Simple do (Simple also gets the explicit stop: at 780x360 rd6's Simple kept playing too).
+   as Kids / Simple do (Simple gets the same explicit stop before its reset).
 2. Med, two-chart uploads: a switch Expert <-> Simple keeps the position by time. The bar the player is on is taken
    before the chart changes (progWalkAt, floored to the bar) and found again in the other chart (progWalkTo), the same
    mechanism 351c02c's Simple toggle used. Both charts share the form, so bar n is the same place in the song.

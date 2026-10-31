@@ -55,7 +55,7 @@ const probe = p => p.evaluate(() => { const v = e => e.getClientRects().length &
 const REC = () => { const A = window.ChordAudio; window.__n = 0; if (A.__r7) return; A.__r7 = 1; for (const f of ['playChord', 'morphChord']) { const o = A[f].bind(A); A[f] = function (...a) { window.__n++; return o(...a); }; } };
 const pos = p => p.evaluate(() => ({ pos: __magic.state.pos, n: __prog.steps.length, bars: __prog.steps.map(s => s.bars || 1), playing: !!__prog.playing, cur: __prog.cur }));
 const barAt = (bars, i) => bars.slice(0, i).reduce((a, b) => a + b, 0);
-async function eraseHold(p) { await tap(p, '#msReset'); await p.waitForTimeout(250); const r = await rectOf(p, '#msConfirm .ms-erase'); if (!r) return false; await touch(p, r.x, r.y, 2300); await p.waitForTimeout(300); return true; }
+async function eraseHold(p) { await p.evaluate(() => document.getElementById('msReset').scrollIntoView({ block: 'center' })); await p.waitForTimeout(150); await tap(p, '#msReset'); await p.waitForTimeout(250); const r = await rectOf(p, '#msConfirm .ms-erase'); if (!r) return false; await touch(p, r.x, r.y, 2300); await p.waitForTimeout(300); return true; }
 
 (async () => {
   const b = await chromium.launch({ executablePath: process.env.CHROME || undefined, args: ['--autoplay-policy=no-user-gesture-required'] });
