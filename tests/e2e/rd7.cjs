@@ -4,7 +4,7 @@
 //   3. v1.2 Anh Da On Hon (partial Full chart): Expert plays the whole song (as many bars as Simple, not 33 steps).
 //   4. Kids: step 3 -> reload in Kids -> Hello -> Start resumes at step 3; the same song card resumes too; another song starts at 0.
 //   5. Dense-layout toast (360x780, 780x360): under the top bar, taps go through it (Next works while it shows), it
-//      fades on the first tap or after ~6 s; ✕ still closes it.
+//      fades on the first tap or after ~6 s (rd9: no ✕).
 //   6/7. Simple's sheet: no Look row, no footer copy.   8. Expert's "?" is the same 44px circle as Simple's.
 // node -r ./emulate.cjs rd7.cjs [WxH]   env BASE, OUT, SHOTS, CMP
 const { chromium } = require('playwright-core'); const fs = require('fs'); const path = require('path');
@@ -128,11 +128,11 @@ async function eraseHold(p) { await p.evaluate(() => document.getElementById('ms
       s = await probe(p); F(s.song === 'Kids Twinkle' && s.pos === 0, `${tag}: another song -> ${s.song} @${s.pos} (want Twinkle @0)`);
       await done(p, tag);
     }
-    // 5. dense-layout toast: pass-through, Next works under it, fades on a tap / after ~6 s, ✕ closes
+    // 5. dense-layout toast: pass-through, Next works under it, fades on a tap / after ~6 s
     { const tag = `${T} dense toast`;
       const p = await open(b, w, h, SET.full, '?test=1&hour=12');
       const t = await p.evaluate(() => { const n = document.getElementById('xDenseNote'); if (!n) return null; const r = n.getBoundingClientRect(), top = document.getElementById('xTop').getBoundingClientRect(); const cs = getComputedStyle(n);
-        const hit = document.elementFromPoint(r.x + 12, r.y + r.height / 2); return { y: r.y, b: r.bottom, topB: top.bottom, pe: cs.pointerEvents, xpe: getComputedStyle(n.querySelector('.x-note-x')).pointerEvents, through: !n.contains(hit), r: [r.x, r.y, r.width, r.height].map(Math.round) }; });
+        const hit = document.elementFromPoint(r.x + 12, r.y + r.height / 2); return { y: r.y, b: r.bottom, topB: top.bottom, pe: cs.pointerEvents, xpe: n.querySelector('button, a, input, [tabindex]') ? 'interactive' : 'auto', through: !n.contains(hit), r: [r.x, r.y, r.width, r.height].map(Math.round) }; });
       D.toast = t;
       F(t && t.pe === 'none' && t.xpe === 'auto' && t.through, `${tag}: toast is not pass-through ${JSON.stringify(t)}`);
       // rd8: the place moved to the chord panel's top edge (geometry checked in rd8.cjs)
@@ -147,9 +147,6 @@ async function eraseHold(p) { await p.evaluate(() => document.getElementById('ms
       g = await q.evaluate(() => ({ el: !!document.getElementById('xDenseNote') })); F(g.el, `${tag}: gone before 6 s`);
       await q.waitForTimeout(2600); g = await q.evaluate(() => ({ el: !!document.getElementById('xDenseNote'), why: __xmode.log.denseGone })); F(!g.el && g.why === 'time', `${tag}: not gone after ~6 s ${JSON.stringify(g)}`);
       await done(q, tag + ' timer');
-      const x = await open(b, w, h, SET.full, '?test=1&hour=12'); await tap(x, '#xDenseNote .x-note-x'); await x.waitForTimeout(200);
-      g = await x.evaluate(() => ({ el: !!document.getElementById('xDenseNote'), why: __xmode.log.denseGone })); F(!g.el && g.why === 'x', `${tag}: ✕ ${JSON.stringify(g)}`);
-      await done(x, tag + ' x');
     }
     // 6 / 7. Simple's sheet: no Look row, no footer copy
     { const tag = `${T} simple sheet`;

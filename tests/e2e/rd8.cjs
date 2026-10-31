@@ -95,12 +95,12 @@ async function nextIn(p, mode) { if (mode === 'expert') await p.evaluate(() => d
       const p = await open(b, w, h, SET.full, '?test=1&hour=12');
       const g = await p.evaluate(() => { const n = document.getElementById('xDenseNote'); if (!n) return null;
         const q = e => { const r = e.getBoundingClientRect(); return { l: r.left, t: r.top, r: r.right, b: r.bottom }; };
-        const nr = q(n), card = q(document.querySelector('.next-card')), t = n.querySelector('.x-note-t'), x = n.querySelector('.x-note-x');
+        const nr = q(n), card = q(document.querySelector('.next-card')), t = n.querySelector('.x-note-t');
         const ov = (a, c) => a.l < c.r - 0.5 && c.l < a.r - 0.5 && a.t < c.b - 0.5 && c.t < a.b - 0.5;
         const ctrls = [...document.querySelectorAll('#xTop button, #xTop [role=button], #xNext, #xPlay, .x-go button, .x-src button, #dev-badge')].filter(e => e.getClientRects().length && !document.querySelector('.next-card').contains(e));
         const hit = ctrls.filter(e => ov(nr, q(e))).map(e => e.id || e.className);
-        const tr = q(t), xr = q(x), mid = document.elementFromPoint((tr.l + tr.r) / 2, (tr.t + tr.b) / 2);
-        return { nr, card, hit, n: ctrls.length, text: t.textContent, oneLine: getComputedStyle(t).whiteSpace === 'nowrap' && t.scrollWidth <= t.clientWidth + 1 && nr.b - nr.t <= 34, xRight: xr.l > tr.r - 1 && xr.r <= nr.r + 0.5 && xr.r >= nr.r - 10,
+        const tr = q(t), mid = document.elementFromPoint((tr.l + tr.r) / 2, (tr.t + tr.b) / 2);
+        return { nr, card, hit, n: ctrls.length, text: t.textContent, oneLine: getComputedStyle(t).whiteSpace === 'nowrap' && t.scrollWidth <= t.clientWidth + 1 && nr.b - nr.t <= 34,
           inside: nr.l >= card.l - 0.5 && nr.r <= card.r + 0.5 && nr.t >= card.t - 0.5 && nr.b <= card.b + 0.5, through: !n.contains(mid), pe: getComputedStyle(n).pointerEvents }; });
       D.banner = g && { r: [g.nr.l, g.nr.t, g.nr.r - g.nr.l, g.nr.b - g.nr.t].map(Math.round), card: [g.card.l, g.card.t].map(Math.round), hit: g.hit, n: g.n };
       F(g, `${tag}: no banner`);
@@ -108,7 +108,7 @@ async function nextIn(p, mode) { if (mode === 'expert') await p.evaluate(() => d
         F(g.text === 'Dense layout is here now', `${tag}: copy "${g.text}"`);
         F(g.inside, `${tag}: banner not on the chord panel ${JSON.stringify(D.banner)}`);
         F(g.n > 3 && g.hit.length === 0, `${tag}: banner overlaps ${g.hit} (${g.n} controls checked)`);
-        F(g.oneLine && g.xRight, `${tag}: not one line with ✕ on the right (oneLine ${g.oneLine}, xRight ${g.xRight})`);
+        F(g.oneLine, `${tag}: not one line`);
         F(g.through && g.pe === 'none', `${tag}: not pass-through`);
       }
       if (CMP && (w === 360 || w === 780)) await p.screenshot({ path: path.join(CMP, `${T}-banner.png`) });

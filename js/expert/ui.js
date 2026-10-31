@@ -540,8 +540,7 @@ function showDenseNote() {
   var o = notes(); if (o.denseMoved) { xLog.denseNote = "seen"; return; }
   o.denseMoved = true; try { localStorage.setItem(NOTE_KEY, JSON.stringify(o)); } catch (e) {}
   var n = el("div", "x-note", "<span class=\"x-note-t\">" + NOTE_TEXT + "</span>", { id: "xDenseNote", role: "status" });
-  var x = el("button", "x-note-x", "\u2715", { "aria-label": "Dismiss" }); x.addEventListener("click", dropDenseNote); n.appendChild(x);
-  document.body.appendChild(n); xLog.denseNote = "shown"; placeDenseNote();
+  document.body.appendChild(n); xLog.denseNote = "shown"; placeDenseNote(); setTimeout(placeDenseNote, 300);   // again once the strip has fitted
   window.addEventListener("resize", placeDenseNote);
   // rd7: it never blocks play: taps pass through it, and it fades out after NOTE_MS or on the first tap anywhere
   noteT = setTimeout(function () { fadeDenseNote("time"); }, NOTE_MS);
@@ -549,14 +548,25 @@ function showDenseNote() {
 }
 export const NOTE_MS = 6000;
 export const NOTE_TEXT = "Dense layout is here now";
-// rd8: along the top edge of the chord panel (the strip above the pads), inset 6px; never over the top bar or Next.
+// rd9: along the top edge of the chord panel (the strip above the pads), inset 6px, ending left of any chip in that
+// strip (the bVII chip at the top right); 28px tall under 400px of height, so it clips step badges, not chord names.
+// If that leaves too little room for the line, it spans the panel (it is pass-through either way).
 function placeDenseNote() {
   var n = $("xDenseNote"), c = document.querySelector(".next-card"); if (!n || !c) return;
   var r = c.getBoundingClientRect(); if (!r.width) return;
-  n.style.left = Math.round(r.left + 6) + "px"; n.style.top = Math.round(r.top + 4) + "px"; n.style.width = Math.round(r.width - 12) + "px";
+  var slim = window.innerHeight < 400, H = slim ? 28 : 30, top = Math.round(r.top + 4), left = Math.round(r.left + 6), right = Math.round(r.right - 6);
+  Array.prototype.forEach.call(document.querySelectorAll("#suggest .ss-chip, #suggest .ss-note"), function (e) {
+    if (!e.getClientRects().length || getComputedStyle(e).visibility === "hidden") return;
+    var q = e.getBoundingClientRect();
+    if (q.top < top + H && q.bottom > top && q.right > left) right = Math.min(right, Math.floor(q.left - 6));
+  });
+  if (right - left < 180) right = Math.round(r.right - 6);
+  n.classList.toggle("slim", slim);
+  n.style.left = left + "px"; n.style.top = top + "px"; n.style.width = (right - left) + "px";
+  xLog.denseAt = [left, top, right - left, H];
 }
 var noteT = 0;
-function noteTap(e) { if (e.target && e.target.closest && e.target.closest(".x-note-x")) return; fadeDenseNote("tap"); }
+function noteTap() { fadeDenseNote("tap"); }   // rd9: no ✕; the tap still reaches the control under the banner
 function fadeDenseNote(why) {
   var n = $("xDenseNote"); clearTimeout(noteT); noteT = 0; window.removeEventListener("pointerdown", noteTap, true); window.removeEventListener("resize", placeDenseNote);
   if (!n || n.classList.contains("out")) return;

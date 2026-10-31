@@ -207,7 +207,7 @@ const LABEL = { kids: 'Kids', simple: 'Simple', expert: 'Expert' };
       F(await p.evaluate(() => JSON.parse(localStorage.getItem('touchChord.notes.v1') || '{}').denseMoved === true), `${tag}: not saved as seen`);
       const nr = await rectOf(p, '#xDenseNote'); F(nr && nr.t >= -0.5 && nr.b <= h + 0.5 && nr.l >= -0.5 && nr.r <= w + 0.5, `${tag}: note off screen ${JSON.stringify(nr)}`);
       if (w === 360 || w === 820) { await p.screenshot({ path: path.join(SHOTS, `rd6-${T}-dense-note.png`) }); if (CMP) await p.screenshot({ path: path.join(CMP, `${T}-expert-dense-note.png`) }); }
-      await tap(p, '#xDenseNote .x-note-x'); await p.waitForTimeout(400); s = await probe(p); F(s.note == null, `${tag}: ✕ did not dismiss the note`);
+      await tap(p, '#xDenseNote'); await p.waitForTimeout(600); s = await probe(p); F(s.note == null, `${tag}: a tap did not dismiss the note`);   // rd9: no ✕, the first tap fades it
       await p.reload(); await p.waitForTimeout(1400); s = await probe(p); F(s.note == null && s.mode === 'expert', `${tag}: note shown again after a reload (${s.note}, ${s.mode})`);
       await done(p, tag);
       const p2 = await open(b, w, h, null, '?test=1&hour=12'); s = await probe(p2); F(s.note == null, `${tag}: note on a fresh setup`);
