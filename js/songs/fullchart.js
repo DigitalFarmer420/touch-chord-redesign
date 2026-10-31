@@ -3,9 +3,45 @@
 // place); each marker moves to the Full chord sounding at that Simple chord's bar / beat. Shallow copies
 // only (chords shared), so the saved answer is unchanged.
 function offs(ch) { var o = [], t = 0; ch.forEach(function (c) { o.push(t); t += c.durationBeats || 0; }); return o; }
-export function upFullLyrics(full, simple, bpb) {
+// rd10 (Noff rd9 Low): the lyrics of one pass of a repeated section. A Full section played more than once has one
+// set of markers for every pass (v1.2 Anh's Full verse lists all the song's verse lines on chords 0-7, so pass 2 showed
+// pass 1's lines). When the easy sections that tile a pass's bars have lyrics, that pass takes theirs: each marker goes
+// to the Full chord sounding at its easy chord's beat inside the pass. Returns null when the easy chart does not tile
+// the pass exactly or has no lyrics there (the section's own lyrics are kept).
+function upPassLyrics(fs, A, P, simple, sStart) {
+  var fOff = offs(fs.chords), lines = [], tiles = 0, any = false;
+  for (var j = 0; j < simple.length; j++) {
+    var es = simple[j], S = sStart[j], one = upSecBeats(es) / (es.repeat || 1), L = upSecBeats(es);
+    if (S + L <= A + 1e-6 || S >= A + P - 1e-6) continue;
+    if (S < A - 1e-6 || S + L > A + P + 1e-6) return null;   // an easy section straddles the pass: no clean split
+    tiles += L;
+    var eOff = offs(es.chords);
+    for (var r = 0; r < (es.repeat || 1); r++) (es.lyrics || []).forEach(function (ln) {
+      var seen = {}, mk = [];
+      (ln.markers || []).forEach(function (m) {
+        var t = S + r * one + (eOff[m.chordIndex] || 0) - A, best = 0;
+        fOff.forEach(function (o, k) { if (o <= t + 1e-6) best = k; });
+        if (!seen[best]) { seen[best] = true; mk.push({ charIndex: m.charIndex, chordIndex: best }); }
+      });
+      if (ln.text) any = true;
+      lines.push({ text: ln.text, markers: mk });
+    });
+  }
+  return any && Math.abs(tiles - P) < 1e-6 ? lines : null;
+}
+export function secLyrics(sec, rep) { return (sec && sec.passLyrics && sec.passLyrics[rep || 0]) || (sec && sec.lyrics) || []; }
+export function upFullLyrics(full, simple, bpb, easy) {   // easy: the whole easy chart in play order (default simple)
   function at(c) { var p = c.position || {}; return ((p.bar || 1) - 1) * (bpb || 4) + ((p.beat || 1) - 1); }
+  var fStart = [], sStart = [], t0 = 0;
+  full.forEach(function (f) { fStart.push(t0); t0 += upSecBeats(f); });
+  easy = easy || simple;
+  t0 = 0; easy.forEach(function (x) { sStart.push(t0); t0 += upSecBeats(x); });
   return full.map(function (fs, i) {
+    if ((fs.repeat || 1) > 1 && fs.chords && fs.chords.length) {
+      var P = upSecBeats(fs) / fs.repeat, pass = [], ok = true;
+      for (var r = 0; r < fs.repeat; r++) { var L = upPassLyrics(fs, fStart[i] + r * P, P, easy, sStart); if (!L) { ok = false; break; } pass.push(L); }
+      if (ok) { var o2 = {}; for (var k2 in fs) o2[k2] = fs[k2]; o2.passLyrics = pass; o2.lyrics = pass[0]; return o2; }
+    }
     if (fs.lyrics && fs.lyrics.length) return fs;
     var ss = simple.filter(function (x) { return fs.id && x.id === fs.id; })[0] || simple[i];
     if (!ss || !ss.lyrics || !ss.lyrics.length) return fs;
@@ -73,5 +109,5 @@ export function upFullSecs(full, simple, bpb) {
     if (hit < 0) full.forEach(function (f, k) { if (hit < 0 && origin[k] === sg) hit = k; });
     return hit >= 0 ? upReuse(full[hit], sec) : sec;
   });
-  return upFullLyrics(out, pair, bpb).map(function (x, i) { return out[i] === pair[i] ? pair[i] : x; });
+  return upFullLyrics(out, pair, bpb, simple).map(function (x, i) { return out[i] === pair[i] ? pair[i] : x; });
 }

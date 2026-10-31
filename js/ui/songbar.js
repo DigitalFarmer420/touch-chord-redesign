@@ -4,6 +4,7 @@ import { prog, placeBadges } from "../songs/playback.js?v=112.13";
 import { paintUpNext, upSelected, upT, upA, upPlaceLock, upEsc, upCurStep } from "../songs/song.js?v=112.13";
 import { upProgObj, upEv, upSym, upFlagged, upSecName } from "../songs/upload.js?v=112.13";
 import { state, shared } from "../state.js?v=112.13";
+import { secLyrics } from "../songs/fullchart.js?v=112.13";
 import { upLyrMap, lyrState, paintLyr2, lyrPad } from "./lyrics.js?v=112.13";
 import { fitStrip } from "./strip.js?v=112.13";
 export function paintSongBar() {
@@ -41,13 +42,13 @@ export function paintSongBar() {
     return;
   }
   function chTag(ci) { return "<span data-c=\"" + ci + "\" class=\"sb-ch" + (ci === curCi ? " on" : "") + (upFlagged(si, ci) ? " flag" : "") + "\">" + upEsc(upA(upSym(si, ci))) + "</span>"; }
-  var html = "", line = null;
-  (sec.lyrics || []).forEach(function (ln) {
+  var html = "", line = null, LY = secLyrics(sec, e0 ? e0.rep : 0);   // rd10: this pass's lines
+  LY.forEach(function (ln) {
     var has = ln.markers.some(function (m) { return m.chordIndex === Math.max(0, curCi); });
     if (has && !line) line = ln;
   });
-  if (!line && sec.lyrics && sec.lyrics.length && curCi >= 0) {
-    sec.lyrics.forEach(function (ln) { if (ln.markers.some(function (m) { return m.chordIndex <= curCi; })) line = ln; });
+  if (!line && LY.length && curCi >= 0) {
+    LY.forEach(function (ln) { if (ln.markers.some(function (m) { return m.chordIndex <= curCi; })) line = ln; });
   }
   if (line) {
     var mk = line.markers.slice().sort(function (a, b) { return a.charIndex - b.charIndex; }), p = 0;

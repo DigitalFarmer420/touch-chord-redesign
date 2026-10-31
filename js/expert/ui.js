@@ -26,6 +26,7 @@ import { fitStrip, stripLabel } from "../ui/strip.js?v=112.13";
 import { setExpert as setKidsViewOff, setModeHandler, kidsStartOver, setTheme as setKidsTheme } from "../kids/view.js?v=112.13";
 import { setSimple } from "../ui/layout.js?v=112.13";
 import { libSetVer } from "../songs/library.js?v=112.13";
+import { secLyrics } from "../songs/fullchart.js?v=112.13";
 import { makeChip, configureSheet, openModeSheet, bootSheet, paintSheet, sheetOpen } from "../ui/modesheet.js?v=112.13";
 import { registerLook, lookApplyNow, lookShown } from "../ui/look.js?v=112.13";   // redesign-dev: the Kids view (kids-build) is the switch's Kids
 import { EXPERT_STORE, parsePref, prefFromUrl, modeOf, modeTarget, typeBarInit, typeBarReduce, typeBarLabel, TYPEBAR_HOLD_MS,
@@ -384,7 +385,7 @@ function paintSrc() {
     var U = shared.U;
     if (U && upSelected()) {
       var cur = upCurStep(), e0 = U.events[cur >= 0 ? cur : 0] || U.events[0], sec = e0 ? U.secs[e0.si] : null;
-      var ly = sec ? lyricNow(sec, cur >= 0 ? e0.ci : -1) : null;
+      var ly = sec ? lyricNow({ lyrics: secLyrics(sec, e0.rep) }, cur >= 0 ? e0.ci : -1) : null;   // rd10: this pass's lines
       var line = ly ? esc(ly.before) + (ly.word ? "<span class=\"x-now\">" + esc(ly.word) + "</span>" : "") + esc(ly.after)
         : (sec ? sec.chords.map(function (c, ci) { return "<span class=\"" + (cur >= 0 && ci === e0.ci ? "x-now" : "") + "\">" + esc(accSym(c.chord)) + "</span>"; }).join(" ") : "");
       var locked = !!U.locked;

@@ -4,14 +4,15 @@ import { prog, PROG_TEST, placeBadges } from "../songs/playback.js?v=112.13";
 import { upA, upEsc } from "../songs/song.js?v=112.13";
 import { upEv, upSym, upFlagged, upSecName } from "../songs/upload.js?v=112.13";
 import { state, shared } from "../state.js?v=112.13";
+import { secLyrics } from "../songs/fullchart.js?v=112.13";
 import { paintSongBar } from "./songbar.js?v=112.13";
 import { fitStrip } from "./strip.js?v=112.13";
 // v95: full-mode two-row lyrics. Lines in play order from the song's chord / section / lyric-line map (no
 // word timing): event i is on the line the one-line bar would show for it (first line with a marker on
 // that chord, else the last line with a marker before it; -1 = the section's chords). A new entry starts
 // whenever (section, repeat, line) changes, so the bar moves on once playback passes the line's last chord.
-function upLineOf(sec, ci) {
-  var L = sec.lyrics || [], r = -1, i;
+function upLineOf(sec, ci, rep) {
+  var L = secLyrics(sec, rep), r = -1, i;   // rd10: a repeated section's lines for this pass
   for (i = 0; i < L.length; i++) if (L[i].markers.some(function (m) { return m.chordIndex === ci; })) return i;
   for (i = 0; i < L.length; i++) if (L[i].markers.some(function (m) { return m.chordIndex <= ci; })) r = i;
   return r;
@@ -19,10 +20,10 @@ function upLineOf(sec, ci) {
 export function upLyrMap() {
   if (shared.U._lyr && shared.U._lyr.secs === shared.U.secs) return shared.U._lyr;
   var seq = [], at = [], last = null;
-  var any = shared.U.secs.some(function (sec) { return (sec.lyrics || []).some(function (ln) { return ln.markers && ln.markers.length && ln.text; }); });
+  var any = shared.U.secs.some(function (sec) { return [sec.lyrics || []].concat(sec.passLyrics || []).some(function (L) { return L.some(function (ln) { return ln.markers && ln.markers.length && ln.text; }); }); });
   shared.U.events.forEach(function (e, i) {
-    var li = upLineOf(shared.U.secs[e.si], e.ci), k = e.si + ":" + e.rep + ":" + li;
-    if (!last || last.k !== k) { last = { k: k, si: e.si, li: li, start: i }; seq.push(last); }
+    var li = upLineOf(shared.U.secs[e.si], e.ci, e.rep), k = e.si + ":" + e.rep + ":" + li;
+    if (!last || last.k !== k) { last = { k: k, si: e.si, rep: e.rep, li: li, start: i }; seq.push(last); }
     at.push(seq.length - 1);
   });
   shared.U._lyr = { secs: shared.U.secs, seq: seq, at: at, any: any };
@@ -34,7 +35,7 @@ function upLyrRow(ent, curCi, cls, sec2) {
   function tag(ci) {   // row 2: no data-c, so the next-chord outline stays on row 1
     return "<span" + (cls === "r1" ? " data-c=\"" + ci + "\"" : "") + " class=\"sb-ch" + (ci === curCi ? " on" : "") + (upFlagged(si, ci) ? " flag" : "") + "\">" + upEsc(upA(upSym(si, ci))) + "</span>";
   }
-  var line = ent.li >= 0 ? sec.lyrics[ent.li] : null;
+  var line = ent.li >= 0 ? secLyrics(sec, ent.rep)[ent.li] : null;
   if (line) {
     var mk = line.markers.slice().sort(function (a, b) { return a.charIndex - b.charIndex; }), q = 0;
     mk.forEach(function (m) { html += upEsc(line.text.slice(q, m.charIndex)) + tag(m.chordIndex); q = Math.max(q, m.charIndex); });
