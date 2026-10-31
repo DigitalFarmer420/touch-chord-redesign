@@ -22,10 +22,11 @@ export function paintSimple() {
   placeProg();
 }
 
+// rd6: no Simple toggle any more; the Kids / Simple / Expert switch (expert/ui.js setMode) calls this.
 // One switch. ON: hide Sound/FX/Key/Loop/Layout controls (CSS: html.simple),
 // force the Octave layout, stop any loop recording/playback, and force Key
 // mode off. Hidden values are kept; OFF restores the chosen layout and Key mode.
-function setSimple(on) {
+export function setSimple(on) {
   on = !!on;
   if (on === state.simple) return;
   var keep = progWalkAt();   // v111 (D5): the matching step after the switch
@@ -117,9 +118,6 @@ function onSizeChange() {
 }
 
 export function wireLayoutUi() {
-  document.getElementById("simpleBtn").addEventListener("click", function () {
-    setSimple(!state.simple);
-  });
   document.querySelector("#ctl .ctl-tabs").addEventListener("click", function (e) {
     var b = e.target.closest ? e.target.closest("button") : null;
     if (!b) return;

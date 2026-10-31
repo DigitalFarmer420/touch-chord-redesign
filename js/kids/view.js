@@ -22,6 +22,8 @@ import { renderPads, keyHaptic, padKey } from "../ui/pads.js?v=112.13";
 import { stripPress, stripRelease } from "../ui/strip.js?v=112.13";
 import { keyOf, soundFinger, liftFinger, resoundHeldFinger } from "../ui/touch.js?v=112.13";
 import { api as ChordAudio } from "../audio/index.js?v=112.13";
+import { makeChip, openModeSheet } from "../ui/modesheet.js?v=112.13";
+import { registerLook, lookApplyNow } from "../ui/look.js?v=112.13";
 
 // The six Kids songs (presets.js order): picture, title for parents, short chip name.
 export const KV_SONGS = {
@@ -46,18 +48,15 @@ function btn(cls, html, label) { var b = h("button", cls, html); b.type = "butto
 function emo(s) { return "<span class=\"kv-emo\" aria-hidden=\"true\">" + s + "</span>"; }
 function songName() { var p = prog.list[prog.idx]; return p ? p.name : null; }
 function meta(name) { return KV_SONGS[name] || { pic: "\uD83C\uDFB5", title: String(name || "").replace(/^Kids\s+/, ""), chip: String(name || "").replace(/^Kids\s+/, "") }; }
-function gearBtn() {
-  var g = btn("kv-gear", "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M19.4 13a7.5 7.5 0 0 0 0-2l2-1.6-2-3.4-2.4 1a7.6 7.6 0 0 0-1.7-1L15 3.5h-4l-.4 2.5a7.6 7.6 0 0 0-1.7 1l-2.4-1-2 3.4L6.6 11a7.5 7.5 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a7.6 7.6 0 0 0 1.7 1l.4 2.5h4l.4-2.5a7.6 7.6 0 0 0 1.7-1l2.4 1 2-3.4zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z\" transform=\"translate(-1 0)\"/></svg>", "Settings");
-  g.addEventListener("click", function () { openSettings(true); });
-  return g;
-}
+// rd6: the mode chip (★ Kids, top right) replaces the Kids gear; it opens the shared Settings sheet after a 1 s hold.
+function chipBtn() { return makeChip("kids"); }
 
 // ---------- build ----------
 function build() {
   root = h("div", "kv"); root.id = "kv"; root.hidden = true;
   // a. Hello
   var hello = h("section", "kv-scr kv-hello"); hello.setAttribute("aria-label", "Hello");
-  hello.appendChild(gearBtn());
+  hello.appendChild(chipBtn());
   hello.appendChild(h("h1", "kv-title", "Touch&nbsp;Chord"));
   hello.appendChild(h("div", "kv-notes", emo("\uD83C\uDFB5\uD83C\uDFB9\uD83C\uDFB5")));
   var go = btn("kv-go", "<span class=\"kv-tri\"></span>", "Start");
@@ -66,7 +65,7 @@ function build() {
   hello.appendChild(h("div", "kv-tip", emo("\uD83D\uDD08") + "<span>No sound? Turn the volume up. Touch Chord plays even with the iPhone silent switch on.</span>"));
   // b. Songs
   var songs = h("section", "kv-scr kv-songs"); songs.setAttribute("aria-label", "Songs");
-  var sh = h("div", "kv-shead"); sh.appendChild(h("h2", "kv-h", emo("\uD83C\uDFB6") + " Songs")); sh.appendChild(gearBtn()); songs.appendChild(sh);
+  var sh = h("div", "kv-shead"); sh.appendChild(h("h2", "kv-h", emo("\uD83C\uDFB6") + " Songs")); sh.appendChild(chipBtn()); songs.appendChild(sh);
   els.cards = h("div", "kv-cards"); els.cards.setAttribute("role", "list"); songs.appendChild(els.cards);
   // c. Play
   var play = h("section", "kv-scr kv-play"); play.setAttribute("aria-label", "Play");
@@ -80,7 +79,7 @@ function build() {
     b.addEventListener("click", function () { kv.mood = m[0]; paint(true); });
     els.mood.appendChild(b);
   });
-  top.appendChild(home); top.appendChild(els.chip); top.appendChild(h("span", "kv-sp")); top.appendChild(gearBtn());
+  top.appendChild(home); top.appendChild(els.chip); top.appendChild(h("span", "kv-sp")); top.appendChild(chipBtn());
   els.top = top; play.appendChild(top); play.appendChild(els.lyr);
   var mid = h("div", "kv-mid");
   els.pads = h("div", "kv-pads"); els.pads.setAttribute("role", "group"); els.pads.setAttribute("aria-label", "Seven chords");
@@ -122,7 +121,6 @@ function build() {
   hello.hidden = songs.hidden = play.hidden = true;   // rd5.1: no Kids screen shows until show() picks exactly one
   root.appendChild(hello); root.appendChild(songs); root.appendChild(play);
   els.hello = hello; els.songs = songs; els.playScr = play;
-  buildSettings();
   document.body.appendChild(root);
 }
 
@@ -144,105 +142,21 @@ function pickSong(i, fresh) {
   show("play");
 }
 
-// ---------- settings ----------
-function row(label, sub, ctrl, tip, cls) {
-  var r = h("div", "kv-set" + (cls ? " " + cls : ""));
-  var st = h("div", "kv-st", "<span class=\"kv-sl\">" + label + "</span>" + (sub ? "<small>" + sub + "</small>" : ""));
-  r.appendChild(st);
-  if (tip) {
-    var q = btn("kv-q", "?", label + ": what is this?"); q.setAttribute("aria-expanded", "false");
-    var t = h("p", "kv-tiptxt", tip); t.hidden = true;
-    q.addEventListener("click", function () { t.hidden = !t.hidden; q.setAttribute("aria-expanded", t.hidden ? "false" : "true"); });
-    r.appendChild(q); r.tipEl = t;
-  }
-  if (ctrl) r.appendChild(ctrl);
-  return r;
-}
-function tg(id, label) { var b = btn("kv-tg", "", label); b.id = id; b.setAttribute("role", "switch"); b.setAttribute("aria-checked", "false"); return b; }
-function seg(id, opts, label) {
-  var s = h("div", "kv-seg"); s.id = id; s.setAttribute("role", "radiogroup"); s.setAttribute("aria-label", label);
-  opts.forEach(function (o) { var b = btn("", o[1]); b.dataset.v = o[0]; b.setAttribute("role", "radio"); s.appendChild(b); });
-  return s;
-}
-function buildSettings() {
-  var wrap = h("div", "kv-sheetwrap"); wrap.hidden = true; wrap.id = "kvSettings";
-  var dim = h("div", "kv-dim"); dim.addEventListener("click", function () { openSettings(false); });
-  var sh = h("div", "kv-sheet"); sh.setAttribute("role", "dialog"); sh.setAttribute("aria-label", "Settings"); sh.setAttribute("aria-modal", "true");
-  sh.appendChild(h("div", "kv-grab"));
-  var hd = h("div", "kv-shd"); hd.appendChild(h("h3", "", "Settings"));
-  var x = btn("kv-x", "\u2715", "Close"); x.addEventListener("click", function () { openSettings(false); }); hd.appendChild(x); sh.appendChild(hd);
-  var body = h("div", "kv-sbody");
-  var pa = tg("kvPlayAlong", "Play along"), hi = tg("kvHints", "Show hints"), nu = tg("kvNums", "Numbers on chords");
-  pa.addEventListener("click", function () { document.getElementById("playAlongBtn").click(); paintSettings(); paint(true); });
-  hi.addEventListener("click", function () { if (state.playAlong === false) return; document.getElementById("paHintsBtn").click(); paintSettings(); });
-  nu.addEventListener("click", function () { document.getElementById("progNumsBtn").click(); paintSettings(); });
-  var look = seg("kvLook", [["day", "\u2600 Day"], ["lamp", "\u263E Lamp"]], "Look");
-  look.addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; setTheme(b.dataset.v); });
-  var mode = seg("kvMode", [["kids", "Kids"], ["simple", "Simple"], ["expert", "Expert"]], "Kids, Simple or Expert");   // redesign-dev: the one mode switch
-  mode.addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b || b.dataset.v === "kids") return; openSettings(false); if (modeHandler) modeHandler(b.dataset.v); else setExpert(true); });
-  els.rowPA = row("Play along", "Off: songs still play, guide marks hide", pa, "On: tap the gold pad or the gold key to play the next note of the song. Off: Next and Play song still move the song on; only the gold marks hide.");
-  els.rowHi = row("Show hints", "", hi, "A short tip shows when a tap misses the gold note.");
-  els.rowNu = row("Numbers on chords", "", nu, "Shows step numbers on the song's chords in Expert mode.");
-  els.rowLook = row("Look", "Day is the default", look);
-  els.rowMode = row("Mode", "Simple and Expert: styles, sound, upload", mode, "Kids is this screen. Simple opens the app with fewer controls. Expert opens the full chord grid with styles, sound, keyboard layouts, upload and the chord types. The gear menu and Expert settings have the same Kids / Simple / Expert switch to come back.");
-  var reset = btn("kv-set kv-reset", "<span class=\"kv-st\"><span class=\"kv-sl\">Start over</span><small>Reset all settings</small></span><span class=\"kv-chev\">\u203A</span>");
-  reset.addEventListener("click", function () { openConfirm(true); });
-  [els.rowPA, els.rowHi, els.rowNu, els.rowLook, els.rowMode].forEach(function (r) { body.appendChild(r); if (r.tipEl) body.appendChild(r.tipEl); });
-  body.appendChild(reset);
-  body.appendChild(h("div", "kv-ver", "Touch Chord " + APP_VERSION));
-  sh.appendChild(body);
-  wrap.appendChild(dim); wrap.appendChild(sh);
-  // g3. Start over (confirm; erase needs a 2 s hold)
-  var cf = h("div", "kv-confirm"); cf.hidden = true; cf.id = "kvConfirm";
-  var card = h("div", "kv-ccard"); card.setAttribute("role", "alertdialog"); card.setAttribute("aria-label", "Start over?");
-  card.innerHTML = "<div class=\"kv-broom\">" + emo("\uD83E\uDDF9") + "</div><div class=\"kv-ch\">Start over?</div><div class=\"kv-cs\">This resets all settings. It can't be undone. Your saved songs stay.</div>";
-  var keep = btn("kv-keep", "Keep everything"); keep.addEventListener("click", function () { openConfirm(false); });
-  var er = btn("kv-erase", "<span class=\"kv-fill\"></span><span class=\"kv-et\">Hold 2 s to erase</span>"); wireHold(er);
-  card.appendChild(keep); card.appendChild(er); cf.appendChild(h("div", "kv-dim")); cf.appendChild(card);
-  root.appendChild(wrap); root.appendChild(cf);
-  els.settings = wrap; els.confirm = cf;
-}
-function wireHold(b) {
-  var t = 0, fill = b.querySelector(".kv-fill");
-  function stop() { clearTimeout(t); t = 0; b.classList.remove("holding"); fill.style.transition = "none"; fill.style.width = "0"; }
-  b.addEventListener("pointerdown", function (e) {
-    e.preventDefault(); try { b.setPointerCapture(e.pointerId); } catch (err) {}
-    b.classList.add("holding"); void fill.offsetWidth; fill.style.transition = "width 2s linear"; fill.style.width = "100%";
-    t = setTimeout(function () { t = 0; stop(); startOver(); }, 2000);
-  });
-  b.addEventListener("pointerup", stop); b.addEventListener("pointercancel", stop); b.addEventListener("pointerleave", function () { if (t) stop(); });
-}
-function startOver() {
-  openConfirm(false); openSettings(false);
+// ---------- settings (rd6: the shared sheet, js/ui/modesheet.js) ----------
+// Start over in Kids: the grown-up factory reset, then the Kids view from Hello (as before rd6).
+export function kidsStartOver() {
   document.getElementById("factoryReset").click();   // the grown-up factory reset (settings to defaults)
-  state.expert = false; state.theme = "day"; state.kidsSong = null; kv.mood = "happy";
+  state.expert = false; state.theme = "auto"; state.kidsSong = null; state.kidsWalk = null; kv.mood = "happy";
+  lookApplyNow("kids");
   enter(true);
   scheduleSave(0);
   show("hello");
 }
-export function openSettings(open) {
-  if (open) paintSettings();
-  els.settings.hidden = !open;
-  if (open) { var c = els.settings.querySelector(".kv-x"); if (c) c.focus({ preventScroll: true }); }
-}
-function openConfirm(open) { els.confirm.hidden = !open; }
-function setTg(b, on, dis) { b.setAttribute("aria-checked", on ? "true" : "false"); b.classList.toggle("on", !!on); b.disabled = !!dis; b.classList.toggle("dis", !!dis); }
-function setSeg(s, v) { Array.prototype.forEach.call(s.querySelectorAll("button"), function (b) { var on = b.dataset.v === v; b.classList.toggle("on", on); b.setAttribute("aria-checked", on ? "true" : "false"); }); }
-function paintSettings() {
-  var paOff = state.playAlong === false;
-  setTg(document.getElementById("kvPlayAlong"), !paOff);
-  setTg(document.getElementById("kvHints"), !paOff && state.paHints !== false, paOff);
-  els.rowHi.classList.toggle("dis", paOff);
-  els.rowHi.querySelector("small") ? (els.rowHi.querySelector("small").textContent = paOff ? "Turn on Play along to use hints" : "") : null;
-  if (!els.rowHi.querySelector("small")) { var sm = document.createElement("small"); sm.textContent = paOff ? "Turn on Play along to use hints" : ""; els.rowHi.querySelector(".kv-st").appendChild(sm); }
-  setTg(document.getElementById("kvNums"), !!state.progNums);
-  setSeg(document.getElementById("kvLook"), state.theme === "lamp" ? "lamp" : "day");
-  setSeg(document.getElementById("kvMode"), "kids");
-}
+export function openSettings(open) { openModeSheet(!!open); }
+// rd6 Look: "auto" (the clock), "day" or "lamp"; the resolved look is html.kv-lamp (js/ui/look.js).
 export function setTheme(t) {
-  state.theme = t === "lamp" ? "lamp" : "day";
-  document.documentElement.classList.toggle("kv-lamp", state.theme === "lamp");
-  if (els.settings) paintSettings();
+  state.theme = t === "lamp" || t === "day" ? t : "auto";
+  lookApplyNow("kids");
   scheduleSave(0);
 }
 
@@ -267,6 +181,7 @@ function enter(boot) {
     if (w && /^Kids /.test(w.name)) { kv.resume = w; walked = true; }   // (else: the place saved when Simple was left)
     if (kb) kb.click();   // the style row's own Kids pick (sound preset, C major, Twinkle)
   } else if (!boot) kv.resume = null;   // still in Kids in Expert: the song is where Expert left it
+  if (!boot && !kv.resume && state.kidsWalk && state.kidsWalk.name && (!state.kidsSong || state.kidsWalk.name === state.kidsSong)) kv.resume = state.kidsWalk;   // rd6 (Noff Low): the saved step survives a reload in another mode
   var want = kv.resume && kv.resume.name ? kv.resume.name : (state.kidsSong || null), ix = -1;   // rd5.1: a switch also reopens the saved Kids song (was boot-only)
   if (want) prog.list.forEach(function (p, i) { if (p.name === want) ix = i; });
   if (ix >= 0 && ix !== prog.idx) progSet(ix);
@@ -284,14 +199,21 @@ function enter(boot) {
   startPaint();
 }
 function leave() {
-  if (kv.on && state.style === "kids") kv.resume = progWalkAt();
+  if (kv.on && state.style === "kids") { kv.resume = progWalkAt(); saveWalk(kv.resume); }
   kv.on = false; shared.kidsView = false;
   hideReward();
-  openSettings(false); openConfirm(false);
+  openModeSheet(false);
   document.documentElement.classList.remove("kv");
   root.hidden = true;
   stopPaint();
   renderPads();
+}
+function saveWalk(w) {
+  if (!w || !w.name || !KV_SONGS[w.name]) return;
+  var o = state.kidsWalk;
+  if (o && o.name === w.name && !!o.end === !!w.end && (w.end || o.t === w.t)) return;
+  state.kidsWalk = w.end ? { name: w.name, end: true } : { name: w.name, t: w.t };
+  scheduleSave();
 }
 export function show(scr) {
   if (scr === "play" && !KV_SONGS[songName()]) scr = "songs";   // rd5.1 guard: no Kids song loaded = the song list, never a blank play screen
@@ -302,7 +224,8 @@ export function show(scr) {
   kv.log.push("screen:" + scr);
   if (scr !== "play") { paint(true); return; }
   try { paint(true); } catch (err) { kv.log.push("play-failed"); show("songs"); return; }   // rd5.1 guard: finish the play screen or go back to the list
-  if (!els.chip.textContent.trim()) { kv.log.push("play-blank"); show("songs"); }
+  if (!els.chip.textContent.trim()) { kv.log.push("play-blank"); show("songs"); return; }
+  if (!els.lyr.textContent.trim()) { kv.log.push("play-nolyrics"); show("songs"); }   // rd6 (Noff Info): no blank lyrics box either
 }
 
 // ---------- input ----------
@@ -438,7 +361,7 @@ function lyrHtml() {
 }
 function layoutSlots() {   // phone landscape: the lyric line and Happy / Sad move into the top bar; iPad: Happy / Sad up top
   var de = document.documentElement, land = de.classList.contains("lay-phone-land"), pad = de.classList.contains("lay-pad-land") || de.classList.contains("lay-pad-port");
-  var sp = els.top.querySelector(".kv-sp"), gear = els.top.querySelector(".kv-gear");
+  var sp = els.top.querySelector(".kv-sp"), gear = els.top.querySelector(".mode-chip");
   if (land) { if (els.lyr.parentNode !== els.top) els.top.insertBefore(els.lyr, sp); }
   else if (els.lyr.parentNode !== els.playScr) els.playScr.insertBefore(els.lyr, els.top.nextSibling);
   if (land || pad) { if (els.mood.parentNode !== els.top) els.top.insertBefore(els.mood, gear); }
@@ -459,6 +382,7 @@ export function paint(force) {
   if (shared.suggestPreview && shared.suggestPreview.midis) Object.keys(shared.suggestPreview.midis).forEach(function (m) { lit[m] = 1; });
   var name = songName();
   if (kv.screen === "play" && name && KV_SONGS[name] && state.kidsSong !== name) { state.kidsSong = name; scheduleSave(); }   // Hello opens the last song played
+  if (kv.screen === "play" && name && KV_SONGS[name]) saveWalk(progWalkAt());   // rd6: the step is saved with the song
   var sig = [kv.screen, name, prog.cur, magic ? magic.pos : -1, prog.playing, g, goldPad, kv.mood, paOff, Object.keys(lit).join(","), state.theme, kv.reward].join("|");
   if (!force && sig === kv.sig) return;
   kv.sig = sig;
@@ -492,7 +416,7 @@ function stopPaint() { if (kv.timer) { clearInterval(kv.timer); kv.timer = 0; } 
 // Boot: after the saved settings and the first render (main.js boot).
 export function boot() {
   build();
-  setTheme(state.theme);
+  registerLook("kids", function () { return state.theme; }, function (l) { document.documentElement.classList.toggle("kv-lamp", l === "lamp"); });
   window.addEventListener("resize", function () { paint(true); });
   if (!state.expert) enter(true);
   if (TEST) window.__kv = { kv: kv, show: show, setExpert: setExpert, setTheme: setTheme, paint: paint, reward: showReward, gold: goldMidi, songs: function () { return prog.list.map(function (p) { return p.name; }); } };

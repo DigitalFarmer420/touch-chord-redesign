@@ -21,12 +21,19 @@ import { computeSpec, renderPads, refreshHeld, setWinKeys } from "../ui/pads.js?
 import { liftFinger } from "../ui/touch.js?v=112.13";
 import { stripRelease } from "../ui/strip.js?v=112.13";
 import { fitStrip, stripLabel } from "../ui/strip.js?v=112.13";
-import { setExpert as setKidsViewOff, setModeHandler } from "../kids/view.js?v=112.13";   // redesign-dev: the Kids view (kids-build) is the switch's Kids
+import { setExpert as setKidsViewOff, setModeHandler, kidsStartOver, setTheme as setKidsTheme } from "../kids/view.js?v=112.13";
+import { setSimple } from "../ui/layout.js?v=112.13";
+import { libSetVer } from "../songs/library.js?v=112.13";
+import { makeChip, configureSheet, openModeSheet, bootSheet, paintSheet, sheetOpen } from "../ui/modesheet.js?v=112.13";
+import { registerLook, lookApplyNow, lookShown } from "../ui/look.js?v=112.13";   // redesign-dev: the Kids view (kids-build) is the switch's Kids
 import { EXPERT_STORE, parsePref, prefFromUrl, modeOf, modeTarget, typeBarInit, typeBarReduce, typeBarLabel, TYPEBAR_HOLD_MS,
-  sourceInit, sourceReduce, progDots, lyricNow, STYLE_MENU, styleName, expertWindowKeys, expertStyleFix } from "./model.js?v=112.13";
+  sourceInit, sourceReduce, progDots, lyricNow, STYLE_MENU, styleName, expertWindowKeys, expertStyleFix, fullToExpert, chartFor } from "./model.js?v=112.13";
+// rd6: ?test=1&classic=1 keeps the legacy classic screens (Full layout, Kids style chip in Simple) for the sound-equivalence
+// suites (audioeq / kvaudio replay the 351c02c taps). Users can no longer reach them.
+const CLASSIC = /[?&]test=1(&|$)/.test(location.search) && /[?&]classic=1(&|$)/.test(location.search);
 
 var pref, tb, src, lastStyle = "pop", active = false, built = false, lastSel = null, lastProg = 0;
-export const xLog = { mode: [], src: [], tb: [] };   // read by the e2e suite (?test=1 hooks)
+export const xLog = { mode: [], src: [], tb: [], chart: [] };   // read by the e2e suite (?test=1 hooks)
 var $ = function (id) { return document.getElementById(id); };
 function el(tag, cls, html, attrs) {
   var e = document.createElement(tag);
@@ -46,6 +53,7 @@ function click(sel) { var b = typeof sel === "string" ? document.querySelector(s
 // ---------- mode ----------
 export function expertActive() { return active; }
 export function currentMode() { return modeOf({ kv: !!shared.kidsView, style: state.style, simple: state.simple, on: pref.on }); }
+function modeState() { return { kv: !!shared.kidsView, style: state.style, simple: state.simple, on: pref && pref.on, classic: CLASSIC }; }
 // rd2 (Noff, rd1 Low): a finger that went down before a mode switch must not act on the new screen when it lifts
 // (hold a Kids pad, switch to Simple, lift on a chip: no chord). Its own release still runs (the held sound ends as
 // before); only the click its lift would make on whatever is under it now is dropped.
@@ -74,7 +82,7 @@ export function setMode(target) {
   Object.keys(downs).forEach(function (id) { stale[id] = true; });   // fingers down now belong to the old screen
   var t = modeTarget({ style: state.style, simple: state.simple }, target, lastStyle);
   xLog.mode.push(target);
-  closeAll();
+  closeAll(); openModeSheet(false); dropDenseNote();
   pref.on = t.on; savePref();
   if (t.kv) {   // Kids = the Kids view: leave the Expert screen first, then the Kids view takes over (it picks the Kids style)
     paintMode();
@@ -84,16 +92,16 @@ export function setMode(target) {
   }
   if (shared.kidsView) setKidsViewOff(true);   // back to the full app (the Kids view keeps its place in the song)
   if (t.style) click("#styles button[data-style=\"" + t.style + "\"]");
-  if (t.simple !== null && !!state.simple !== t.simple) click("#simpleBtn");
+  if (t.simple !== null && !!state.simple !== t.simple) setSimple(t.simple);   // rd6: no Simple toggle button any more
   paintMode();
 }
 function paintMode() {
-  var fix = expertStyleFix({ kv: !!shared.kidsView, style: state.style, simple: state.simple, on: pref && pref.on });
-  if (fix) { xLog.styleFix = (xLog.styleFix || 0) + 1; click("#styles button[data-style=\"" + fix + "\"]"); }   // rd4: Kids is not an Expert style
+  if (fullToExpert(modeState())) { pref.on = true; savePref(); xLog.toExpert = (xLog.toExpert || 0) + 1; }   // rd6: no classic Full screen (a Start over outside Simple, ?expert=0)
+  var fix = expertStyleFix(modeState());
+  if (fix) { xLog.styleFix = (xLog.styleFix || 0) + 1; click("#styles button[data-style=\"" + fix + "\"]"); }   // rd4: Kids is not an Expert style; rd6: nor a Simple one
   if (state.style !== "kids") lastStyle = state.style;
   var de = document.documentElement, on = currentMode() === "expert";
-  de.classList.toggle("x-lamp", pref.look !== "day");
-  de.classList.toggle("x-day", pref.look === "day");
+  if (lookShown("expert") == null) lookApplyNow("expert");
   if (on !== active) {
     active = on;
     de.classList.toggle("expert", on);
@@ -103,11 +111,25 @@ function paintMode() {
     setTimeout(function () { fitStrip(); placeBadges(); fitNowSymbol(); }, 0);
   }
   paintModeSegs();
+  syncChart();
+  if (sheetOpen()) paintSheet();
   if (on) paint();
 }
+// rd6: uploaded songs: Simple plays the easy chart, Expert the Full chart (a one-chart song plays it in both). Set on every
+// mode switch, load and song change; the per-song Simple / Full pick in My songs still works until the next one.
+var chartAt = { id: null, mode: null };
+function syncChart() {
+  var U = shared.U, m = currentMode();
+  if (!U || CLASSIC) return;
+  if (chartAt.id === U.id && chartAt.mode === m) return;
+  chartAt = { id: U.id, mode: m };
+  var want = chartFor(m, !!U.two);
+  if (want && U.ver !== want && U.id) { xLog.chart.push(m + ":" + want); try { libSetVer(U.id, want); } catch (e) { xLog.chart.push("err:" + e); } }
+}
+export function chartState() { var U = shared.U; return U ? { id: U.id, two: !!U.two, ver: U.ver, events: U.events.length } : null; }
 function paintModeSegs() {
   var m = currentMode();
-  Array.prototype.forEach.call(document.querySelectorAll(".x-mode button[data-mode]"), function (b) {
+  Array.prototype.forEach.call(document.querySelectorAll("#msMode button[data-mode]"), function (b) {
     var o = b.dataset.mode === m; b.classList.toggle("on", o); b.setAttribute("aria-checked", o ? "true" : "false");
   });
 }
@@ -119,7 +141,7 @@ function build() {
   top.appendChild(el("button", "x-b x-key", "<span class=\"x-kl\">C major</span><span class=\"x-car\">\u25be</span>", { id: "xKey", "aria-haspopup": "dialog", "aria-label": "Key" }));
   top.appendChild(el("button", "x-b x-style", "<span class=\"x-sl\">Pop</span><span class=\"x-car\">\u25be</span>", { id: "xStyle", "aria-haspopup": "listbox", "aria-expanded": "false", "aria-label": "Style" }));
   top.appendChild(el("span", "x-slot"));
-  top.appendChild(el("button", "x-b x-badge", "Expert", { id: "xBadge", "aria-haspopup": "dialog", title: "Settings" }));
+  var chip = makeChip("expert", "xModeChip"); chip.classList.add("x-b"); top.appendChild(chip);   // rd6: the mode chip (was the gold Expert button)
   top.appendChild(el("button", "x-b x-help", "?", { id: "xHelp", "aria-label": "How to" }));
   var tog = el("div", "x-seg x-tog", "<button type=\"button\" data-v=\"song\" role=\"tab\">\u266c Song</button><button type=\"button\" data-v=\"prog\" role=\"tab\">\u25a6 Progressions</button>", { id: "xTog", role: "tablist", "aria-label": "Song or progressions" });
   var go = el("div", "x-go", null, { id: "xGo" });
@@ -142,25 +164,12 @@ function build() {
     if (BL[pc]) { b.style.left = "calc(" + (wi / 7 * 100) + "% - 6.5%)"; blacks.appendChild(b); } else { whites.appendChild(b); wi++; }
   }
   mini.appendChild(whites); mini.appendChild(blacks);
-  var sset = el("div", "x-sheet x-settings", null, { id: "xSettings", role: "dialog", "aria-label": "Settings", hidden: "" });
-  sset.innerHTML = "<div class=\"x-grab\"></div><div class=\"x-sh-h\"><span>Settings</span><button type=\"button\" class=\"x-b x-close\" aria-label=\"Close\">\u2715</button></div>"
-    + "<div class=\"x-lbl\">Mode</div><div class=\"x-seg x-mode\" role=\"radiogroup\" aria-label=\"Mode\"><button type=\"button\" role=\"radio\" data-mode=\"kids\">Kids</button><button type=\"button\" role=\"radio\" data-mode=\"simple\">Simple</button><button type=\"button\" role=\"radio\" data-mode=\"expert\">Expert</button></div>"
-    + "<button type=\"button\" class=\"x-set\" data-proxy=\"playAlongBtn\"><span class=\"x-st\">Play along<small>Tap the marked chord to move on</small></span><span class=\"x-tg\"></span></button>"
-    + "<button type=\"button\" class=\"x-set\" data-proxy=\"paHintsBtn\"><span class=\"x-st\">Show hints<small>Gold now, dashed next chord</small></span><span class=\"x-tg\"></span></button>"
-    + "<button type=\"button\" class=\"x-set\" data-proxy=\"progNumsBtn\"><span class=\"x-st\">Progression numbers</span><span class=\"x-tg\"></span></button>"
-    + "<div class=\"x-set x-look\"><span class=\"x-st\">Look<small>Lamp is the Expert default</small></span><span class=\"x-seg\"><button type=\"button\" data-look=\"day\">\u2600 Day</button><button type=\"button\" data-look=\"lamp\">\u263e Lamp</button></span></div>"
-    + "<button type=\"button\" class=\"x-set x-go-row\" data-act=\"upload\"><span class=\"x-st\">Upload a song</span><span class=\"x-chev\">\u203a</span></button>"
-    + "<button type=\"button\" class=\"x-set x-go-row\" data-act=\"howto\"><span class=\"x-st\">How to</span><span class=\"x-chev\">\u203a</span></button>"
-    + "<button type=\"button\" class=\"x-set x-go-row\" data-act=\"tour\"><span class=\"x-st\">Tour</span><span class=\"x-chev\">\u203a</span></button>"
-    + "<button type=\"button\" class=\"x-set x-go-row x-danger\" data-act=\"reset\"><span class=\"x-st\">Start over<small>Asks first; resets settings</small></span><span class=\"x-chev\">\u203a</span></button>"
-    + "<div class=\"x-ver\"></div>";
-  [top, tog, go, song, list, ctl, scrim, smenu, ksheet, sset].forEach(function (n) { app.insertBefore(n, nowCol); });
+  [top, tog, go, song, list, ctl, scrim, smenu, ksheet].forEach(function (n) { app.insertBefore(n, nowCol); });
   // Sound sheet extras (inside the existing Sound pane; shown only in Expert): a Vol slider that drives #volume.
   var vol = el("label", "x-volrow", "<span>Vol</span><input id=\"xVol\" type=\"range\" min=\"0\" max=\"100\" step=\"1\" aria-label=\"Volume\"><b id=\"xVolVal\"></b>");
   $("paneSound").appendChild(vol);
-  // Decision 11: the mode switch also lives in the gear menu (Kids / Simple / classic Full screens).
-  var gm = el("div", "x-gearmode", "<span class=\"cfg-lbl\">Mode</span><span class=\"x-seg x-mode\" role=\"radiogroup\" aria-label=\"Mode\"><button type=\"button\" role=\"radio\" data-mode=\"kids\">Kids</button><button type=\"button\" role=\"radio\" data-mode=\"simple\">Simple</button><button type=\"button\" role=\"radio\" data-mode=\"expert\">Expert</button></span>", { id: "modeRow" });
-  $("configMenu").insertBefore(gm, $("configMenu").firstChild);
+  // rd6: Simple's chip sits in the classic top bar, next to "?" (it replaces the Simple toggle and the gear menu).
+  var hb = $("howtoBtn"); if (hb && hb.parentNode) hb.parentNode.insertBefore(makeChip("simple", "modeChip"), hb);
   built = true;
 }
 
@@ -174,7 +183,7 @@ function openOnly(id) {
   placeSheets();
 }
 export function closeAll(except) {
-  ["xStyleMenu", "xKeySheet", "xSettings"].forEach(function (id) { if (id !== except && $(id)) $(id).hidden = true; });
+  ["xStyleMenu", "xKeySheet"].forEach(function (id) { if (id !== except && $(id)) $(id).hidden = true; });
   if ($("xStyle")) { $("xStyle").setAttribute("aria-expanded", "false"); $("xStyle").classList.remove("open"); }
   if (except !== "ctl") setCtlSheet(false);
   if (src && src.listOpen && except !== "xPList") srcDo("close");
@@ -223,6 +232,17 @@ function fitStyleMenu(top) {
   var head = parseFloat(cs.paddingTop) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth);   // the cut row reaches the bottom edge
   var n = Math.max(1, Math.floor((avail - head - rowH / 2) / rowH));
   m.style.maxHeight = Math.floor(head + rowH * n + rowH / 2) + "px";
+  paintStyleMore();
+}
+// rd6 (Uiux): the open Style list scrolls so the selected style is fully in view (centred when it was not).
+export function scrollStyleSel() {
+  var m = $("xStyleMenu"); if (!m || m.hidden) return;
+  var b = m.querySelector(".x-mi[data-style=\"" + state.style + "\"]"); if (!b) return;
+  var mr = m.getBoundingClientRect(), br = b.getBoundingClientRect(), cs = getComputedStyle(m);
+  var top = br.top - mr.top - parseFloat(cs.borderTopWidth) + m.scrollTop, bot = top + br.height;
+  var fade = m.scrollHeight > m.clientHeight ? br.height / 2 : 0;   // the cut half row + fade at the bottom
+  if (top >= m.scrollTop && bot <= m.scrollTop + m.clientHeight - fade) { paintStyleMore(); return; }
+  m.scrollTop = Math.max(0, Math.min(m.scrollHeight - m.clientHeight, top - (m.clientHeight - br.height) / 2));
   paintStyleMore();
 }
 function paintStyleMore() {
@@ -407,10 +427,7 @@ export function paint() {
   $("xFull").classList.toggle("on", !!state.allKeys);
   var ps = document.querySelector("#prog .pg-song"), pon = !!(ps && ps.classList.contains("on"));
   $("xPlay").textContent = pon ? "\u25a0" : "\u25b6"; $("xPlay").setAttribute("aria-pressed", pon ? "true" : "false"); $("xPlay").setAttribute("aria-label", pon ? "Stop song" : "Play song");
-  Array.prototype.forEach.call(document.querySelectorAll("#xSettings .x-set[data-proxy]"), function (b) { var o = $(b.dataset.proxy); b.classList.toggle("on", !!o && o.getAttribute("aria-checked") === "true"); b.setAttribute("aria-checked", b.classList.contains("on") ? "true" : "false"); b.setAttribute("role", "switch"); });
-  Array.prototype.forEach.call(document.querySelectorAll("#xSettings [data-look]"), function (b) { b.classList.toggle("on", b.dataset.look === (pref.look === "day" ? "day" : "lamp")); });
   var v = $("volume"); if (v) { $("xVol").value = v.value; $("xVolVal").textContent = v.value; }
-  var ver = $("appVersion"); if (ver) document.querySelector("#xSettings .x-ver").textContent = ver.textContent;
   paintType();
   paintSrc();
 }
@@ -420,13 +437,12 @@ export function expertPaintNow() { paintMode(); }
 // ---------- wire ----------
 function wireAll() {
   $("xKey").addEventListener("click", function () { openOnly("xKeySheet"); paint(); });
-  $("xStyle").addEventListener("click", function () { if ($("xStyleMenu").hidden) openOnly("xStyleMenu"); else closeAll(); });
+  $("xStyle").addEventListener("click", function () { if ($("xStyleMenu").hidden) { openOnly("xStyleMenu"); paint(); scrollStyleSel(); } else closeAll(); });
   $("xStyleMenu").addEventListener("scroll", paintStyleMore, { passive: true });
   $("xStyleMenu").addEventListener("click", function (e) {
     var b = e.target.closest("button[data-style]"); if (!b) return;
     unlock(); closeAll(); click("#styles button[data-style=\"" + b.dataset.style + "\"]"); schedule();
   });
-  $("xBadge").addEventListener("click", function () { openOnly("xSettings"); paint(); });
   $("xHelp").addEventListener("click", function () { closeAll(); click("#howtoBtn"); });
   $("xNext").addEventListener("click", function () { click("#prog .pg-step"); schedule(); });
   $("xPlay").addEventListener("click", function () { click("#prog .pg-song"); schedule(); });
@@ -476,26 +492,6 @@ function wireAll() {
     var md = e.target.closest("[data-km]"); if (md) { setKidKey(k.pc, md.dataset.km); schedule(); return; }
     if (e.target.closest(".x-close")) closeAll();
   });
-  // Settings sheet
-  $("xSettings").addEventListener("click", function (e) {
-    var b = e.target.closest("button"); if (!b) return;
-    if (b.classList.contains("x-close")) { closeAll(); return; }
-    if (b.dataset.mode) { setMode(b.dataset.mode); return; }
-    if (b.dataset.proxy) { click("#" + b.dataset.proxy); schedule(); return; }
-    if (b.dataset.look) { pref.look = b.dataset.look; savePref(); paintMode(); return; }
-    var act = b.dataset.act;
-    if (act === "upload") { closeAll(); click("#uploadBtn"); }
-    else if (act === "howto") { closeAll(); click("#howtoBtn"); }
-    else if (act === "tour") { closeAll(); click("#tourBtn"); }
-    else if (act === "reset") { if (window.confirm("Start over? This resets every setting (your songs stay).")) { closeAll(); click("#factoryReset"); schedule(); } }
-  });
-  // Gear-menu mode switch (classic screens)
-  document.querySelector(".x-gearmode").addEventListener("click", function (e) {
-    var b = e.target.closest("button[data-mode]"); if (!b) return;
-    e.stopPropagation();
-    var m = $("configMenu"); if (m) m.hidden = true; var c = $("configBtn"); if (c) c.setAttribute("aria-expanded", "false");
-    setMode(b.dataset.mode);
-  });
   $("xVol").addEventListener("input", function () { var v = $("volume"); v.value = $("xVol").value; v.dispatchEvent(new Event("input", { bubbles: true })); $("xVolVal").textContent = v.value; });
   $("xVol").addEventListener("change", function () { var v = $("volume"); v.value = $("xVol").value; v.dispatchEvent(new Event("change", { bubbles: true })); });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && active) closeAll(); });
@@ -511,6 +507,28 @@ function wireAll() {
   function onResize() { clearTimeout(rz); rz = setTimeout(function () { if (!active) return; placeTog(); placeSheets(); fitStrip(); placeBadges(); fitNowSymbol(); }, 80); }
   window.addEventListener("resize", onResize); window.addEventListener("orientationchange", onResize);
 }
+
+// rd6: Start over (the shared sheet, after its 2 s hold): Kids as before (reset, then Kids from Hello); Simple / Expert
+// reset every setting (the Expert look back to Auto) and stay in the same mode.
+function startOver(m) {
+  if (m === "kids") { kidsStartOver(); return; }
+  click("#factoryReset");
+  pref.look = "auto"; pref.on = m === "expert"; savePref(); lookApplyNow("expert");
+  if (m === "simple" && !state.simple) setSimple(true);
+  paintMode();
+}
+// rd6 (Uiux): one-time note when an old Full-layout setup opens in Expert. Seen = saved in its own key (once per device;
+// Start over keeps it); new setups never see it.
+export const NOTE_KEY = "touchChord.notes.v1";
+function notes() { try { var o = JSON.parse(localStorage.getItem(NOTE_KEY) || "{}"); return o && typeof o === "object" ? o : {}; } catch (e) { return {}; } }
+function showDenseNote() {
+  var o = notes(); if (o.denseMoved) { xLog.denseNote = "seen"; return; }
+  o.denseMoved = true; try { localStorage.setItem(NOTE_KEY, JSON.stringify(o)); } catch (e) {}
+  var n = el("div", "x-note", "<span class=\"x-note-t\">Simple's dense layout lives in Expert now</span>", { id: "xDenseNote", role: "status" });
+  var x = el("button", "x-note-x", "\u2715", { "aria-label": "Dismiss" }); x.addEventListener("click", dropDenseNote); n.appendChild(x);
+  document.body.appendChild(n); xLog.denseNote = "shown";
+}
+function dropDenseNote() { var n = $("xDenseNote"); if (n) n.remove(); }
 
 // Boot (from main.js, after the app's own boot: saved settings applied, first song set).
 export function boot() {
@@ -530,7 +548,7 @@ export function boot() {
   setHintAvoid(function () {
     if (!active) return [];
     var out = [];
-    Array.prototype.forEach.call(document.querySelectorAll("#xTop, #xTog, #xGo, #xSrc, #xPList, .now-card, #xCtl, .kb-wrap, #dev-badge, .pg-badge, #xSettings, #xStyleMenu"), function (n) {
+    Array.prototype.forEach.call(document.querySelectorAll("#xTop, #xTog, #xGo, #xSrc, #xPList, .now-card, #xCtl, .kb-wrap, #dev-badge, .pg-badge, #xStyleMenu, #xDenseNote"), function (n) {
       if (n.closest("[hidden]") || getComputedStyle(n).display === "none") return; out.push(n.getBoundingClientRect()); });
     var g = document.querySelector(".next-card"), q = g && g.getBoundingClientRect(), B = 8;
     if (q && q.width) out.push({ left: q.left, right: q.right, top: q.top, bottom: q.top + B, width: q.width, height: B }, { left: q.left, right: q.right, top: q.bottom - B, bottom: q.bottom, width: q.width, height: B },
@@ -539,10 +557,25 @@ export function boot() {
   });
   tb = typeBarInit(false);
   src = sourceInit(srcCtx());
+  if (CLASSIC) document.documentElement.classList.add("tc-classic");
+  registerLook("expert", function () { return pref.look; }, function (l) { var de = document.documentElement; de.classList.toggle("x-lamp", l !== "day"); de.classList.toggle("x-day", l === "day"); });
   build();
   wireAll();
+  bootSheet();
+  configureSheet({
+    mode: currentMode,
+    setMode: setMode,
+    lookGet: function (m) { return m === "kids" ? state.theme : pref.look; },
+    lookSet: function (m, v) { if (m === "kids") setKidsTheme(v); else { pref.look = v; savePref(); lookApplyNow("expert"); paintMode(); } },
+    isDay: function (m) { return m === "kids" ? lookShown("kids") === "day" : m === "expert" ? lookShown("expert") === "day" : false; },
+    startOver: startOver
+  });
   placeTog();
+  // rd6: an old saved setup in the classic Full layout opens in Expert (once per device a note says where it went)
+  var oldFull = fullToExpert(modeState()) && !shared.firstFresh && !/[?&]expert=[01](&|$)/.test(location.search);
   if (urlOn && currentMode() !== "expert") setMode("expert");   // ?expert=1 opens Expert, also on a first visit (else the Kids view)
   paintMode();
+  if (oldFull) { xLog.oldFull = true; showDenseNote(); }
   setTimeout(function () { if (active) { placeTog(); placeSheets(); fitStrip(); placeBadges(); fitNowSymbol(); } }, 60);
 }
+if (/[?&]test=1(&|$)/.test(location.search)) window.__xmode = { log: xLog, mode: function () { return currentMode(); }, chart: chartState, scrollSel: scrollStyleSel, pref: function () { return Object.assign({}, pref); } };

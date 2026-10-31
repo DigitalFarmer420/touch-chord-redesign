@@ -63,8 +63,9 @@ export const state = {
   playAlong: true,             // v108: Config > Play along enable
   paHints: true,               // v112: Config > Show hints (Play along hints)
   expert: true,                // Kids redesign: false = the Kids view (Simple), true = the full app (Expert)
-  theme: "day",                // Kids redesign: Kids view look, "day" (Daylight) or "lamp" (Lamplight)
+  theme: "auto",               // Kids view look: "auto" (rd6, the clock: Day 7:00-19:00), "day" or "lamp"
   kidsSong: null,              // Kids redesign: the last Kids song played in the Kids view (picker "last", Hello resume)
+  kidsWalk: null,              // rd6: the Kids song's place ({ name, t } or { name, end }), saved so a reload keeps the step
   keySpell: {}                 // v50: key root spelling picks, e.g. { "1major": "Db" }
 };
 
@@ -129,11 +130,18 @@ export function factoryDefaults() {
     // Kids redesign: a saved setup from before it (no "expert") opens the full app as before; only a first visit
     // (loadSettings) opens the Kids view. Factory reset keeps the full app, so it is unchanged.
     expert: true,
-    theme: "day",
-    kidsSong: null
+    theme: "auto",   // rd6: Auto is the default for new / unset setups; a saved "day" / "lamp" is kept
+    kidsSong: null,
+    kidsWalk: null
   };
 }
 
+// rd6: the Kids step (playback.js progWalkAt shape)
+export function sanitizeWalk(w) {
+  if (!w || typeof w !== "object" || typeof w.name !== "string" || w.name.length >= 80) return null;
+  if (w.end === true) return { name: w.name, end: true };
+  return typeof w.t === "number" && isFinite(w.t) && w.t >= 0 && w.t < 10000 ? { name: w.name, t: w.t } : null;
+}
 function sanitizeSettings(raw) {
   var d = factoryDefaults();
   if (!raw || typeof raw !== "object") return d;
@@ -179,8 +187,9 @@ function sanitizeSettings(raw) {
     lockKey: (raw.lockKey && typeof raw.lockKey === "object" && raw.lockKey.pc === (raw.lockKey.pc | 0) && raw.lockKey.pc >= 0 && raw.lockKey.pc < 12 && SCALES.indexOf(raw.lockKey.mode) >= 0)
       ? { pc: raw.lockKey.pc, mode: raw.lockKey.mode } : null,
     expert: bool(raw.expert, d.expert),
-    theme: pick(raw.theme, ["day", "lamp"], d.theme),
-    kidsSong: typeof raw.kidsSong === "string" && raw.kidsSong.length < 80 ? raw.kidsSong : null
+    theme: pick(raw.theme, ["auto", "day", "lamp"], d.theme),
+    kidsSong: typeof raw.kidsSong === "string" && raw.kidsSong.length < 80 ? raw.kidsSong : null,
+    kidsWalk: sanitizeWalk(raw.kidsWalk)
     // Legacy `latch` key (cce4d86) is ignored; Sustain is never persisted.
   };
 }
@@ -237,8 +246,9 @@ export function collectSettings() {
     band: (state.band | 0) >= 1 ? state.band | 0 : 50,   // older builds read this (1..100) and start Band off anyway
     lockKey: shared.lockKey ? { pc: shared.lockKey.pc, mode: shared.lockKey.mode } : null,
     expert: state.expert !== false,
-    theme: state.theme === "lamp" ? "lamp" : "day",
-    kidsSong: state.kidsSong || null
+    theme: state.theme === "lamp" || state.theme === "day" ? state.theme : "auto",
+    kidsSong: state.kidsSong || null,
+    kidsWalk: state.kidsWalk || null
   };
 }
 

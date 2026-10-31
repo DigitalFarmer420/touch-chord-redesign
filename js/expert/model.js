@@ -5,11 +5,11 @@
 export const EXPERT_STORE = "touchChord.expert.v1";   // separate from touchChord.settings.v1 (state.js is not touched)
 
 // ---- Expert preference (on / look) ----
-export function expertDefaults() { return { v: 1, on: false, look: "lamp" }; }   // decision 1: Lamplight is the Expert default look
+export function expertDefaults() { return { v: 1, on: false, look: "auto" }; }   // rd6: Auto is the default look (was Lamp, decision 1); a saved "day" / "lamp" is kept
 export function sanitizePref(raw) {
   var d = expertDefaults();
   if (!raw || typeof raw !== "object") return d;
-  return { v: 1, on: typeof raw.on === "boolean" ? raw.on : d.on, look: raw.look === "day" ? "day" : "lamp" };
+  return { v: 1, on: typeof raw.on === "boolean" ? raw.on : d.on, look: raw.look === "day" || raw.look === "lamp" ? raw.look : "auto" };
 }
 export function parsePref(str) { try { return sanitizePref(JSON.parse(str)); } catch (e) { return expertDefaults(); } }
 // ?expert=1 / ?expert=0 in the URL turns Expert on / off (and is saved like a tap on the mode switch).
@@ -36,7 +36,13 @@ export function modeOf(s) {
 // Returns { kv: <Kids view on>, style: <style to pick or null>, simple: <bool or null = unchanged>, on: <Expert pref> }.
 // The Kids view picks the Kids style itself (kids/view.js enter), so "kids" leaves style and Simple alone.
 // rd4: Expert has no Kids style; a saved Expert setup with style Kids loads as Pop (null = nothing to fix)
-export function expertStyleFix(s) { return !s.kv && !s.simple && s.on && s.style === "kids" ? "pop" : null; }
+export function expertStyleFix(s) { return !s.kv && (s.simple ? !s.classic : s.on) && s.style === "kids" ? "pop" : null; }   // rd6: Simple has no Kids style either (s.classic = the test-only legacy screens)
+// rd6: the classic Full layout is gone. A setup that would open it (a saved Full setup, or a reset outside Simple) opens
+// Expert; s.classic = the test-only legacy screens (?test=1&classic=1, kept for the sound-equivalence suites).
+export function fullToExpert(s) { return !s.classic && modeOf(s) === "full"; }
+// rd6: which chart of an uploaded song plays: Simple = the easy chart ("simple"), Expert = the Full chart ("full");
+// a song with one chart plays it everywhere (null = leave it).
+export function chartFor(mode, two) { if (!two) return null; return mode === "expert" ? "full" : mode === "simple" ? "simple" : null; }
 export function modeTarget(cur, target, lastStyle) {
   var back = lastStyle && lastStyle !== "kids" ? lastStyle : "pop";
   if (target === "kids") return { kv: true, style: null, simple: null, on: false };

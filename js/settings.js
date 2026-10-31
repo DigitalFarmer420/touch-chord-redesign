@@ -9,6 +9,7 @@ import { paintProgNumsBtn, paintPlayAlongBtn, setVolume, setBand } from "./ui/ge
 import { paintSimple } from "./ui/layout.js?v=112.13";
 import { setKeyModeState } from "./ui/palette.js?v=112.13";
 import { dumpSustain, paintSustainBtn } from "./ui/sustain.js?v=112.13";
+import { lookApplyNow } from "./ui/look.js?v=112.13";
 
 function markOn(groupSel, attr, value) {
   var all = document.querySelectorAll(groupSel + " button");
@@ -29,9 +30,10 @@ export function applySettings(s) {
   state.playAlong = s.playAlong !== false;   // v108
   state.paHints = s.paHints !== false;   // v112
   state.expert = s.expert !== false;   // Kids redesign: Simple (Kids view) / Expert
-  state.theme = s.theme === "lamp" ? "lamp" : "day";
+  state.theme = s.theme === "lamp" || s.theme === "day" ? s.theme : "auto";   // rd6: + Auto (kids/view.js applies the look)
   state.kidsSong = s.kidsSong || null;
-  document.documentElement.classList.toggle("kv-lamp", state.theme === "lamp");
+  state.kidsWalk = s.kidsWalk || null;
+  lookApplyNow("kids");   // rd6: no-op until the Kids view registers its look (boot), then a reset re-applies it
   paintPlayAlongBtn();
   state.layout = s.layout;
   state.sound = s.sound;

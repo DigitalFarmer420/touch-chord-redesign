@@ -82,12 +82,12 @@ html.expert .x-seg button.on { background: var(--x-ink); color: var(--x-onink); 
 html.expert #xTop { display: flex; gap: 8px; align-items: stretch; min-width: 0; }
 html.expert #xTop .x-key { flex: 0 1 112px; } html.expert #xTop .x-style { flex: 0 1 100px; }
 html.expert #xTop .x-slot { flex: 1 1 0; min-width: 0; display: flex; justify-content: center; }
-html.expert #xTop .x-badge { flex: 0 0 auto; color: var(--x-gold); border-color: #6b5320; font-size: calc(var(--x-fs) - 1.5px); }
+html.expert #xTop .mode-chip { flex: 0 0 auto; color: var(--x-gold); border-color: #6b5320; font-size: calc(var(--x-fs) - 1.5px); }
 html.expert #xTop .x-help { flex: 0 0 var(--x-row); border-radius: 50%; padding: 0; font-size: 18px; }
 html.expert #xTop .x-style.open { border-color: var(--x-gold); color: var(--x-gold); }
 html.expert.lay-pad-port #xTop .x-key, html.expert.lay-pad-land #xTop .x-key { flex-basis: 190px; }
 html.expert.lay-pad-port #xTop .x-style, html.expert.lay-pad-land #xTop .x-style { flex-basis: 170px; }
-html.expert.lay-pad-port #xTop .x-badge, html.expert.lay-pad-land #xTop .x-badge { flex-basis: 120px; }
+html.expert.lay-pad-port #xTop .mode-chip, html.expert.lay-pad-land #xTop .mode-chip { flex-basis: 120px; }
 html.expert #xTop .x-slot #xTog { flex: 0 1 380px; }
 
 /* ---------- Song | Progressions (decision 8) ---------- */
