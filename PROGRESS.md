@@ -128,3 +128,32 @@ too (was boot-only, so it fell back to Twinkle). Guard in show(): play with no K
 back to the song list. New e2e tests/e2e/modeswitch.cjs (360x780, 412x915, 780x360): reload in Kids / Expert / Simple, with
 and without a song in progress, every ordered pair of switches; one Kids screen, one gear, landing rule, chip + lyrics +
 one gold key on play, Kids view hidden in Expert / Simple. rd5 d1a3fef fails it (28 fails at 360x780). Badge v112.13-rd5.1.
+
+## rd6 (user: one mode control; Uiux mockup touchchord-review/modes/mock.html; Noff rd5.1 Low + Info) - badge v112.13-rd6
+- One mode chip in every mode, top right (Kids ★ / Simple ◐ / Expert ◆), replacing the Kids gear, Simple's gear menu and
+  Simple toggle, and Expert's gold Expert button. It opens one Settings sheet (js/ui/modesheet.js, css/modesheet.css) with
+  the same rows in every mode: Mode (3 segments + hints), Play along, Show hints, Chord numbers, Look, Upload a song
+  (Expert only), How to & tour, Start over (2 s hold-to-erase confirm everywhere). The rows drive the app's own (now hidden)
+  controls, so every old setting stays reachable. Kids: the chip opens only after a 1 s press-and-hold with a filling bar;
+  a short tap shows "Grown-ups: hold 1 second". The click made by the lifting finger is ignored for 250 ms, so the sheet
+  that opened under it does not close or act at once.
+- Switching keeps song, key and step, closes the sheet and fades the new mode in; rd5.1 landing rule kept for Kids.
+- No Simple toggle and no classic Full layout for users: old Full setups open in Expert (Expert pref set on), with a
+  one-time dismissible note "Simple's dense layout lives in Expert now" (touchChord.notes.v1 {denseMoved:true}, saved when
+  shown; never for fresh setups, saved Expert setups or ?expert=0/1). Saved Simple stays Simple; Simple has no Kids style
+  chip and a saved Simple + Kids loads as Pop. Uploads: Expert plays the Full chart, Simple the easy one, one-chart songs
+  play it in both (set on load, switch and reload; the pencil pick still works until the next switch).
+- Look = Auto · Day · Lamp (js/ui/lookmath.js pure, js/ui/look.js runtime). Auto is the default for new / unset setups;
+  saved Day / Lamp kept. Auto: Day 7:00-19:00 by the device clock, Lamp otherwise; checked every 15 s and on return to the
+  page; at the boundary it waits until nothing is held / playing and 4 s since the last touch, then cross-fades (View
+  Transitions, else a CSS fade). Kids and Expert; Simple shows the row disabled with a note (Simple Lamp = rd7).
+- Expert Style menu scrolls the selected style fully into view when it opens.
+- Noff Low: the Kids step is saved with the song (state.kidsWalk) and survives a reload (Kids step 3 -> Expert -> reload ->
+  Kids at step 3). Noff Info: the play guard also checks lyrics (blank -> song list); kidsSongProblems() + unit test.
+- Test-only hatches: ?test=1&classic=1 keeps the old classic screens (so audioeq / kvaudio / grownup replay 351c02c's taps);
+  ?test=1&hour=H fixes Auto's hour. Neither is reachable without ?test=1.
+- Tests: unit 98/98; e2e rd6 (new, 6 sizes); expert, kidsview x5, modeswitch x3 updated for the chip + hold; kvaudio and
+  audioeq on the classic hatch (0 diffs vs 351c02c); audioeq REAL=1 (real Expert / Simple modes) cd19e41 vs rd6.
+  grownup.cjs adapted, not a gate any more: B opens with ?classic=1, the top bar is hidden on both sides and the gear-menu
+  shot is dropped (the menu is gone). Remaining diffs are only the style-chip strip in the top row at 780x360 (Full) and
+  1024x768 (Simple), which reflows because the Simple toggle left that row; everything below is pixel-identical.
