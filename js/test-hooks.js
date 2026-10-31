@@ -1,4 +1,5 @@
 // window.__* helpers for the Playwright suites. Loaded only with ?test=1 (dynamic import from main.js).
+import { secLyrics } from "./songs/fullchart.js?v=112.13";
 import { api as ChordAudio } from "./audio/index.js?v=112.13";
 import { KIDS_LYRICS } from "./songs/kids-songs.js?v=112.13";
 import { upSave, libSaveErr, libOpen, libSetVer, libDelete } from "./songs/library.js?v=112.13";
@@ -58,7 +59,7 @@ export function install() {
     timer: function () { return shared.suggestTimer; }
   };
   if (PROG_TEST) window.__applySongKey = function (t, m) { return applySongKey(t, m); };
-  if (PROG_TEST) window.__lyr2 = { state: lyrState, map: function () { if (!shared.U) return null; var M = upLyrMap(); return { any: M.any, seq: M.seq.map(function (x) { return { si: x.si, li: x.li, start: x.start }; }), at: M.at.slice() }; } };
+  if (PROG_TEST) window.__lyr2 = { state: lyrState, map: function () { if (!shared.U) return null; var M = upLyrMap(); return { any: M.any, seq: M.seq.map(function (x) { var L = x.li >= 0 ? secLyrics(shared.U.secs[x.si], x.rep)[x.li] : null; return { si: x.si, li: x.li, rep: x.rep, start: x.start, text: L ? L.text : null }; }), at: M.at.slice() }; } };
   if (PROG_TEST) window.__kidsLyr = { state: klState, data: function () { return KIDS_LYRICS; } };
   if (PROG_TEST) window.__upload = {
     check: function (t) { return upCheck(t); },
