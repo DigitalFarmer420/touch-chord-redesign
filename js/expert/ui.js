@@ -127,12 +127,13 @@ function syncChart() {
   chartAt = { id: U.id, mode: m };
   var want = chartFor(m, !!U.two);
   if (want && U.ver !== want && U.id) {
-    // rd7 (Noff rd6 #2): both charts share the form, so the position is kept by time: the bar the player is on (start
-    // of that bar) is found again in the other chart (as 351c02c's Simple toggle kept the step with progWalkAt / To).
+    // rd7 (Noff rd6 #2): both charts share the form, so the position is kept by time (as 351c02c's Simple toggle kept
+    // the step with progWalkAt / To).
     var w = upSelected() ? progWalkAt() : null;
     xLog.chart.push(m + ":" + want); try { libSetVer(U.id, want); } catch (e) { xLog.chart.push("err:" + e); }
-    if (w && !w.end) { w.t = Math.floor(w.t + 1e-6); progWalkTo(w); xLog.chart.push("at:" + w.t + ">" + magic.pos); }
-    else if (w && w.end) progWalkTo(w);
+    // rd8 (Noff rd7 Low): the exact beat, not the bar's start: the step that covers it in the other chart is next
+    // (Bb13 at bar 3.5 -> Simple's Bb at 3.5, not Fm at 3), so the chord just played is never played again.
+    if (w) { progWalkTo(w); xLog.chart.push("at:" + (w.end ? "end" : w.t) + ">" + magic.pos); }
   }
 }
 export function chartState() { var U = shared.U; return U ? { id: U.id, two: !!U.two, ver: U.ver, events: U.events.length } : null; }
