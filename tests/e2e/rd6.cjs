@@ -203,7 +203,7 @@ const LABEL = { kids: 'Kids', simple: 'Simple', expert: 'Expert' };
       const p = await open(b, w, h, SET.full);
       let s = await probe(p); D.dense = { first: s.note, mode: s.mode };
       F(s.mode === 'expert', `${tag}: old Full setup opened in ${s.mode}`);
-      F(s.note === "Simple's dense layout lives in Expert now", `${tag}: note "${s.note}"`);
+      F(s.note === 'Dense layout is here now', `${tag}: note "${s.note}"`);
       F(await p.evaluate(() => JSON.parse(localStorage.getItem('touchChord.notes.v1') || '{}').denseMoved === true), `${tag}: not saved as seen`);
       const nr = await rectOf(p, '#xDenseNote'); F(nr && nr.t >= -0.5 && nr.b <= h + 0.5 && nr.l >= -0.5 && nr.r <= w + 0.5, `${tag}: note off screen ${JSON.stringify(nr)}`);
       if (w === 360 || w === 820) { await p.screenshot({ path: path.join(SHOTS, `rd6-${T}-dense-note.png`) }); if (CMP) await p.screenshot({ path: path.join(CMP, `${T}-expert-dense-note.png`) }); }

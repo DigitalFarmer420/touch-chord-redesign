@@ -96,11 +96,14 @@ html.look-fade *, html.look-fade *::before, html.look-fade *::after { transition
 html.simple:not(.tc-classic) #styles button[data-style="kids"] { display: none !important; }
 
 /* ---------- Expert: one-time note for an old Full-layout setup ---------- */
-/* rd7 (Uiux spec for Noff rd6 #5): a toast just under the top bar; taps go through it (only its ✕ takes them) */
-.x-note { position: fixed; z-index: 62; left: 50%; transform: translateX(-50%); top: calc(var(--x-top-b, 56px) + 4px); pointer-events: none; transition: opacity .35s ease; display: flex; align-items: center; gap: 10px;
-  max-width: calc(100% - 24px); box-sizing: border-box; padding: 8px 8px 8px 14px; border-radius: 14px; background: #2f8f83; color: #fff; font: 700 14px/1.25 Nunito, system-ui, sans-serif; box-shadow: 0 8px 22px rgba(0,0,0,.35); }
+/* rd8 (Uiux + Noff rd7 #2): a one-line banner along the top edge of the chord panel (.next-card), ✕ on its right.
+   ui.js places it from the panel's rect. Taps go through it (only the ✕ takes them); it fades after 6 s or on the first tap. */
+.x-note { position: fixed; z-index: 62; left: 0; top: 0; width: 200px; height: 30px; pointer-events: none; transition: opacity .35s ease; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  box-sizing: border-box; padding: 0 3px 0 12px; border-radius: 10px; background: #2f8f83; color: #fff; font: 700 13px/1 Nunito, system-ui, sans-serif; box-shadow: 0 4px 12px rgba(0,0,0,.25); }
+.x-note-t { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .x-note.out { opacity: 0; }
-.x-note-x { pointer-events: auto; flex: none; width: 36px; height: 36px !important; min-height: 0 !important; border-radius: 18px; border: 0; background: rgba(255,255,255,.2); color: #fff; font-size: 14px; padding: 0; }
+.x-note-x { position: relative; pointer-events: auto; flex: none; width: 26px; height: 26px !important; min-height: 0 !important; border-radius: 13px; border: 0; background: rgba(255,255,255,.2); color: #fff; font-size: 12px; padding: 0; line-height: 26px; }
+.x-note-x::after { content: ""; position: absolute; inset: -6px; }   /* a bigger touch target, still inside the panel */
 /* the classic app's button base (copper .on, borders) must not reach the sheet */
 .ms-wrap .ms-row, .ms-wrap .ms-row.on { background: transparent !important; color: var(--ms-ink) !important; border-color: var(--ms-line) !important; box-shadow: none !important; }
 .ms-wrap .ms-row.ms-danger { color: var(--ms-danger) !important; }

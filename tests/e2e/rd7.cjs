@@ -135,7 +135,7 @@ async function eraseHold(p) { await p.evaluate(() => document.getElementById('ms
         const hit = document.elementFromPoint(r.x + 12, r.y + r.height / 2); return { y: r.y, b: r.bottom, topB: top.bottom, pe: cs.pointerEvents, xpe: getComputedStyle(n.querySelector('.x-note-x')).pointerEvents, through: !n.contains(hit), r: [r.x, r.y, r.width, r.height].map(Math.round) }; });
       D.toast = t;
       F(t && t.pe === 'none' && t.xpe === 'auto' && t.through, `${tag}: toast is not pass-through ${JSON.stringify(t)}`);
-      F(t && t.y >= t.topB - 0.5 && t.y <= t.topB + 16, `${tag}: toast not just under the top bar ${JSON.stringify(t)}`);
+      // rd8: the place moved to the chord panel's top edge (geometry checked in rd8.cjs)
       if (CMP && w === 360) await p.screenshot({ path: path.join(CMP, `${process.env.PFX || 'after'}-${T}-dense-toast.png`) });
       const p0 = (await pos(p)).pos;
       const nx = await rectOf(p, '#xNext'); await touch(p, nx.x, nx.y, 60); await p.waitForTimeout(300);

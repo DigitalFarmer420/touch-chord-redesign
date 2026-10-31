@@ -535,22 +535,30 @@ function notes() { try { var o = JSON.parse(localStorage.getItem(NOTE_KEY) || "{
 function showDenseNote() {
   var o = notes(); if (o.denseMoved) { xLog.denseNote = "seen"; return; }
   o.denseMoved = true; try { localStorage.setItem(NOTE_KEY, JSON.stringify(o)); } catch (e) {}
-  var n = el("div", "x-note", "<span class=\"x-note-t\">Simple's dense layout lives in Expert now</span>", { id: "xDenseNote", role: "status" });
+  var n = el("div", "x-note", "<span class=\"x-note-t\">" + NOTE_TEXT + "</span>", { id: "xDenseNote", role: "status" });
   var x = el("button", "x-note-x", "\u2715", { "aria-label": "Dismiss" }); x.addEventListener("click", dropDenseNote); n.appendChild(x);
-  document.body.appendChild(n); xLog.denseNote = "shown";
+  document.body.appendChild(n); xLog.denseNote = "shown"; placeDenseNote();
+  window.addEventListener("resize", placeDenseNote);
   // rd7: it never blocks play: taps pass through it, and it fades out after NOTE_MS or on the first tap anywhere
   noteT = setTimeout(function () { fadeDenseNote("time"); }, NOTE_MS);
   window.addEventListener("pointerdown", noteTap, true);
 }
 export const NOTE_MS = 6000;
+export const NOTE_TEXT = "Dense layout is here now";
+// rd8: along the top edge of the chord panel (the strip above the pads), inset 6px; never over the top bar or Next.
+function placeDenseNote() {
+  var n = $("xDenseNote"), c = document.querySelector(".next-card"); if (!n || !c) return;
+  var r = c.getBoundingClientRect(); if (!r.width) return;
+  n.style.left = Math.round(r.left + 6) + "px"; n.style.top = Math.round(r.top + 4) + "px"; n.style.width = Math.round(r.width - 12) + "px";
+}
 var noteT = 0;
 function noteTap(e) { if (e.target && e.target.closest && e.target.closest(".x-note-x")) return; fadeDenseNote("tap"); }
 function fadeDenseNote(why) {
-  var n = $("xDenseNote"); clearTimeout(noteT); noteT = 0; window.removeEventListener("pointerdown", noteTap, true);
+  var n = $("xDenseNote"); clearTimeout(noteT); noteT = 0; window.removeEventListener("pointerdown", noteTap, true); window.removeEventListener("resize", placeDenseNote);
   if (!n || n.classList.contains("out")) return;
   xLog.denseGone = why; n.classList.add("out"); setTimeout(function () { n.remove(); }, 400);
 }
-function dropDenseNote() { clearTimeout(noteT); noteT = 0; window.removeEventListener("pointerdown", noteTap, true); var n = $("xDenseNote"); if (n) { xLog.denseGone = xLog.denseGone || "x"; n.remove(); } }
+function dropDenseNote() { clearTimeout(noteT); noteT = 0; window.removeEventListener("pointerdown", noteTap, true); window.removeEventListener("resize", placeDenseNote); var n = $("xDenseNote"); if (n) { xLog.denseGone = xLog.denseGone || "x"; n.remove(); } }
 
 // rd7: the classic top bar's "?" icon (index.html #howtoBtn), so Expert's matches it
 const HELP_SVG = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r="0.6" fill="currentColor"/></svg>';
