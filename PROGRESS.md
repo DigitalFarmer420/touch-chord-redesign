@@ -198,3 +198,23 @@ rd6.cjs updated for 6 / 7.
    Lamp palette), so a real Auto / Day / Lamp in Simple means building a light Day theme for the classic screens
    (~170 hard-coded colours in base / topbar / strip / panels / keyboard / modes / dialogs css) plus contrast checks.
 Tests: unit rd8.test.js (+ rd7 updated); e2e tests/e2e/rd8.cjs; rd6 / rd7 updated for the new copy / place.
+
+## rd9 (Noff rd8 SUMMARY.md + Uiux/Noff steering) - badge v112.13-rd9
+1. Medium (rd8 regression): in a reused Full section (Anh v1.2 verse2a, verse2b, chorus2, solo, verse3) the lyric
+   markers follow the section's own beats: offsets are taken inside the section (easy chord -> its beat -> the Full
+   chord covering that beat), not from the donor section's absolute positions, so they no longer pile onto the last
+   chord. Lines with two markers keep both. Sections that are not reused keep rd7's mapping. verse2a markers are now
+   0 | 1,2 | 3,4,5 | 6 | 7 (= the easy chart); each Expert step shows the line Simple shows at the same beat.
+2. Low: a switch at the song's end stays at the end (Expert 74/74 -> Simple 68/68 -> Expert 74/74). The stale "last
+   step" index past the shorter chart is cleared, so songbar's TypeError 'si' is gone.
+3. Low: round trips are idempotent. The beat a switch came from is reused when the player has not moved since
+   (and is not playing), so Abmaj7 @21.5 -> Simple Ab @21 -> Expert Abmaj7 (rd8: Gm7 @21). Every Expert step (74) ->
+   Simple -> Expert and every Simple step (68) -> Expert -> Simple comes back to itself (v1.3).
+4. Dense-layout banner (Uiux + Noff steering): no ✕ at all. The whole banner is pointer-events:none, has no
+   interactive element, and fades after 6 s or on the first tap anywhere, which still reaches the control underneath.
+   It sits on the chord panel's top edge, ending 6px left of any chip in its strip (full panel width if that leaves
+   under 180px), 30px tall, 28px ("slim") when the viewport is under 400px tall. Never on the top bar, Next or Play,
+   no chip covered at 360x780, 412x915, 780x360, 844x390, 820x1180, 1180x820.
+5. Simple Day / Lamp look: moved to rd10.
+Tests: unit rd9.test.js; e2e tests/e2e/rd9.cjs (lyrics vs beats, end of song, all round trips, banner geometry and a
+tap through it plays the chip); rd6 / rd7 / rd8 banner checks updated for no ✕.

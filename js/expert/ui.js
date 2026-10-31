@@ -134,6 +134,7 @@ function syncChart() {
     // the beat they came from is used again (Abmaj7 @21.5 -> Simple Ab @21 -> Expert Abmaj7 @21.5, not Gm7 @21).
     var an = chartAnchor;
     if (w && !w.end && an && an.id === U.id && an.ver === U.ver && an.pos === magic.pos && !prog.playing) w.t = an.t;
+    xLog.chart.push(m + ":" + want); try { libSetVer(U.id, want); } catch (e) { xLog.chart.push("err:" + e); }
     // rd8 (Noff rd7 Low): the exact beat, not the bar's start: the step that covers it in the other chart is next
     // (Bb13 at bar 3.5 -> Simple's Bb at 3.5, not Fm at 3), so the chord just played is never played again.
     if (w) { progWalkTo(w); xLog.chart.push("at:" + (w.end ? "end" : w.t) + ">" + magic.pos); }
