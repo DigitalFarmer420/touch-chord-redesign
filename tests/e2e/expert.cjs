@@ -144,7 +144,7 @@ const SUS = { '360x780': [108, 52], '820x1180': [230, 72], '1180x820': [206, 84]
     await p.click('#msMode [data-mode=kids]'); await p.waitForTimeout(400);
     F(await p.evaluate(() => document.querySelector('#styles .on').dataset.style === 'kids' && document.documentElement.classList.contains('kv') && !document.getElementById('kv').hidden && !document.documentElement.classList.contains('expert') && document.getElementById('modeSheet').hidden), 'Simple chip Kids: the Kids view (Kids style), sheet closed');
     { const c = await p.evaluate(() => { const e = [...document.querySelectorAll('#kv .mode-chip')].find(x => x.getClientRects().length); const q = e.getBoundingClientRect(); return [q.x + q.width / 2, q.y + q.height / 2]; });
-      await p.mouse.move(c[0], c[1]); await p.mouse.down(); await p.waitForTimeout(1150); await p.mouse.up(); await p.waitForTimeout(200); }
+      await p.mouse.move(c[0], c[1]); await p.mouse.down(); await p.waitForTimeout(1150); await p.mouse.up(); await p.waitForTimeout(400); }
     F(await p.evaluate(() => !document.getElementById('modeSheet').hidden && document.querySelector('#msMode [data-mode=kids]').classList.contains('on')), 'Kids chip (1 s hold): the same Kids / Simple / Expert switch, Kids on');
     await p.evaluate(() => document.querySelector('#msMode [data-mode=expert]').click()); await p.waitForTimeout(400);
     F(await p.evaluate(() => document.documentElement.classList.contains('expert') && !document.documentElement.classList.contains('kv') && document.querySelector('#styles .on').dataset.style === 'jazz'), 'Kids view Expert: back to Expert in the last style (Jazz), Kids view closed');
