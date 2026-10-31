@@ -178,3 +178,23 @@ one gold key on play, Kids view hidden in Expert / Simple. rd5 d1a3fef fails it 
 8. Uiux Info: Expert's "?" is the classic 44px circle with the same icon as Simple's.
 Tests: unit + rd7.test.js; new e2e tests/e2e/rd7.cjs (360x780, 780x360; fails 27 checks on 38996e9, passes on rd7);
 rd6.cjs updated for 6 / 7.
+
+## rd8 (Noff rd7 SUMMARY.md Low findings + Uiux) - badge v112.13-rd8
+1. Two-chart switch: the exact beat is kept (rd7 floored it to the bar), so the step that covers the current beat in the
+   other chart is next: Expert Bb13 @ bar 3.5 -> Simple Bb @ 3.5 (rd7: Fm @ 3); Simple G7 @ 0.5 -> Expert G7#9 @ 0.5;
+   v1.2 G7#9 @ 50.5 -> Simple G7 @ 50.5 (rd7: Eb @ 50). A Full chord with no easy chord on its beat lands on the easy
+   chord covering it (Abmaj7 @ 21.5 -> Ab @ 21-23). The chord just played is never played again.
+2. Dense-layout note: a one-line banner (30px) along the top edge of the chord panel (.next-card, inset 6px), copy
+   "Dense layout is here now", ✕ on its right; pass-through and the 6 s / first-tap fade kept. Placed from the panel's
+   rect (and on resize), so it never overlaps the top bar, Next or Play (checked at 360x780, 412x915, 780x360, 844x390,
+   820x1180, 1180x820).
+3. Partial Full chart: a later easy section with no Full section at its place reuses Full voicings. Rule: a Full
+   section's origin is the easy section that starts on its beat and lasts one Full pass; an easy section reuses it when
+   its chords (symbols, beats and repeat) equal that origin's. Same section type first, then any type (Anh's solo has the
+   intro's chords -> the Full intro). The copy keeps the easy section's id, label, repeat and lyrics, so length and
+   order never change; otherwise the easy section. Anh Da On Hon v1.2 Expert: 74 steps, Full chords all through
+   (verse2a/2b/3 = Full verse, chorus2 = Full chorus, solo = Full intro), 62 bars.
+4. Simple Lamp look: NOT in rd8 (see the report). The classic Simple screen is already a dark warm theme (close to the
+   Lamp palette), so a real Auto / Day / Lamp in Simple means building a light Day theme for the classic screens
+   (~170 hard-coded colours in base / topbar / strip / panels / keyboard / modes / dialogs css) plus contrast checks.
+Tests: unit rd8.test.js (+ rd7 updated); e2e tests/e2e/rd8.cjs; rd6 / rd7 updated for the new copy / place.
