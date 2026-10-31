@@ -2,7 +2,7 @@
 // DPR 3, isMobile, hasTouch). Layout (nothing overlaps, keys docked C..B with 7 white keys, Sustain size and place, full 7x5 grid),
 // Type bar toggle (table docks between grid and keys, grid stays fully visible, Sustain spans both table rows), hold a type + tap a
 // key (maj7 + F = F A C E, release = normal), Song | Progressions (one at a time, pick unloads, Song re-selects), Style drop-down,
-// Key sheet, Sound sheet stops above the keys, mode switch (Kids / Simple / Expert), classic Full untouched without Expert.
+// Key sheet, Sound sheet stops above the keys, mode switch (rd6: the mode chip + shared sheet), a saved Full setup opens Expert.
 // Writes OUT/expert.json. env BASE, OUT, X_SHOTS (screenshot dir, optional).
 const { chromium } = require('playwright-core'); const fs = require('fs'); const path = require('path');
 const URL0 = process.env.URL || process.env.BASE || 'http://localhost:8080/index.html';
@@ -20,7 +20,7 @@ const SUS = { '360x780': [108, 52], '820x1180': [230, 72], '1180x820': [206, 84]
     const ctx = await b.newContext({ viewport: { width: w, height: h } });
     await ctx.addInitScript(`try{if(!sessionStorage.getItem('x')){sessionStorage.setItem('x',1);localStorage.clear();localStorage.setItem('touchChord.tour.v1','done');localStorage.setItem('touchChord.settings.v1',JSON.stringify({v:1,settings:{style:'pop',simple:false,playAlong:true,paHints:false,lockKey:{pc:0,mode:'major'}}}));}}catch(e){}`);
     const p = await ctx.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
-    await p.goto(URL0 + (URL0.includes('?') ? '&' : '?') + 'test=1&expert=1'); await p.waitForTimeout(1300);
+    await p.goto(URL0 + (URL0.includes('?') ? '&' : '?') + 'test=1&hour=22&expert=1'); await p.waitForTimeout(1300);
     await p.evaluate(() => {
       const A = window.ChordAudio; window.__L = []; const pc = A.playChord.bind(A);
       A.playChord = function (g, m, o) { window.__L.push({ g, m: (m || []).slice().sort((a, b) => a - b) }); return pc(g, m, o); };
@@ -30,9 +30,9 @@ const SUS = { '360x780': [108, 52], '820x1180': [230, 72], '1180x820': [206, 84]
     });
     const r = s => p.evaluate(s => window.__r(s), s);
     const shot = async n => { if (SHOTS) await p.screenshot({ path: path.join(SHOTS, `${tag}-${n}.png`) }); };
-    // 1. Expert on, Lamplight, classic top bar / style row hidden
+    // 1. Expert on, Auto = Lamp at night, classic top bar / style row hidden
     const cls = await p.evaluate(() => document.documentElement.className);
-    F(/\bexpert\b/.test(cls), 'html.expert on with ?expert=1'); F(/\bx-lamp\b/.test(cls), 'Lamplight is the default look (decision 1)');
+    F(/\bexpert\b/.test(cls), 'html.expert on with ?expert=1'); F(/\bx-lamp\b/.test(cls), 'Auto look at night (hour 22) = Lamp (rd6: Auto is the default)');
     F(!(await r('header.topbar')).vis && !(await r('#styles')).vis, 'classic top bar and style chip row hidden (decision 6)');
     // 2. layout: blocks inside the viewport, no overlaps
     const ids = ['#xTop', '#xGo', '#xSrc', '.now-card', '.next-card', '#sustainBtn', '#xCtl', '.kb-wrap'];
@@ -135,16 +135,18 @@ const SUS = { '360x780': [108, 52], '820x1180': [230, 72], '1180x820': [206, 84]
     F(ctl.vis && ctl.b <= kb1.t + 0.5 && JSON.stringify(kb0) === JSON.stringify(kb1), 'Sound sheet opens above the keys; the keys keep their size');
     await shot('sound');
     await p.evaluate(() => document.getElementById('xScrim').click()); await p.waitForTimeout(150);
-    // 12. decision 11: mode switch
-    await p.click('#xBadge'); await p.waitForTimeout(150); await shot('settings');
-    F(await p.evaluate(() => document.querySelectorAll('#xSettings .x-mode button').length === 3 && document.querySelector('#xSettings .x-mode [data-mode=expert]').classList.contains('on')), 'Settings: Kids / Simple / Expert, Expert on');
-    await p.click('#xSettings .x-mode [data-mode=simple]'); await p.waitForTimeout(400);
-    F(await p.evaluate(() => document.documentElement.classList.contains('simple') && !document.documentElement.classList.contains('expert')), 'Simple: the Simple screen, Expert off');
-    await p.evaluate(() => { document.getElementById('configBtn').click(); }); await p.waitForTimeout(100);
-    await p.evaluate(() => document.querySelector('.x-gearmode [data-mode=kids]').click()); await p.waitForTimeout(400);
-    F(await p.evaluate(() => document.querySelector('#styles .on').dataset.style === 'kids' && document.documentElement.classList.contains('kv') && !document.getElementById('kv').hidden && !document.documentElement.classList.contains('expert') && document.getElementById('configMenu').hidden), 'gear menu Kids: the Kids view (Kids style), menu closed');
-    F(await p.evaluate(() => document.querySelectorAll('#kvMode button').length === 3 && document.querySelector('#kvMode [data-v=kids]').classList.contains('on')), 'Kids view settings: the same Kids / Simple / Expert switch, Kids on');
-    await p.evaluate(() => document.querySelector('#kvMode [data-v=expert]').click()); await p.waitForTimeout(400);
+    // 12. decision 11 / rd6: one mode chip + the shared Settings sheet (Kids needs a 1 s hold)
+    await p.click('#xModeChip'); await p.waitForTimeout(150); await shot('settings');
+    F(await p.evaluate(() => !document.getElementById('modeSheet').hidden && document.querySelectorAll('#msMode button').length === 3 && document.querySelector('#msMode [data-mode=expert]').classList.contains('on')), 'Settings: Kids / Simple / Expert, Expert on');
+    await p.click('#msMode [data-mode=simple]'); await p.waitForTimeout(400);
+    F(await p.evaluate(() => document.documentElement.classList.contains('simple') && !document.documentElement.classList.contains('expert') && document.getElementById('modeSheet').hidden), 'Simple: the Simple screen, Expert off, sheet closed');
+    await p.click('#modeChip'); await p.waitForTimeout(150);
+    await p.click('#msMode [data-mode=kids]'); await p.waitForTimeout(400);
+    F(await p.evaluate(() => document.querySelector('#styles .on').dataset.style === 'kids' && document.documentElement.classList.contains('kv') && !document.getElementById('kv').hidden && !document.documentElement.classList.contains('expert') && document.getElementById('modeSheet').hidden), 'Simple chip Kids: the Kids view (Kids style), sheet closed');
+    { const c = await p.evaluate(() => { const e = [...document.querySelectorAll('#kv .mode-chip')].find(x => x.getClientRects().length); const q = e.getBoundingClientRect(); return [q.x + q.width / 2, q.y + q.height / 2]; });
+      await p.mouse.move(c[0], c[1]); await p.mouse.down(); await p.waitForTimeout(1150); await p.mouse.up(); await p.waitForTimeout(200); }
+    F(await p.evaluate(() => !document.getElementById('modeSheet').hidden && document.querySelector('#msMode [data-mode=kids]').classList.contains('on')), 'Kids chip (1 s hold): the same Kids / Simple / Expert switch, Kids on');
+    await p.evaluate(() => document.querySelector('#msMode [data-mode=expert]').click()); await p.waitForTimeout(400);
     F(await p.evaluate(() => document.documentElement.classList.contains('expert') && !document.documentElement.classList.contains('kv') && document.querySelector('#styles .on').dataset.style === 'jazz'), 'Kids view Expert: back to Expert in the last style (Jazz), Kids view closed');
     F(await p.evaluate(() => JSON.parse(localStorage.getItem('touchChord.expert.v1')).on === true), 'Expert choice saved in its own store');
     // rd2 (Uiux #5): one mark per key - sounding = solid gold outline, next chord = teal dashed only on keys not sounding, no copper next-box
@@ -159,19 +161,19 @@ const SUS = { '360x780': [108, 52], '820x1180': [230, 72], '1180x820': [206, 84]
     await p.evaluate(() => __progApi.stop && __progApi.stop()); await p.waitForTimeout(150);
     F(!errs.length, 'no page errors ' + errs.join(' | ')); D.errs = errs;
     await ctx.close();
-    // 13. classic Full untouched without Expert
+    // 13. rd6: no classic Full screen any more: a saved Full setup opens Expert (12-key window, no classic top bar)
     const c2 = await b.newContext({ viewport: { width: w, height: h } });
     await c2.addInitScript(`try{if(!sessionStorage.getItem('x')){sessionStorage.setItem('x',1);localStorage.clear();localStorage.setItem('touchChord.tour.v1','done');localStorage.setItem('touchChord.settings.v1',JSON.stringify({v:1,settings:{style:'pop',simple:false}}));}}catch(e){}`);
-    const p2 = await c2.newPage(); await p2.goto(URL0 + (URL0.includes('?') ? '&' : '?') + 'test=1'); await p2.waitForTimeout(1200);
+    const p2 = await c2.newPage(); await p2.goto(URL0 + (URL0.includes('?') ? '&' : '?') + 'test=1&hour=22'); await p2.waitForTimeout(1200);
     const cl = await p2.evaluate(() => ({ expert: document.documentElement.classList.contains('expert'), keys: document.querySelectorAll('#pads .pad').length, top: getComputedStyle(document.querySelector('header.topbar')).display, xtop: getComputedStyle(document.getElementById('xTop')).display }));
-    F(!cl.expert && cl.keys === 13 && cl.top !== 'none' && cl.xtop === 'none', 'without Expert: the classic Full screen (13-key window, classic top bar) ' + JSON.stringify(cl));
+    F(cl.expert && cl.keys === 12 && cl.top === 'none' && cl.xtop !== 'none', 'a saved Full setup opens Expert (12-key window, Expert top bar) ' + JSON.stringify(cl));
     await c2.close();
     // 15. rd4: a saved Expert setup with the Kids style loads as Pop in Expert (no crash), with and without ?expert=1
     for (const q of ['', 'expert=1']) {
       const c4 = await b.newContext({ viewport: { width: w, height: h } });
       await c4.addInitScript(`try{if(!sessionStorage.getItem('x')){sessionStorage.setItem('x',1);localStorage.clear();localStorage.setItem('touchChord.tour.v1','done');localStorage.setItem('touchChord.expert.v1',JSON.stringify({on:true}));localStorage.setItem('touchChord.settings.v1',JSON.stringify({v:1,settings:{style:'kids',simple:false,playAlong:true,lockKey:{pc:0,mode:'major'}}}));}}catch(e){}`);
       const p4 = await c4.newPage(); const e4 = []; p4.on('pageerror', e => e4.push(e.message));
-      await p4.goto(URL0 + (URL0.includes('?') ? '&' : '?') + 'test=1' + (q ? '&' + q : '')); await p4.waitForTimeout(1300);
+      await p4.goto(URL0 + (URL0.includes('?') ? '&' : '?') + 'test=1&hour=22' + (q ? '&' + q : '')); await p4.waitForTimeout(1300);
       const k4 = await p4.evaluate(() => ({ expert: document.documentElement.classList.contains('expert'), kv: document.documentElement.classList.contains('kv'), style: document.querySelector('#styles .on') && document.querySelector('#styles .on').dataset.style, label: document.querySelector('#xStyle .x-sl').textContent, keys: document.querySelectorAll('#pads .pad').length }));
       F(k4.expert && !k4.kv && k4.style === 'pop' && k4.label === 'Pop' && k4.keys === 12, `saved Expert + Kids style ${q || '(no ?expert)'} loads as Pop in Expert ${JSON.stringify(k4)}`);
       await p4.evaluate(() => __progApi.next()); await p4.waitForTimeout(300);
@@ -182,7 +184,7 @@ const SUS = { '360x780': [108, 52], '820x1180': [230, 72], '1180x820': [206, 84]
       const c5 = await b.newContext({ viewport: { width: w, height: h } });
       await c5.addInitScript(`try{if(!sessionStorage.getItem('x')){sessionStorage.setItem('x',1);localStorage.clear();localStorage.setItem('touchChord.tour.v1','done');localStorage.setItem('touchChord.settings.v1',JSON.stringify({v:1,settings:{style:'pop',simple:false,playAlong:true,paHints:true,lockKey:{pc:0,mode:'major'}}}));}}catch(e){}`);
       const p5 = await c5.newPage(); const e5 = []; p5.on('pageerror', e => e5.push(e.message));
-      await p5.goto(URL0 + (URL0.includes('?') ? '&' : '?') + 'test=1&expert=1'); await p5.waitForTimeout(1300);
+      await p5.goto(URL0 + (URL0.includes('?') ? '&' : '?') + 'test=1&hour=22&expert=1'); await p5.waitForTimeout(1300);
       const hint = async () => p5.evaluate(() => { const hEl = document.getElementById('paHint'); if (hEl.hidden) return null; const H = hEl.getBoundingClientRect(), bad = [];
         const ov = r => r.width > 0 && r.height > 0 && H.left < r.right && r.left < H.right && H.top < r.bottom && r.top < H.bottom;
         document.querySelectorAll('#xTop, #xTog, #xGo, #xSrc, .now-card, #xCtl, .kb-wrap, #dev-badge, .pg-badge, #suggest .ss-chip, #suggest .ss-note, #pads .pad, .x-dots, #xSrc *').forEach(n => { if (getComputedStyle(n).display !== 'none' && ov(n.getBoundingClientRect())) bad.push((n.id || n.className || n.tagName) + ''); });
@@ -205,7 +207,7 @@ const SUS = { '360x780': [108, 52], '820x1180': [230, 72], '1180x820': [206, 84]
     const c3 = await b.newContext({ viewport: { width: w, height: h } });
     await c3.addInitScript(`try{if(!sessionStorage.getItem('x')){sessionStorage.setItem('x',1);localStorage.clear();localStorage.setItem('touchChord.tour.v1','done');localStorage.setItem('touchChord.settings.v1',JSON.stringify({v:1,settings:{style:'pop',simple:false,playAlong:true,paHints:false,lockKey:{pc:0,mode:'major'}}}));}}catch(e){}`);
     const p3 = await c3.newPage(); const errs3 = []; p3.on('pageerror', e => errs3.push(e.message));
-    await p3.goto(URL0 + (URL0.includes('?') ? '&' : '?') + 'test=1&expert=1'); await p3.waitForTimeout(1300);
+    await p3.goto(URL0 + (URL0.includes('?') ? '&' : '?') + 'test=1&hour=22&expert=1'); await p3.waitForTimeout(1300);
     await p3.evaluate(() => {
       const A = window.ChordAudio; window.__L = []; const pc = A.playChord.bind(A);
       A.playChord = function (g, m, o) { window.__L.push({ g, m: (m || []).map(Number).filter(isFinite) }); return pc(g, m, o); };
@@ -270,7 +272,7 @@ const SUS = { '360x780': [108, 52], '820x1180': [230, 72], '1180x820': [206, 84]
     tag = `${w}x${h} style list`; const ctx = await b.newContext({ viewport: { width: w, height: h } });
     await ctx.addInitScript(`try{if(!sessionStorage.getItem('x')){sessionStorage.setItem('x',1);localStorage.clear();localStorage.setItem('touchChord.tour.v1','done');}}catch(e){}`);
     const p = await ctx.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
-    await p.goto(URL0 + (URL0.includes('?') ? '&' : '?') + 'test=1&expert=1'); await p.waitForTimeout(1300);
+    await p.goto(URL0 + (URL0.includes('?') ? '&' : '?') + 'test=1&hour=22&expert=1'); await p.waitForTimeout(1300);
     await p.click('#xStyle'); await p.waitForTimeout(300);
     const look = () => p.evaluate(() => { const m = document.getElementById('xStyleMenu'), M = m.getBoundingClientRect(), cs = getComputedStyle(m);
       const iT = M.top + parseFloat(cs.borderTopWidth), iB = M.bottom - parseFloat(cs.borderBottomWidth);

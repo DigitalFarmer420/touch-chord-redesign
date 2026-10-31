@@ -19,7 +19,7 @@ async function run(b, w, h, expert) {
   const ctx = await b.newContext({ viewport: { width: w, height: h } });
   await ctx.addInitScript(`try{if(!sessionStorage.getItem('x')){sessionStorage.setItem('x',1);localStorage.clear();localStorage.setItem('touchChord.tour.v1','done');localStorage.setItem('touchChord.settings.v1',JSON.stringify({v:1,settings:${JSON.stringify(s)}}));}}catch(e){}`);
   const p = await ctx.newPage(); const errs = []; p.on('pageerror', e => errs.push('' + e));
-  await p.goto(URL + '?test=1'); await p.waitForTimeout(1300); await p.evaluate(HOOK);
+  await p.goto(URL + '?test=1&classic=1&hour=12'); await p.waitForTimeout(1300); await p.evaluate(HOOK);
   if (!expert) { await p.evaluate(() => { document.querySelector('#kv .kv-go').click(); }); await p.waitForTimeout(400); }
   const cdp = await ctx.newCDPSession(p);
   const touchAt = async (x, y, ms) => { await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] }); await p.waitForTimeout(ms); await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }); await p.waitForTimeout(350); };

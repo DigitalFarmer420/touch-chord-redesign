@@ -8,6 +8,11 @@ import { lookFor, lookQuiet, LOOK_PAUSE_MS } from "./lookmath.js?v=112.13";
 const views = {};   // name -> { pick: () => "auto" | "day" | "lamp", apply: (look) => void, shown }
 export const lookLog = { switches: [], waits: 0 };
 var lastNote = -1e9, pauseMs = LOOK_PAUSE_MS, retryT = 0, wired = false;
+// Tests only (?test=1&hour=H): a fixed hour for Auto, so the suites see the same look at any time of day (the real-clock
+// path is covered by the rd6 suite with Playwright's mocked clock). __look.setHour(h) moves it (null = the real clock).
+const TEST = /[?&]test=1(&|$)/.test(location.search);
+var hourAt = TEST && /[?&]hour=(\d{1,2})(&|$)/.test(location.search) ? +/[?&]hour=(\d{1,2})/.exec(location.search)[1] : null;
+function clock() { var d = new Date(); if (hourAt != null) d.setHours(hourAt, 30, 0, 0); return d; }
 function now() { return performance.now(); }
 function busy() { return Object.keys(fingers).length > 0 || !!prog.playing || !!loop.playing || !!loop.transport; }
 export function noteActivity() { lastNote = now(); }
@@ -19,7 +24,7 @@ export function registerLook(name, pick, apply) {
 // A pick changed (or boot): show it right away (the user asked for it).
 export function lookApplyNow(name) {
   var v = views[name]; if (!v) return null;
-  v.shown = lookFor(v.pick(), new Date());
+  v.shown = lookFor(v.pick(), clock());
   v.apply(v.shown);
   return v.shown;
 }
@@ -38,7 +43,7 @@ function fade(fn) {
 // The clock check: returns what it did ("same", "wait" or "switch").
 export function lookCheck() {
   var due = [];
-  Object.keys(views).forEach(function (n) { var v = views[n], want = lookFor(v.pick(), new Date()); if (v.shown !== want) due.push([v, want, n]); });
+  Object.keys(views).forEach(function (n) { var v = views[n], want = lookFor(v.pick(), clock()); if (v.shown !== want) due.push([v, want, n]); });
   if (!due.length) return "same";
   if (busy()) noteActivity();
   if (!lookQuiet({ busy: busy(), now: now(), lastNote: lastNote }, pauseMs)) {
@@ -55,4 +60,4 @@ function wire() {
   setInterval(lookCheck, 15000);
   document.addEventListener("visibilitychange", function () { if (!document.hidden) lookCheck(); });
 }
-if (/[?&]test=1(&|$)/.test(location.search)) window.__look = { check: lookCheck, log: lookLog, shown: lookShown, setPause: function (ms) { pauseMs = ms; }, idle: function () { lastNote = -1e9; } };
+if (TEST) window.__look = { setHour: function (h) { hourAt = h; }, check: lookCheck, log: lookLog, shown: lookShown, setPause: function (ms) { pauseMs = ms; }, idle: function () { lastNote = -1e9; } };

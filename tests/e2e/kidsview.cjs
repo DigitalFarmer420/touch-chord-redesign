@@ -24,7 +24,7 @@ async function open(b, w, h, fresh) {
   await ctx.addInitScript(`try{if(!sessionStorage.getItem('x')){sessionStorage.setItem('x',1);localStorage.clear();localStorage.setItem('touchChord.tour.v1','done');}}catch(e){}`);
   const p = await ctx.newPage(); p.__errs = [];
   p.on('pageerror', e => p.__errs.push('' + e)); p.on('console', m => { if (m.type() === 'error') p.__errs.push(m.text()); });
-  await p.goto(URL + '?test=1&kv=1'); await p.waitForTimeout(1200); await rec(p);
+  await p.goto(URL + '?test=1&kv=1&hour=12');   // rd6: Auto look at noon = Day await p.waitForTimeout(1200); await rec(p);
   return p;
 }
 const rec = p => p.evaluate(() => { const A = window.ChordAudio; window.__L = []; if (A.__kvw) return; A.__kvw = 1; const pc = A.playChord.bind(A);
@@ -47,7 +47,8 @@ const st = p => p.evaluate(() => { const rc = e => { const r = e.getBoundingClie
   for (const [w, h] of SIZES) { const tag = `${w}x${h}`, D = R.data[tag] = {};
     const p = await open(b, w, h); const cdp = await p.context().newCDPSession(p);
     const touch = async (x, y, ms = 90) => { await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] }); await p.waitForTimeout(ms); await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }); await p.waitForTimeout(40); };
-    const tapEl = async (sel, fy = 0.5) => { const r = await p.evaluate(s => { const e = document.querySelector(s); if (!e || !e.getClientRects().length) return null; if (e.closest('.kv-sheet')) e.scrollIntoView({ block: 'center' }); const q = e.getBoundingClientRect(); return { x: q.x, y: q.y, w: q.width, h: q.height }; }, sel); if (!r) { R.fails.push(`${tag}: no ${sel}`); return; } await touch(r.x + r.w / 2, r.y + r.h * fy); };
+    const tapEl = async (sel, fy = 0.5, ms = 90) => { const r = await p.evaluate(s => { const e = document.querySelector(s); if (!e || !e.getClientRects().length) return null; if (e.closest('.ms-sheet')) e.scrollIntoView({ block: 'center' }); const q = e.getBoundingClientRect(); return { x: q.x, y: q.y, w: q.width, h: q.height }; }, sel); if (!r) { R.fails.push(`${tag}: no ${sel}`); return; } await touch(r.x + r.w / 2, r.y + r.h * fy, ms); };
+    const holdChip = async () => { await tapEl('#kv .kv-play .mode-chip', 0.5, 1150); await p.waitForTimeout(150); };   // rd6: the Kids chip opens Settings after a 1 s hold
     const shot = async n => { if (SHOTS) await p.screenshot({ path: path.join(SHOTS, `${tag}-${n}.png`) }); };
     // 1. first visit: Hello over a hidden full app
     let s = await st(p); F(s.on && s.app === 'none' && s.screen === 'hello', `${tag}: first visit is not the Kids Hello (on ${s.on}, #app ${s.app}, screen ${s.screen})`); await shot('hello');
@@ -140,40 +141,40 @@ const st = p => p.evaluate(() => { const rc = e => { const r = e.getBoundingClie
     await p.evaluate(() => { __progApi.set(__prog.list.findIndex(q => q.name === 'Kids Old MacDonald')); __kv.show('play'); }); await p.waitForTimeout(250);
     for (let i = 0; i < 7; i++) await p.evaluate(() => document.querySelector('#kv .kv-next').click());
     await p.waitForTimeout(300); const before = await st(p);
-    await tapEl('#kv .kv-play .kv-gear'); await p.waitForTimeout(250); await shot('settings');
+    await holdChip(); await p.waitForTimeout(100); await shot('settings');
     // redesign-dev: one Kids / Simple / Expert switch. Expert = the Expert screen (it plays the grown-up styles, so it
     // leaves the Kids style); Kids from the Expert settings comes back to the Kids song at the same step.
-    F(await p.evaluate(() => document.querySelectorAll('#kvMode button').length === 3), `${tag}: Kids view mode switch is not Kids / Simple / Expert`);
-    await tapEl('#kvMode button[data-v="expert"]'); await p.waitForTimeout(500); s = await st(p);
+    F(await p.evaluate(() => document.querySelectorAll('#msMode button').length === 3 && !document.getElementById('modeSheet').hidden), `${tag}: Kids view mode switch is not Kids / Simple / Expert`);
+    await tapEl('#msMode button[data-mode="expert"]'); await p.waitForTimeout(500); s = await st(p);
     F(!s.on && s.app !== 'none' && await p.evaluate(() => document.documentElement.classList.contains('expert')), `${tag}: Expert did not open the Expert screen`);
     await p.evaluate(() => __progApi.next()); await p.waitForTimeout(200);
-    await tapEl('#xBadge'); await p.waitForTimeout(250); await tapEl('#xSettings .x-mode [data-mode="kids"]'); await p.waitForTimeout(500); s = await st(p);
+    await tapEl('#xModeChip'); await p.waitForTimeout(250); await tapEl('#msMode button[data-mode="kids"]'); await p.waitForTimeout(500); s = await st(p);
     F(s.on && s.app === 'none' && s.screen === 'play' && s.song === before.song && s.pos === before.pos, `${tag}: back to Kids: on ${s.on} screen ${s.screen} ${s.song} @${s.pos} (want ${before.song} @${before.pos})`);
     // 8. Play along off: gold marks hide, Next / Play song still move on
-    await tapEl('#kv .kv-play .kv-gear'); await p.waitForTimeout(200); await tapEl('#kvPlayAlong'); await p.waitForTimeout(250); await tapEl('#kvSettings .kv-x'); await p.waitForTimeout(200);
+    await holdChip(); await tapEl('#msPlayAlong'); await p.waitForTimeout(250); await tapEl('#modeSheet .ms-x'); await p.waitForTimeout(200);
     s = await st(p); F(s.paOff && await p.evaluate(() => document.documentElement.classList.contains('pa-off')), `${tag}: Play along off not set (kv ${s.paOff})`);
     F(s.gold.every(g => !g.star && !g.arrowShown) && !(await p.evaluate(() => [...document.querySelectorAll('#kv .kv-pad.gold')].some(e => getComputedStyle(e).outlineStyle !== 'none' && parseFloat(getComputedStyle(e).outlineWidth) > 0))), `${tag}: gold marks still shown with Play along off`);
     await shot('pa-off');
     const p0 = s.pos; await tapEl('#kv .kv-ctl .kv-next'); await p.waitForTimeout(250); F((await st(p)).pos === p0 + 1, `${tag}: Next did not advance with Play along off`);
     await take(p); await tapEl('#kv .kv-playbtn'); await p.waitForTimeout(1500); s = await st(p); const pl = await take(p);
     F(s.playing && pl.length > 0, `${tag}: Play song did not play with Play along off`); await tapEl('#kv .kv-playbtn'); await p.waitForTimeout(250);
-    await tapEl('#kv .kv-play .kv-gear'); await p.waitForTimeout(200); await tapEl('#kvPlayAlong'); await p.waitForTimeout(200); await tapEl('#kvSettings .kv-x'); await p.waitForTimeout(200);
+    await holdChip(); await tapEl('#msPlayAlong'); await p.waitForTimeout(200); await tapEl('#modeSheet .ms-x'); await p.waitForTimeout(200);
     F(!(await st(p)).paOff, `${tag}: Play along did not come back on`);
     // 9. theme persists
     const dayBg = (await st(p)).bg;
-    await tapEl('#kv .kv-play .kv-gear'); await p.waitForTimeout(200); await tapEl('#kvLook button[data-v="lamp"]'); await p.waitForTimeout(300); await tapEl('#kvSettings .kv-x');
+    await holdChip(); await tapEl('#msLook button[data-look="lamp"]'); await p.waitForTimeout(300); await tapEl('#modeSheet .ms-x');
     await p.reload(); await p.waitForTimeout(1300); await rec(p); s = await st(p);
     F(s.lamp && s.on && s.bg !== dayBg, `${tag}: Lamplight lost on reload (lamp ${s.lamp}, bg ${s.bg} vs ${dayBg})`);
     F(s.screen === 'hello', `${tag}: reload did not start at Hello`);
     await tapEl('#kv .kv-go'); await p.waitForTimeout(300); s = await st(p); F(s.screen === 'play' && s.song === 'Kids Old MacDonald', `${tag}: Hello after reload did not resume the last song (${s.screen} ${s.song})`);
     await shot('lamp');
-    await tapEl('#kv .kv-play .kv-gear'); await p.waitForTimeout(200); await tapEl('#kvLook button[data-v="day"]'); await p.waitForTimeout(300); await tapEl('#kvSettings .kv-x');
+    await holdChip(); await tapEl('#msLook button[data-look="day"]'); await p.waitForTimeout(300); await tapEl('#modeSheet .ms-x');
     await p.reload(); await p.waitForTimeout(1300); s = await st(p); F(!s.lamp && s.bg === dayBg, `${tag}: Daylight lost on reload`);
     // 10. Simple / Expert persists
     await p.evaluate(() => __kv.setExpert(true)); await p.waitForTimeout(400); await p.reload(); await p.waitForTimeout(1300); s = await st(p);
     F(!s.on && s.app !== 'none' && !(await p.evaluate(() => document.documentElement.classList.contains('kv'))), `${tag}: Expert lost on reload`);
     F(await p.evaluate(() => JSON.parse(localStorage.getItem('touchChord.settings.v1')).settings.expert === true), `${tag}: expert not saved`);
-    await tapEl('#configBtn'); await p.waitForTimeout(250); await tapEl('#modeRow button[data-mode="kids"]'); await p.waitForTimeout(400); await p.reload(); await p.waitForTimeout(1300); s = await st(p);
+    await tapEl('#xModeChip'); await p.waitForTimeout(250); await tapEl('#msMode button[data-mode="kids"]'); await p.waitForTimeout(400); await p.reload(); await p.waitForTimeout(1300); s = await st(p);
     F(s.on && s.app === 'none', `${tag}: Simple lost on reload`);
     // 11. rd2 (Noff rd1 Low): hold a pad, switch to Simple with another finger, lift on the new screen: no chord from the
     // lift (351c02c: silent), and the held pad's own release still runs
@@ -183,7 +184,7 @@ const st = p => p.evaluate(() => { const rc = e => { const r = e.getBoundingClie
     const fr = await p.evaluate(() => { const e = [...document.querySelectorAll('#kv .kv-pad')].find(x => x.textContent.trim().startsWith('F')); const q = e.getBoundingClientRect(); return { x: q.x + q.width / 2, y: q.y + q.height / 2 }; });
     await take(p); await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: fr.x, y: fr.y, id: 7 }] }); await p.waitForTimeout(300);
     const held = await take(p); F(held.length >= 1, `${tag}: holding F made no sound`);
-    await p.evaluate(() => document.querySelector('#kvMode [data-v="simple"]').click()); await p.waitForTimeout(500);
+    await p.evaluate(() => document.querySelector('#msMode [data-mode="simple"]').click()); await p.waitForTimeout(500);
     D.staleUnder = await p.evaluate(([x, y]) => { const e = document.elementFromPoint(x, y); return e ? (e.closest('.ss-chip, .ss-note, button') || e).textContent.trim().slice(0, 12) : null; }, [fr.x, fr.y]);
     F(await p.evaluate(() => document.documentElement.classList.contains('simple') && !document.documentElement.classList.contains('kv')), `${tag}: Simple did not open`);
     const s0 = await p.evaluate(() => window.__S);

@@ -45,6 +45,7 @@ try {
   var tcFirst = !tcRaw && !(/[?&]test=1(&|$)/.test(location.search) && !/[?&]kv=1(&|$)/.test(location.search));   /* tests: a fresh ?test=1 opens the full app as before; ?test=1&kv=1 = a real first visit */
   if ((tcFirst || (tcEnv && tcEnv.settings && tcEnv.settings.expert === false)) && !/[?&]expert=1(&|$)/.test(location.search)) document.documentElement.classList.add("kv");   /* redesign-dev: ?expert=1 opens Expert */
   /* rd6 Look: "lamp", or Auto (no / "auto" theme) outside Day hours (7:00-19:00) = Lamp; a saved "day" stays Day */
-  var tcTh = tcEnv && tcEnv.settings ? tcEnv.settings.theme : null, tcH = new Date().getHours();
+  var tcTh = tcEnv && tcEnv.settings ? tcEnv.settings.theme : null, tcH = new Date().getHours(), tcHq = /[?&]test=1(&|$)/.test(location.search) && /[?&]hour=(\d{1,2})(&|$)/.exec(location.search);
+  if (tcHq) tcH = +tcHq[1];
   if (tcTh === "lamp" || (tcTh !== "day" && !(tcH >= 7 && tcH < 19))) document.documentElement.classList.add("kv-lamp");
 } catch (err) { /* ignore */ }

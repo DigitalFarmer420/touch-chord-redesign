@@ -18,6 +18,10 @@ if (process.argv[2] === '--compare') {
 }
 const { chromium } = require('playwright-core');
 const U = process.env.BASE || 'http://127.0.0.1:8080/index.html', OUT = process.env.OUT || '/tmp', TAG = process.env.TAG || 'run';
+// rd6: the classic Full layout is gone for users; '&classic=1' (test-only, ignored by older builds) keeps it so the
+// recording replays the same taps as 351c02c. REAL=1 instead plays the real rd6 modes (Expert pref on for the non-Simple
+// configs, no classic hatch) to compare two builds that both have Expert (cd19e41 vs rd6). hour=12 fixes the Auto look.
+const REAL = process.env.REAL === '1', Q = REAL ? '?test=1&hour=12' : '?test=1&classic=1&hour=12';
 const REC = `(() => { const T = () => { const A = window.ChordAudio; if (!A || !A.playChord) return setTimeout(T, 5); if (A.__rec) return; A.__rec = [];
   const now = () => (A.ctx ? A.ctx.currentTime : 0), rt = t => t == null ? null : Math.round((t - now()) * 200) / 200;
   const g = x => String(x);
@@ -37,10 +41,10 @@ for (const st of ['pop', 'kids']) CONFIGS.push({ style: st, layout: 'octave', si
     const tag = `${w}x${h}-${c.style}-${c.layout}-${c.simple ? 'simple' : 'full'}${c.playAlong === false ? '-paoff' : ''}`;
     const s = Object.assign({ lockKey: { pc: 0, mode: 'major' }, playAlong: true, expert: true }, c);
     const ctx = await b.newContext({ viewport: { width: w, height: h } });
-    await ctx.addInitScript(`try{if(!sessionStorage.getItem('x')){sessionStorage.setItem('x',1);localStorage.clear();localStorage.setItem('touchChord.tour.v1','done');localStorage.setItem('touchChord.settings.v1',JSON.stringify({v:1,settings:${JSON.stringify(s)}}));}}catch(e){}`);
+    await ctx.addInitScript(`try{if(!sessionStorage.getItem('x')){sessionStorage.setItem('x',1);localStorage.clear();localStorage.setItem('touchChord.tour.v1','done');localStorage.setItem('touchChord.settings.v1',JSON.stringify({v:1,settings:${JSON.stringify(s)}}));${REAL && !c.simple ? "localStorage.setItem('touchChord.expert.v1',JSON.stringify({on:true}));" : ''}}}catch(e){}`);
     await ctx.addInitScript(REC);
     const p = await ctx.newPage(); p.on('pageerror', e => errs.push(tag + ': ' + e));
-    await p.goto(U + '?test=1'); await p.waitForTimeout(900);
+    await p.goto(U + Q); await p.waitForTimeout(900);
     await p.evaluate(async () => {
       const W = ms => new Promise(r => setTimeout(r, ms));
       const ev = (el, type, id, x, y) => { const r = el.getBoundingClientRect(); el.dispatchEvent(new PointerEvent(type, { bubbles: true, cancelable: true, pointerId: id, pointerType: 'touch', isPrimary: id === 1, button: 0, clientX: x != null ? x : r.left + r.width / 2, clientY: y != null ? y : r.top + r.height * 0.75 })); };

@@ -7,6 +7,10 @@
 //    app); a kept song lands on its play screen with the same song and step, the chip and lyrics filled and exactly one
 //    gold key, Hello's disc / title / notes hidden; no song = the song list (six cards);
 //  - in Expert / Simple: #kv hidden, no Kids screen or gear visible, html.expert / html.simple as asked.
+// rd6: the switch is the mode chip (top right) + the shared Settings sheet in every mode; in Kids the chip needs a 1 s
+// press-and-hold (a real touch held 1.15 s). After every switch: exactly one mode chip visible, labelled with the mode, and
+// none of the old controls (Kids gear, Simple toggle, gear menu, gold Expert button); the sheet is closed. The Kids step
+// survives the reload in Expert / Simple (rd6, Noff Low): the first Kids entry after it resumes at the saved step.
 // No page errors. node -r ./emulate.cjs modeswitch.cjs [WxH]   env BASE / URL, OUT, SHOTS
 const { chromium } = require('playwright-core'); const fs = require('fs'); const path = require('path');
 const URL = process.env.URL || process.env.BASE || 'http://localhost:8080/index.html';
@@ -20,15 +24,24 @@ const probe = p => p.evaluate(() => {
   const v = e => !!(e && e.getClientRects().length && getComputedStyle(e).visibility !== 'hidden');
   const n = s => [...document.querySelectorAll(s)].filter(v).length;
   return { kv: de.classList.contains('kv') && v(kv), expert: de.classList.contains('expert'), simple: de.classList.contains('simple'), screen: kv.dataset.screen,
-    scr: n('#kv .kv-scr'), gears: n('#kv .kv-gear'), hello: n('#kv .kv-go, #kv .kv-title, #kv .kv-notes'), cards: n('#kv .kv-card'),
+    scr: n('#kv .kv-scr'), gears: n('#kv .mode-chip'), chips: [...document.querySelectorAll('.mode-chip')].filter(v).map(e => e.dataset.modeChip + ':' + e.textContent.trim()),
+    old: n('.kv-gear, #simpleBtn, #configBtn, #xBadge, .x-gearmode, #kvSettings'), sheet: !document.getElementById('modeSheet').hidden, hello: n('#kv .kv-go, #kv .kv-title, #kv .kv-notes'), cards: n('#kv .kv-card'),
     chip: kv.querySelector('.kv-chip').textContent.trim(), lyr: kv.querySelector('.kv-lyr').textContent.trim(), gold: n('#kv .kv-wk.gold, #kv .kv-bk.gold'),
     song: __prog.list[__prog.idx] && __prog.list[__prog.idx].name, cur: __prog.cur, pos: __magic.state.pos };
 });
-// the real switch controls of each mode (Kids settings, Expert settings, the classic gear menu)
-const go = (p, from, to) => p.evaluate(([from, to]) => {
-  const sel = from === 'kids' ? `#kvMode button[data-v="${to}"]` : from === 'expert' ? `#xSettings .x-mode [data-mode="${to}"]` : `#modeRow button[data-mode="${to}"]`;
-  const b = document.querySelector(sel); if (!b) return sel; b.click(); return null;
-}, [from, to]);
+// rd6: the real switch of each mode: its mode chip (Kids: a 1.15 s touch hold), then the mode in the shared sheet
+const go = async (p, from, to) => {
+  const c = await p.evaluate(() => { const e = [...document.querySelectorAll('.mode-chip')].find(x => x.getClientRects().length && getComputedStyle(x).visibility !== 'hidden'); if (!e) return null; const q = e.getBoundingClientRect(); return { x: q.x + q.width / 2, y: q.y + q.height / 2, m: e.dataset.modeChip }; });
+  if (!c) return 'visible mode chip'; if (c.m !== from) return `chip ${c.m} in ${from}`;
+  const cdp = p.__cdp || (p.__cdp = await p.context().newCDPSession(p));
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: c.x, y: c.y }] }); await p.waitForTimeout(from === 'kids' ? 1150 : 80);
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }); await p.waitForTimeout(200);
+  const r = await p.evaluate(to => { if (document.getElementById('modeSheet').hidden) return 'sheet did not open'; const b = document.querySelector(`#msMode button[data-mode="${to}"]`); if (!b) return 'no ' + to; const q = b.getBoundingClientRect(); return { x: q.x + q.width / 2, y: q.y + q.height / 2 }; }, to);
+  if (typeof r === 'string') return r;
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: r.x, y: r.y }] }); await p.waitForTimeout(60);
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  return null;
+};
 (async () => {
   const b = await chromium.launch({ executablePath: process.env.CHROME || undefined, args: ['--autoplay-policy=no-user-gesture-required'] });
   for (const [w, h] of SIZES) for (const start of ['kids', 'expert', 'simple']) for (const song of [true, false]) {
@@ -36,7 +49,7 @@ const go = (p, from, to) => p.evaluate(([from, to]) => {
     const ctx = await b.newContext({ viewport: { width: w, height: h } });
     await ctx.addInitScript(`try{if(!sessionStorage.getItem('x')){sessionStorage.setItem('x',1);localStorage.clear();localStorage.setItem('touchChord.tour.v1','done');}}catch(e){}`);
     const p = await ctx.newPage(); const errs = []; p.on('pageerror', e => errs.push('' + e));
-    await p.goto(URL + '?test=1&kv=1'); await p.waitForTimeout(1200);
+    await p.goto(URL + '?test=1&kv=1&hour=12'); await p.waitForTimeout(1200);
     let s = await probe(p); F(s.kv && s.screen === 'hello' && s.scr === 1 && s.gears === 1, `${tag}: first visit is not one Kids Hello (screen ${s.screen}, ${s.scr} screens, ${s.gears} gears)`);
     let keep = null;
     if (song) {   // a song in progress: Old MacDonald, two steps in
@@ -46,7 +59,7 @@ const go = (p, from, to) => p.evaluate(([from, to]) => {
       s = await probe(p); keep = { song: s.song, pos: s.pos }; F(s.song === 'Kids Old MacDonald' && s.pos === 2, `${tag}: setup song ${s.song} @${s.pos}`);
     }
     // boot in the start mode: switch there, then reload (the rd5 trigger)
-    if (keep) keep.pos = null;
+    // rd6: the step is saved with the song, so it survives the reload below (rd5.1: the reload started the song over)
     if (start !== 'kids') { const m = await go(p, 'kids', start); F(!m, `${tag}: no ${m}`); await p.waitForTimeout(400); }
     await p.reload(); await p.waitForTimeout(1300);
     s = await probe(p); F(start === 'kids' ? s.kv : !s.kv && s[start], `${tag}: reload did not boot in ${start}`);
@@ -59,9 +72,11 @@ const go = (p, from, to) => p.evaluate(([from, to]) => {
       const from = path7[i - 1], to = path7[i], st = `${tag} #${i} ${from}->${to}`;
       const m = await go(p, from, to); F(!m, `${st}: no ${m}`); await p.waitForTimeout(500); s = await probe(p); D.push({ st, s });
       if (SHOTS) await p.screenshot({ path: path.join(SHOTS, `${w}x${h}-${start}-${song ? 'song' : 'nosong'}-${i}-${from}-${to}.png`) });
+      F(s.chips.length === 1 && s.chips[0].startsWith(to + ':') && s.chips[0].toLowerCase().includes(to), `${st}: mode chips ${JSON.stringify(s.chips)} (want one ${to})`);
+      F(s.old === 0, `${st}: ${s.old} old mode controls visible`); F(!s.sheet, `${st}: the sheet stayed open`);
       if (to === 'kids') {
         F(s.kv && s.scr === 1, `${st}: ${s.scr} Kids screens visible (want 1)`);
-        F(s.gears === 1, `${st}: ${s.gears} gears visible (want 1)`);
+        F(s.gears === 1, `${st}: ${s.gears} Kids chips visible (want 1)`);
         F(s.screen !== 'hello', `${st}: a switch landed on Hello`);
         if (song) {
           F(s.screen === 'play', `${st}: kept song but landed on ${s.screen}`);
