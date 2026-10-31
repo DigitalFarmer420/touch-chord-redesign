@@ -5,7 +5,7 @@ html.simple #ctlToggle,
 html.simple .phase-track { display: none !important; }
 
 /* ===== v24: key chip, key row, why labels, how-to ===== */
-.key-chip { margin-top: 2px; font-size: var(--fs-xs); padding: 2px 8px; border-radius: 999px; border: 1px solid var(--copper); background: transparent; color: var(--ink); min-height: 0; height: auto; line-height: 1.4; white-space: nowrap; }
+.key-chip { margin-top: 2px; font-size: var(--fs-xs); padding: 2px 8px; border-radius: 999px; border: 1px solid var(--copper-b); background: transparent; color: var(--ink); min-height: 0; height: auto; line-height: 1.4; white-space: nowrap; }
 .key-row { display: flex; gap: 3px; flex-wrap: wrap; max-width: 100%; }
 .key-row span { font-size: var(--fs-xs); padding: 1px 4px; border-radius: 5px; border: 1px solid var(--line); color: var(--muted); line-height: 1.3; }
 .key-row span b { font-weight: 700; margin-right: 2px; opacity: .7; }
@@ -28,7 +28,7 @@ html.lay-phone-land .key-row { display: none; }
 .ht-x { background: var(--lk-1a1612); }
 .kp-x, .ht-x { min-width: 36px; }
 .ht-box h2 { margin: 0 0 6px; font-size: var(--fs-l); }
-.ht-box h3 { margin: 14px 0 4px; color: var(--copper); font-size: var(--fs-m); }
+.ht-box h3 { margin: 14px 0 4px; color: var(--copper-t); font-size: var(--fs-m); }
 /* v42: picture-first How to, full width, scrollable */
 .howto { align-items: flex-start; padding: 8px; overflow: hidden; }
 .ht-box { max-width: 1000px; max-height: calc(100vh - 16px); max-height: calc(100dvh - 16px); overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
@@ -40,7 +40,7 @@ html.lay-phone-land .key-row { display: none; }
 .ht-box .ht-why { margin: 4px 0 0; }
 .ht-box ol.ht-steps { list-style: none; margin: 0; padding: 0; }
 .ht-box ol.ht-steps > li { margin: 0; padding: 0; }
-.ht-pill { display: inline-block; vertical-align: 2px; margin-left: 6px; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--copper);
+.ht-pill { display: inline-block; vertical-align: 2px; margin-left: 6px; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--copper-b);
   color: var(--ink); background: var(--lk-c88c46-14); font-size: var(--fs-xs); font-weight: 700; line-height: 1.4; letter-spacing: .02em; white-space: nowrap; }
 .ht-box p, .ht-box li { font-size: var(--fs-m); line-height: 1.45; }
 .ht-box ol, .ht-box ul { margin: 4px 0; padding-left: 20px; }
@@ -61,7 +61,7 @@ html.lay-phone-land .key-row { display: none; }
 /* v67: every How to number is the vocabulary yellow, but plain text (not a link). */
 .ht-box .ht-num { color: var(--lk-f3c64f); font-weight: 700; text-decoration: none; cursor: default; pointer-events: none; }
 .ht-box .ht-note { margin: 6px 0 6px; font-size: var(--fs-m); color: var(--muted); }
-.ht-words { margin-top: 18px; padding: 10px 12px 8px; border: 1px solid var(--line); border-top: 2px solid var(--copper); border-radius: 12px; background: var(--lk-e2a15a-06); }
+.ht-words { margin-top: 18px; padding: 10px 12px 8px; border: 1px solid var(--line); border-top: 2px solid var(--copper-b); border-radius: 12px; background: var(--lk-e2a15a-06); }
 .ht-box .ht-words h3 { margin: 0 0 6px; }
 .ht-words dl { margin: 0; display: grid; gap: 6px; }
 .ht-words dl > div { display: grid; grid-template-columns: 92px 1fr; gap: 8px; align-items: baseline; padding: 4px 6px; border-radius: 8px; transition: background .6s; outline: none; }
@@ -120,11 +120,11 @@ html.lay-pad-port .allkeys, html.lay-pad-land .allkeys { font-size: var(--fs-m);
 .kid-key { display: none; }
 html.simple .key-bar { display: none !important; }
 html.simple .kid-key { display: flex; flex-direction: column; gap: 6px; flex: 0 0 auto; }
-.kk-root { position: relative; display: flex; align-items: center; justify-content: space-between; height: var(--kk-h, 58px); border-radius: 14px; background: var(--bg-2, var(--lk-221d17)); border: 2px solid var(--copper); touch-action: none; cursor: grab; outline: none; overflow: hidden; }
+.kk-root { position: relative; display: flex; align-items: center; justify-content: space-between; height: var(--kk-h, 58px); border-radius: 14px; background: var(--bg-2, var(--lk-221d17)); border: 2px solid var(--copper-b); touch-action: none; cursor: grab; outline: none; overflow: hidden; }
 .kk-root:focus-visible { box-shadow: 0 0 0 2px var(--copper); }
 .kk-name { flex: 1 1 auto; text-align: center; font-family: Palatino, "Iowan Old Style", Georgia, serif; font-weight: 700; font-size: calc(var(--kk-fs, 34px) * var(--tx, 1)); line-height: 1; color: var(--ink); pointer-events: none; transition: transform .12s ease-out; }
 .kk-name.nudge-l { transform: translateX(-10px); } .kk-name.nudge-r { transform: translateX(10px); }
-.kk-arrow { flex: 0 0 auto; width: var(--kk-arrow, 36px); height: 100%; min-height: 0; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--copper); font-size: calc(var(--kk-fs, 34px) * .8); line-height: 1; touch-action: manipulation; }
+.kk-arrow { flex: 0 0 auto; width: var(--kk-arrow, 36px); height: 100%; min-height: 0; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--copper-t); font-size: calc(var(--kk-fs, 34px) * .8); line-height: 1; touch-action: manipulation; }
 .kk-mode { display: flex; align-items: center; justify-content: center; gap: 8px; height: var(--kk-mh, 44px); min-height: 0; margin: 0; border-radius: 14px; border: 2px solid transparent; font-size: calc(var(--kk-mfs, 17px) * var(--tx, 1)); font-weight: 800; letter-spacing: .02em; touch-action: manipulation; }
 .kk-mode.major { background: var(--lk-e2b15a); color: var(--lk-2a1c0c); }
 .kk-mode.minor { background: var(--lk-8a7bc0); color: var(--lk-f7f3ff); }
@@ -158,7 +158,7 @@ html.simple .ss .ss-track { display: none; }
 html.simple .ss .ss-note { align-self: center; justify-self: center; width: var(--ss-nb, 54px); height: var(--ss-nb, 54px); border-radius: 50%;
   background: var(--lk-f5e9d2-17); border: 1.5px solid var(--lk-f5e9d2-42); box-shadow: 0 3px 0 var(--lk-000000-45), inset 0 1px 0 var(--lk-ffffff-14);
   transition: transform .08s ease-out, background-color .08s ease-out, box-shadow .08s ease-out; }
-html.simple .ss .ss-note.home { background: var(--lk-e2b15a-3); border: 2.5px solid var(--copper); }
+html.simple .ss .ss-note.home { background: var(--lk-e2b15a-3); border: 2.5px solid var(--copper-b); }
 html.simple .ss .ss-note.home::before { display: none; }
 html.simple .ss .ss-note.press { transform: scale(.92); background: var(--lk-fff4de-42); box-shadow: 0 1px 0 var(--lk-000000-45); }
 html.simple .ss .ss-note.home.press { background: var(--lk-f0c478-55); }
@@ -318,7 +318,7 @@ html:not(.simple) .ss .ss-note { align-self: stretch; justify-self: stretch; wid
   color: var(--ink); transition: transform .08s ease-out, background-color .08s ease-out, box-shadow .08s ease-out; }
 html:not(.simple) .ss .ss-note .nn { font-size: calc(var(--ss-note) * var(--tx, 1)); }
 html:not(.simple) .ss .ss-note small { margin-top: 1px; }
-html:not(.simple) .ss .ss-note.home { background: var(--lk-e2b15a-3); border: 2.5px solid var(--copper); color: var(--copper); }
+html:not(.simple) .ss .ss-note.home { background: var(--lk-e2b15a-3); border: 2.5px solid var(--copper-b); color: var(--copper-t); }
 html:not(.simple) .ss .ss-note.home::before { display: none; }
 html:not(.simple) .ss .ss-note.press { transform: scale(.92); background: var(--lk-fff4de-42); box-shadow: 0 1px 0 var(--lk-000000-45); }
 html:not(.simple) .ss .ss-note.home.press { background: var(--lk-f0c478-55); }
@@ -357,17 +357,17 @@ html:not(.simple).lay-phone-port .ss .ss-chip .rn { display: none; }
    top of the Now column; elsewhere the top bar), Play / Stop and Next inside it. ===== */
 .prog { display: flex; align-items: stretch; gap: 6px; flex: 0 0 auto; min-width: 0; }
 .pg-sel { position: relative; display: flex; align-items: stretch; flex: 1 1 auto; min-width: 0; height: var(--pg-h, 40px); border-radius: 12px;
-  background: var(--bg-2, var(--lk-221d17)); border: 2px solid var(--copper); touch-action: none; cursor: grab; outline: none; overflow: hidden; box-sizing: border-box; }
+  background: var(--bg-2, var(--lk-221d17)); border: 2px solid var(--copper-b); touch-action: none; cursor: grab; outline: none; overflow: hidden; box-sizing: border-box; }
 .pg-sel:focus-visible { box-shadow: 0 0 0 2px var(--copper); }
 .pg-arrow { flex: 0 0 auto; width: var(--pg-arrow, 26px); height: auto; min-height: 0; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent;
-  color: var(--copper); font-size: var(--pg-afs, 24px); line-height: 1; touch-action: manipulation; }
+  color: var(--copper-t); font-size: var(--pg-afs, 24px); line-height: 1; touch-action: manipulation; }
 .pg-txt { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; pointer-events: none; }
 .pg-t { display: block; max-width: 100%; text-align: center; font-weight: 800; font-size: max(var(--fs-xs), calc(var(--pg-fs, 14px) * var(--tx, 1))); line-height: 1.12; color: var(--ink);
   overflow-wrap: break-word; transition: transform .12s ease-out; }
 .pg-t.nudge-l { transform: translateX(calc(-1 * var(--pg-nudge, 8px))); } .pg-t.nudge-r { transform: translateX(var(--pg-nudge, 8px)); }
 .pg-btns { display: flex; gap: 4px; flex: 0 0 auto; }
 .pg-btn { flex: 0 0 auto; width: var(--pg-bw, 40px); height: var(--pg-h, 40px); min-height: 0; margin: 0; padding: 0; border-radius: 12px;
-  display: inline-flex; align-items: center; justify-content: center; color: var(--copper); touch-action: manipulation; }
+  display: inline-flex; align-items: center; justify-content: center; color: var(--copper-t); touch-action: manipulation; }
 .pg-btn svg { width: var(--pg-ico, 18px); height: var(--pg-ico, 18px); display: block; }
 /* v60: Simple has the picker again (same component as full mode): ‹ name › with Next under it,
    below Major / Minor. Kid look: serif name, rounded like the key slider. No numerals. */
@@ -484,7 +484,7 @@ html.lay-phone-port:not(.simple) .now-col > .prog .pg-sel { width: 100%; flex: 0
 .band-row span { flex: 0 0 72px; font-size: var(--fs-m); font-weight: 650; color: var(--ink); }
 .band-row input { flex: 1 1 auto; min-width: 0; width: 100%; accent-color: var(--copper); }
 .band-row b { flex: 0 0 auto; min-width: 2.2em; text-align: right; font-size: var(--fs-s); font-weight: 650; color: var(--ink); }
-.band-wrap.on .band-row span { color: var(--sea); }
+.band-wrap.on .band-row span { color: var(--sea-t); }
 .band-wrap.off .band-row b { color: var(--muted); }   /* level 0 = off */
 /* Band fix: phone portrait, the open pane scrolls inside its own box; it never paints over the chord-type row. */
 html.lay-phone-port #ctl { overflow: hidden; }
@@ -628,7 +628,7 @@ html:not(.simple) .now-col > .now-mix { order: 1; }   /* full mode orders the co
 .now-mix > .now-vol .pg-vol svg { display: block; width: 15px; height: 15px; }
 html.lay-phone-land .now-mix > .now-vol, html.lay-phone-port:not(.simple) .now-mix > .now-vol { height: 16px; min-height: 16px; }
 html.lay-phone-land .now-mix > .now-vol .pg-vol svg, html.lay-phone-port:not(.simple) .now-mix > .now-vol .pg-vol svg { width: 12px; height: 12px; }
-.pg-btn.pg-song.on { background: var(--copper); color: var(--lk-1a1209); border-color: var(--copper); }
+.pg-btn.pg-song.on { background: var(--copper); color: var(--lk-1a1209); border-color: var(--copper-b); }
 
 /* v71 Kids next-note hint on the seven pads (both modes) */
 #suggest.kids1 .ss-kidpad { position: relative; overflow: visible; }

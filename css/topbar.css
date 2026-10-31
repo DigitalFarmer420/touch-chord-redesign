@@ -15,7 +15,7 @@ html.lay-phone-land .topbar .spacer { display: none; }
   letter-spacing: 0.14em;
   text-transform: uppercase;
   font-size: var(--fs-s);
-  color: var(--sea);
+  color: var(--sea-t);
   white-space: nowrap;
 }
 
@@ -33,7 +33,7 @@ html.lay-phone-land .topbar .spacer { display: none; }
 
 #ctlToggle { display: none; }
 html.lay-phone-land #ctlToggle { display: inline-flex; align-items: center; gap: 6px; }
-html.drawer-open #ctlToggle { border-color: var(--copper); color: var(--copper); }
+html.drawer-open #ctlToggle { border-color: var(--copper-b); color: var(--copper-t); }
 
 /* Simple mode switch (pill + knob). */
 .simple-sw {
@@ -63,7 +63,7 @@ html.drawer-open #ctlToggle { border-color: var(--copper); color: var(--copper);
   background: var(--lk-cfc4b3);
   transition: left 120ms linear;
 }
-.simple-sw[aria-checked="true"] { color: var(--copper); border-color: var(--copper); }
+.simple-sw[aria-checked="true"] { color: var(--copper-t); border-color: var(--copper-b); }
 .simple-sw[aria-checked="true"] .knob { background: var(--copper); }
 .simple-sw[aria-checked="true"] .knob::after { left: 16px; background: var(--lk-fff6e8); }
 
@@ -76,7 +76,7 @@ html.drawer-open #ctlToggle { border-color: var(--copper); color: var(--copper);
   color: var(--muted);
   background: transparent;
 }
-.config-btn[aria-expanded="true"] { color: var(--ink); border-color: var(--copper); }
+.config-btn[aria-expanded="true"] { color: var(--ink); border-color: var(--copper-b); }
 .config-menu {
   position: absolute;
   top: calc(100% + 10px);
@@ -155,7 +155,7 @@ html.lay-phone-land .now-card .card-label { display: none; }
   letter-spacing: -0.02em;
   white-space: nowrap;
 }
-#symbol.sounding { color: var(--copper); }
+#symbol.sounding { color: var(--copper-t); }
 
 #tones {
   max-width: 100%;

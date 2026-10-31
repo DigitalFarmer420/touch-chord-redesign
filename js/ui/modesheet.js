@@ -136,7 +136,7 @@ function onClick(e) {
     var p = $(b.dataset.proxy); if (p) p.click();
     paintSheet(); return;
   }
-  if (b.dataset.look) { var m = cfg.mode(); if (m === "simple" || !cfg.lookSet) return; cfg.lookSet(m, b.dataset.look); paintSheet(); return; }
+  if (b.dataset.look) { var m = cfg.mode(); if (!cfg.lookSet) return; cfg.lookSet(m, b.dataset.look); paintSheet(); return; }
   var act = b.dataset.act;
   if (act === "reset") { confirmEl.hidden = false; return; }
   if (act === "upload" || act === "howto" || act === "tour") {
@@ -156,11 +156,11 @@ export function paintSheet() {
   setSw($("msHints"), !paOff && state.paHints !== false, paOff);
   sheet.querySelector(".ms-hsub").textContent = paOff ? "Turn on Play along to use hints" : "A tip when a tap misses the marked chord";
   setSw($("msNums"), !!state.progNums);
-  var simple = m === "simple", pick = !simple && cfg.lookGet ? cfg.lookGet(m) : null;
+  var pick = cfg.lookGet ? cfg.lookGet(m) : null;   // rd10: Simple has a Look too (its Lamp = the classic screen)
   Array.prototype.forEach.call(sheet.querySelectorAll("#msLook button"), function (b) {
-    var o = b.dataset.look === pick; b.classList.toggle("on", o); b.setAttribute("aria-checked", o ? "true" : "false"); b.disabled = simple;
+    var o = b.dataset.look === pick; b.classList.toggle("on", o); b.setAttribute("aria-checked", o ? "true" : "false"); b.disabled = false;
   });
-  sheet.querySelector(".ms-look").hidden = simple;   // rd7 (Uiux): no Look row in Simple until Simple has a Lamp look
+  sheet.querySelector(".ms-look").hidden = false;
   sheet.querySelector(".ms-lsub").textContent = pick === "auto" ? "Auto: Day 7:00\u201319:00, Lamp at night" : "";
   $("msUpload").hidden = m !== "expert";
   $("msNote").textContent = m === "kids" ? "Kids: hold the chip 1 second to open (grown-up step)" : "";   // rd7 (Uiux): no permanent Simple footer

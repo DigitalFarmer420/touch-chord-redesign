@@ -17,6 +17,10 @@
   --danger: #e07a62;
   --ctrl: 38px;
   --card: rgba(28, 25, 20, 0.55);
+  /* rd10: the accent as text / as a control edge (the same colour in Lamp; darker in Simple Day for contrast) */
+  --copper-t: var(--copper);
+  --copper-b: var(--copper);
+  --sea-t: var(--sea);
 }
 
 /* rd10: the classic screens' hard-coded colours as variables. These values are the Lamp look (unchanged since

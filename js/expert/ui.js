@@ -47,6 +47,15 @@ function el(tag, cls, html, attrs) {
   return e;
 }
 function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]; }); }
+// rd10: Simple's own Look (Auto · Day · Lamp, Auto by default as in Kids and Expert). The classic dark screen is Lamp;
+// Day is css/simpleday.css (html.s-day), set only while Simple is the mode (never in the test-only classic hatch).
+const SLOOK_KEY = "touchChord.simpleLook.v1";
+var sLook = (function () { var v = null; try { v = JSON.parse(localStorage.getItem(SLOOK_KEY) || "null"); } catch (e) {} return v && (v.look === "day" || v.look === "lamp") ? v.look : "auto"; })();
+function saveSLook() { try { localStorage.setItem(SLOOK_KEY, JSON.stringify({ v: 1, look: sLook })); } catch (e) {} }
+function paintSimpleLook() {
+  var de = document.documentElement, on = !CLASSIC && currentMode() === "simple", day = on && lookShown("simple") === "day";
+  de.classList.toggle("s-day", day); de.classList.toggle("s-lamp", on && !day);
+}
 function savePref() { try { localStorage.setItem(EXPERT_STORE, JSON.stringify(pref)); } catch (e) {} }
 function loadPref() { var raw = null; try { raw = localStorage.getItem(EXPERT_STORE); } catch (e) {} return raw ? parsePref(raw) : parsePref("{}"); }
 function srcCtx() { return { hasSong: !!shared.U, songSelected: upSelected() }; }
@@ -114,6 +123,7 @@ function paintMode() {
     setTimeout(function () { fitStrip(); placeBadges(); fitNowSymbol(); }, 0);
   }
   paintModeSegs();
+  paintSimpleLook();
   syncChart();
   if (sheetOpen()) paintSheet();
   if (on) paint();
@@ -606,6 +616,7 @@ export function boot() {
   tb = typeBarInit(false);
   src = sourceInit(srcCtx());
   if (CLASSIC) document.documentElement.classList.add("tc-classic");
+  registerLook("simple", function () { return sLook; }, function () { paintSimpleLook(); });
   registerLook("expert", function () { return pref.look; }, function (l) { var de = document.documentElement; de.classList.toggle("x-lamp", l !== "day"); de.classList.toggle("x-day", l === "day"); });
   build();
   wireAll();
@@ -613,9 +624,13 @@ export function boot() {
   configureSheet({
     mode: currentMode,
     setMode: setMode,
-    lookGet: function (m) { return m === "kids" ? state.theme : pref.look; },
-    lookSet: function (m, v) { if (m === "kids") setKidsTheme(v); else { pref.look = v; savePref(); lookApplyNow("expert"); paintMode(); } },
-    isDay: function (m) { return m === "kids" ? lookShown("kids") === "day" : m === "expert" ? lookShown("expert") === "day" : false; },
+    lookGet: function (m) { return m === "kids" ? state.theme : m === "simple" ? sLook : pref.look; },
+    lookSet: function (m, v) {
+      if (m === "kids") setKidsTheme(v);
+      else if (m === "simple") { sLook = v === "day" || v === "lamp" ? v : "auto"; saveSLook(); lookApplyNow("simple"); paintMode(); }
+      else { pref.look = v; savePref(); lookApplyNow("expert"); paintMode(); }
+    },
+    isDay: function (m) { return lookShown(m) === "day"; },
     startOver: startOver
   });
   placeTog();

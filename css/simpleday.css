@@ -1,0 +1,47 @@
+/* rd10: Simple's Day look (html.s-day, set by js/expert/ui.js only while Simple is the mode). Simple's Lamp look is the
+   classic dark screen as it was (css/base.css :root and the --lk-* colours there); Day redefines the same variables
+   with the Day palette Kids and Expert use (cream background, warm ink). Chord colours stay as in Lamp (as in
+   Expert Day). Contrast: text AA (4.5:1, 3:1 for large), control edges 3:1 (checked by tests/e2e/rd10.cjs). */
+html.s-day {
+  color-scheme: light;
+  --bg: #F6EFE3; --bg-2: #FFFDF8; --ink: #2B2118; --muted: #66533F; --line: #CDBEA8; --pad: #FFFFFF;
+  --copper: #E2A15A; --copper-ink: #2A1C0C; --copper-t: #8A4F12; --copper-b: #A8621C;
+  --sea: #8FCBB8; --sea-t: #1F6F63; --danger: #B5472F; --card: rgba(255, 253, 248, 0.9);
+  /* body: the faint tints stay, the grid lines are warm ink */
+  --lk-ffffff-015: rgba(43, 33, 24, 0.025);
+  /* switches */
+  --lk-3a332b: #B9A890; --lk-cfc4b3: #FFFFFF; --lk-fff6e8: #FFFFFF; --lk-cfc4b2: #FFFFFF;
+  /* shadows: lighter, warm */
+  --lk-000000-45: rgba(60, 40, 20, 0.16); --lk-000000-6: rgba(60, 40, 20, 0.22); --lk-000000-55: rgba(60, 40, 20, 0.18);
+  --lk-000000-4: rgba(60, 40, 20, 0.15); --lk-000000-35: rgba(60, 40, 20, 0.12); --lk-000000-5: rgba(60, 40, 20, 0.18);
+  --lk-140c04-45: rgba(60, 40, 20, 0.22); --lk-140c04-35: rgba(60, 40, 20, 0.18); --lk-140c04-5: rgba(60, 40, 20, 0.22); --lk-140c04-6: rgba(60, 40, 20, 0.25);
+  --lk-000000-82: rgba(43, 33, 24, 0.45);
+  /* chord strip */
+  --lk-1c1914: #EFE5D6;                                   /* the strip's track */
+  --lk-ffffff-75: rgba(43, 33, 24, 0.55);                 /* borrowed chip edge */
+  --lk-f5e9d2-17: #FFFFFF; --lk-f5e9d2-42: #A8977F;       /* the note row: white keys with a 3:1 edge */
+  --lk-fff4de-42: #F3D3A8; --lk-fff4de-4: #F3D3A8; --lk-fff4de-14: rgba(226, 161, 90, 0.16);
+  --lk-ffffff-14: rgba(255, 255, 255, 0.6); --lk-ffeccd-62: rgba(168, 98, 28, 0.6);
+  --lk-ffffff-05: rgba(43, 33, 24, 0.06); --lk-ffffff-06: rgba(43, 33, 24, 0.06); --lk-ffffff-07: rgba(43, 33, 24, 0.07); --lk-ffffff-04: rgba(43, 33, 24, 0.04);
+  /* next / home marks */
+  --lk-c4853f: #A8621C;
+  --lk-c4853f-5: rgba(168, 98, 28, 0.5); --lk-c4853f-95: rgba(168, 98, 28, 0.95); --lk-c4853f-8: rgba(168, 98, 28, 0.8); --lk-c4853f-45: rgba(168, 98, 28, 0.45); --lk-c4853f-1: #A8621C;
+  --lk-140e08-82: rgba(255, 253, 248, 0.94);
+  /* panels and controls */
+  --lk-2c271f: #EADFCB; --lk-1c1915: #FBF6EE; --lk-221d17: #FFFFFF; --lk-3a332b-55: rgba(43, 33, 24, 0.12);
+  --lk-423a30: #A8977F;                                   /* pad edge, 3:1 on cream */
+  --lk-b9ad9a: #66533F;
+  /* piano keyboard: white keys get a visible edge, black keys stay dark */
+  --lk-f4efe4: #FFFFFF; --lk-c9bfb0: #A8977F; --lk-1b1714: #2B2118;
+  /* how-to, key picker, tour, hints */
+  --lk-1a1612: #FFFDF8; --lk-0f0d0b: #EFE6D6; --lk-2a1f14: #FFF4E0; --lk-241a11: #FFFDF8;
+  --lk-f3c64f: #7A5200; --lk-f3c64f-7: rgba(122, 82, 0, 0.7); --lk-ffe08a: #5C3E00; --lk-f3c64f-18: rgba(226, 161, 90, 0.25);
+  --lk-f3e6cf: #2B2118;
+  /* upload / messages (Simple's song bar and lists) */
+  --lk-ffd0cc: #9E2A1E; --lk-f0c987: #85570F; --lk-f6e2bd: #4A3A28; --lk-b9dcb9: #2F6B3A; --lk-8fd18f: #2C6E31; --lk-ffffff: #2B2118;
+  --lk-f08a24: #C2610A; --lk-e0605a: #B5472F;
+}
+/* the mode chip in Simple's top bar */
+html.s-day header.topbar .mode-chip { background: #FFFFFF; border-color: #B8862A; color: #7A5200; }
+/* text on the darker Day accent */
+html.s-day .tour-num, html.s-day .tour-btn.pri { color: #FFFFFF; }

@@ -30,7 +30,7 @@ html.lay-pad-port #app, html.lay-pad-land #app { --ss-lbl: 34px; --ss-rg: 5px; -
   --ss-k: 1;
 }
 .ss .ss-lbl { grid-column: 1; color: var(--muted); font-size: var(--ss-lfs); letter-spacing: .04em; text-transform: uppercase; display: flex; align-items: center; white-space: nowrap; line-height: 1.15; min-width: 0; overflow: hidden; }
-.ss .ss-lbl b { color: var(--copper); font-weight: 700; font-size: calc(var(--ss-lfs) + 2px); margin-right: 3px; }
+.ss .ss-lbl b { color: var(--copper-t); font-weight: 700; font-size: calc(var(--ss-lfs) + 2px); margin-right: 3px; }
 /* v52: row labels are two line-icon faces with arrows toward the scale row (no text).
    Happy (gold) + up arrow beside the top row; down arrow + sad (purple) beside sad/tension. */
 .ss .ss-lbl { flex-direction: column; justify-content: center; align-items: center; gap: 2px; overflow: visible; }
@@ -78,10 +78,10 @@ html.lay-phone-land:not(.simple) #app { --ss-row: 28px; --ss-rg: 2px; --ss-mid: 
   touch-action: manipulation;
 }
 .ss .ss-note small { font-size: max(var(--fs-xs), calc(var(--ss-small) * var(--tx, 1))); font-weight: 600; color: var(--muted); margin-top: 2px; letter-spacing: .02em; }
-.ss .ss-note.home { color: var(--copper); }
-.ss .ss-note.home::before { content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); aspect-ratio: 1; height: auto; width: min(calc(100% + 4px), calc(var(--ss-strip) + 6px)); border: 2.5px solid var(--copper); border-radius: 50%; background: var(--lk-e2a15a-14); z-index: -1; box-sizing: border-box; }
-.ss .ss-note.home small { color: var(--copper); opacity: .85; }
-.ss .ss-note:focus-visible, .ss .ss-chip:focus-visible { outline: 2px solid var(--copper); outline-offset: 1px; }
+.ss .ss-note.home { color: var(--copper-t); }
+.ss .ss-note.home::before { content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); aspect-ratio: 1; height: auto; width: min(calc(100% + 4px), calc(var(--ss-strip) + 6px)); border: 2.5px solid var(--copper-b); border-radius: 50%; background: var(--lk-e2a15a-14); z-index: -1; box-sizing: border-box; }
+.ss .ss-note.home small { color: var(--copper-t); opacity: .85; }
+.ss .ss-note:focus-visible, .ss .ss-chip:focus-visible { outline: 2px solid var(--copper-b); outline-offset: 1px; }
 /* v112.7 (fitStrip -> fitLong): last resort for a long name in a narrow chip. .sb3 puts the slash bass on its own
    line under the quality; .ell clips the quality with an ellipsis so the label never crosses the border. */
 .ss .ss-chip .q .sb { display: inline; }
