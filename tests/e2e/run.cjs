@@ -28,6 +28,7 @@ const SUITE = [   // [name, file, args]  (both phone sizes each: the tests loop 
   ['rd7', 'rd7.cjs', []],   // rd7: Noff rd6 findings + Uiux Low (Start over stops, two-chart bar kept, v1.2 partial Full, Kids reload resume, pass-through toast, Simple sheet, Expert ? circle)
   ['rd8', 'rd8.cjs', []],   // rd8: switch lands on the chord covering the beat; dense banner on the chord panel (6 sizes); partial Full reuse
   ['rd9', 'rd9.cjs', []],   // rd9: reused-section lyrics follow their own beats; end of song kept on a switch; idempotent round trips; pass-through banner (6 sizes)
+  ['rd10', 'rd10.cjs', []],   // rd10: lyrics parity per pass; Simple Day / Lamp / Auto, Look row in 3 modes, Simple Day contrast, Lamp = rd9 (RD9 env)
 ];
 const only = process.env.ONLY ? process.env.ONLY.split(',') : null;
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.webp': 'image/webp', '.json': 'application/json', '.png': 'image/png' };

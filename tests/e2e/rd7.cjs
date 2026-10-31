@@ -5,7 +5,7 @@
 //   4. Kids: step 3 -> reload in Kids -> Hello -> Start resumes at step 3; the same song card resumes too; another song starts at 0.
 //   5. Dense-layout toast (360x780, 780x360): under the top bar, taps go through it (Next works while it shows), it
 //      fades on the first tap or after ~6 s (rd9: no ✕).
-//   6/7. Simple's sheet: no Look row, no footer copy.   8. Expert's "?" is the same 44px circle as Simple's.
+//   6/7. Simple's sheet: no footer copy (rd10: the Look row is back, Simple has Day / Lamp).   8. Expert's "?" is the same 44px circle as Simple's.
 // node -r ./emulate.cjs rd7.cjs [WxH]   env BASE, OUT, SHOTS, CMP
 const { chromium } = require('playwright-core'); const fs = require('fs'); const path = require('path');
 const URL = process.env.URL || process.env.BASE || 'http://localhost:8080/index.html';
@@ -148,11 +148,11 @@ async function eraseHold(p) { await p.evaluate(() => document.getElementById('ms
       await q.waitForTimeout(2600); g = await q.evaluate(() => ({ el: !!document.getElementById('xDenseNote'), why: __xmode.log.denseGone })); F(!g.el && g.why === 'time', `${tag}: not gone after ~6 s ${JSON.stringify(g)}`);
       await done(q, tag + ' timer');
     }
-    // 6 / 7. Simple's sheet: no Look row, no footer copy
+    // 6 / 7. Simple's sheet: no footer copy; rd10: its Look row is shown (Simple has a Day and a Lamp look now)
     { const tag = `${T} simple sheet`;
       const p = await open(b, w, h, SET.simple); F(await openSheet(p, 'simple'), `${tag}: sheet`);
       const r = await p.evaluate(() => ({ look: !!document.querySelector('#modeSheet .ms-look').getClientRects().length, note: document.getElementById('msNote').textContent, text: document.querySelector('#modeSheet .ms-sheet').innerText }));
-      F(!r.look, `${tag}: Look row shown`); F(!r.note && !/No more Simple|Lamp look is coming|coming next/.test(r.text), `${tag}: footer / roadmap copy "${r.note}"`);
+      F(r.look, `${tag}: no Look row (rd10)`); F(!r.note && !/No more Simple|Lamp look is coming|coming next/.test(r.text), `${tag}: footer / roadmap copy "${r.note}"`);
       if (CMP) await p.screenshot({ path: path.join(CMP, `${process.env.PFX || 'after'}-${T}-simple-sheet.png`) });
       await done(p, tag);
     }

@@ -218,3 +218,22 @@ Tests: unit rd8.test.js (+ rd7 updated); e2e tests/e2e/rd8.cjs; rd6 / rd7 update
 5. Simple Day / Lamp look: moved to rd10.
 Tests: unit rd9.test.js; e2e tests/e2e/rd9.cjs (lyrics vs beats, end of song, all round trips, banner geometry and a
 tap through it plays the chip); rd6 / rd7 / rd8 banner checks updated for no ✕.
+
+## rd10 (Noff rd9 SUMMARY.md Low + Simple Day look) - badge v112.13-rd10
+1. Lyrics of a repeated Full section, per pass. The v1.2 Anh file is ambiguous: its one Full verse (repeat 2) lists
+   all 27 verse lines of the song (verse1a, 1b, 2a, 2b, 3) on chords 0-7 with no pass, so Expert steps 17-23 showed
+   pass 1's lines again. Now each pass of a repeated Full section takes the lines of the easy sections that tile its
+   bars (markers moved to the Full chord at their beat; `passLyrics`, read by the song bar, two-row lyrics and the
+   Expert song line through `secLyrics(sec, rep)`). The saved answer is unchanged; a pass the easy chart does not
+   tile exactly keeps the section's own lines. Every Expert step of v1.2 and v1.3 shows Simple's line at its beat.
+2. Simple's Look (Auto · Day · Lamp, Auto by default, same 7:00-19:00 clock rule and pause-before-switch as Kids /
+   Expert; saved in touchChord.simpleLook.v1). Lamp = the classic dark screen, pixel-identical to rd9. The classic
+   screens' hard-coded colours are CSS variables now (css/base.css --lk-*, + --copper-t / --copper-b / --sea-t for
+   the accent as text / edge); css/simpleday.css (html.s-day, only while Simple is the mode, never with ?classic=1)
+   redefines them: cream #F6EFE3 / white surfaces, warm ink #2B2118, chord colours as in Lamp (minor chips a shade
+   deeper for AA), 3:1 edges on chips, note row, pads, buttons, the mode chip and the sheet's groups / switches.
+   The Look row is back in Simple's sheet.
+3. Contrast (rd10 suite): Simple Day has no text under AA and no control under 3:1 on chips, the note row / pads,
+   lyrics + song bar, controls, step badges and the sheet (360x780, 780x360, 820x1180). Lamp keeps 351c02c's values
+   (some below: minor-chip text 4.1:1, dark button edges ~1.5:1); changing them would break Lamp = classic.
+Tests: unit rd10.test.js; e2e tests/e2e/rd10.cjs; rd6 / rd7 updated for Simple's Look row.
