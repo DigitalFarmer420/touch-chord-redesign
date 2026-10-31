@@ -19,6 +19,112 @@
   --card: rgba(28, 25, 20, 0.55);
 }
 
+/* rd10: the classic screens' hard-coded colours as variables. These values are the Lamp look (unchanged since
+   351c02c); css/simpleday.css redefines them for Simple's Day look (html.s-day). */
+:root {
+  --lk-8fcbb8-16: rgba(143, 203, 184, 0.16);
+  --lk-e2a15a-12: rgba(226, 161, 90, 0.12);
+  --lk-ffffff-015: rgba(255, 255, 255, 0.015);
+  --lk-3a332b: #3a332b;
+  --lk-cfc4b3: #cfc4b3;
+  --lk-fff6e8: #fff6e8;
+  --lk-000000-45: rgba(0, 0, 0, 0.45);
+  --lk-e2b15a: #e2b15a;
+  --lk-8a7bc0: #8a7bc0;
+  --lk-c4923e: #c4923e;
+  --lk-2a1c0c: #2a1c0c;
+  --lk-7d6ea8: #7d6ea8;
+  --lk-6a5c96: #6a5c96;
+  --lk-f7f3ff: #f7f3ff;
+  --lk-2a1f45: #2a1f45;
+  --lk-4a3a72: #4a3a72;
+  --lk-e8dff8: #e8dff8;
+  --lk-6a8f7e: #6a8f7e;
+  --lk-0f1f18: #0f1f18;
+  --lk-ffffff-75: rgba(255,255,255,.75);
+  --lk-1c1914: #1c1914;
+  --lk-000000-6: rgba(0,0,0,.6);
+  --lk-e2a15a-14: rgba(226,161,90,.14);
+  --lk-10211c: #10211c;
+  --lk-2c271f: #2c271f;
+  --lk-1c1915: #1c1915;
+  --lk-000000-55: rgba(0, 0, 0, 0.55);
+  --lk-2a100c: #2a100c;
+  --lk-e2a15a: #e2a15a;
+  --lk-c47a3a: #c47a3a;
+  --lk-e2a15a-35: rgba(226, 161, 90, 0.35);
+  --lk-e2a15a-45: rgba(226, 161, 90, 0.45);
+  --lk-3a332b-55: rgba(58, 51, 43, 0.55);
+  --lk-000000-4: rgba(0, 0, 0, 0.4);
+  --lk-423a30: #423a30;
+  --lk-2a1c0c-7: rgba(42, 28, 12, 0.7);
+  --lk-f4efe4: #f4efe4;
+  --lk-c9bfb0: #c9bfb0;
+  --lk-1b1714: #1b1714;
+  --lk-000000: #000;
+  --lk-000000-82: rgba(0,0,0,.82);
+  --lk-1a1612: #1a1612;
+  --lk-0f0d0b: #0f0d0b;
+  --lk-c88c46-14: rgba(200, 140, 70, .14);
+  --lk-f3c64f: #f3c64f;
+  --lk-f3c64f-7: rgba(243,198,79,.7);
+  --lk-ffe08a: #ffe08a;
+  --lk-e2a15a-06: rgba(226,161,90,.06);
+  --lk-f3c64f-18: rgba(243,198,79,.18);
+  --lk-221d17: #221d17;
+  --lk-f5e9d2-17: rgba(245, 233, 210, .17);
+  --lk-f5e9d2-42: rgba(245, 233, 210, .42);
+  --lk-ffffff-14: rgba(255, 255, 255, .14);
+  --lk-e2b15a-3: rgba(226, 177, 90, .30);
+  --lk-fff4de-42: rgba(255, 244, 222, .42);
+  --lk-f0c478-55: rgba(240, 196, 120, .55);
+  --lk-fff4de-4: rgba(255, 244, 222, .40);
+  --lk-ffffff-05: rgba(255, 255, 255, .05);
+  --lk-f6ead0: #f6ead0;
+  --lk-2a1c0c-55: rgba(42, 28, 12, .55);
+  --lk-cfc4b2: #cfc4b2;
+  --lk-c4853f: #c4853f;
+  --lk-140c04-35: rgba(20, 12, 4, .35);
+  --lk-140c04-45: rgba(20, 12, 4, .45);
+  --lk-ecb25c-95: rgba(236, 178, 92, .95);
+  --lk-ecb25c-0: rgba(236, 178, 92, 0);
+  --lk-ecb25c-8: rgba(236, 178, 92, .8);
+  --lk-ffeccd-62: rgba(255, 236, 205, .62);
+  --lk-fff4de-14: rgba(255, 244, 222, .14);
+  --lk-140e08-82: rgba(20, 14, 8, .82);
+  --lk-c4853f-5: rgba(196, 133, 63, .5);
+  --lk-c4853f-95: rgba(196, 133, 63, .95);
+  --lk-c4853f-8: rgba(196, 133, 63, .8);
+  --lk-c4853f-45: rgba(196, 133, 63, .45);
+  --lk-c4853f-1: rgba(196, 133, 63, 1);
+  --lk-b9ad9a: #b9ad9a;
+  --lk-1a1209: #1a1209;
+  --lk-140c04-5: rgba(20, 12, 4, .5);
+  --lk-2a1f14: #2a1f14;
+  --lk-f3e6cf: #f3e6cf;
+  --lk-000000-35: rgba(0, 0, 0, .35);
+  --lk-1d140b: #1d140b;
+  --lk-140c04-6: rgba(20, 12, 4, .6);
+  --lk-241a11: #241a11;
+  --lk-000000-5: rgba(0, 0, 0, .5);
+  --lk-ffffff-06: rgba(255,255,255,.06);
+  --lk-e2a15a-18: rgba(226, 161, 90, .18);
+  --lk-ffffff-07: rgba(255,255,255,.07);
+  --lk-f08a24: #f08a24;
+  --lk-e2a15a-1: rgba(226,161,90,.10);
+  --lk-ffffff-04: rgba(255,255,255,.04);
+  --lk-e2a15a-16: rgba(226,161,90,.16);
+  --lk-8fd18f: #8fd18f;
+  --lk-e0605a: #e0605a;
+  --lk-e0605a-12: rgba(224,96,90,.12);
+  --lk-ffd0cc: #ffd0cc;
+  --lk-ffffff: #fff;
+  --lk-b9dcb9: #b9dcb9;
+  --lk-f0c987: #f0c987;
+  --lk-f0c987-1: rgba(240,201,135,.10);
+  --lk-f6e2bd: #f6e2bd;
+}
+
 * { box-sizing: border-box; }
 
 html, body {
@@ -35,9 +141,9 @@ html, body {
 
 body {
   background:
-    radial-gradient(900px 380px at 8% -10%, rgba(143, 203, 184, 0.16), transparent 55%),
-    radial-gradient(700px 420px at 110% 110%, rgba(226, 161, 90, 0.12), transparent 50%),
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.015) 0 1px, transparent 1px 14px),
+    radial-gradient(900px 380px at 8% -10%, var(--lk-8fcbb8-16), transparent 55%),
+    radial-gradient(700px 420px at 110% 110%, var(--lk-e2a15a-12), transparent 50%),
+    repeating-linear-gradient(90deg, var(--lk-ffffff-015) 0 1px, transparent 1px 14px),
     var(--bg);
 }
 

@@ -8,39 +8,39 @@ html.lay-phone-port:not(.simple) .pg-btn.pg-up { width: 32px; }
 #songBar[hidden] { display: none !important; }
 /* v73 song chord Lock (song bar + Upload panel) */
 .next-card { position: relative; }
-#sbLock { position: absolute; z-index: 6; top: 0; right: 0; display: flex; align-items: center; gap: 3px; min-width: 0; min-height: 0; height: 22px; padding: 0 7px; font-size: var(--fs-xs); font-weight: 700; line-height: 1; border-radius: 8px; box-shadow: none; color: var(--muted); background: rgba(255,255,255,.06); border: 1px solid var(--line); }
+#sbLock { position: absolute; z-index: 6; top: 0; right: 0; display: flex; align-items: center; gap: 3px; min-width: 0; min-height: 0; height: 22px; padding: 0 7px; font-size: var(--fs-xs); font-weight: 700; line-height: 1; border-radius: 8px; box-shadow: none; color: var(--muted); background: var(--lk-ffffff-06); border: 1px solid var(--line); }
 #sbLock[hidden], html.simple #sbLock { display: none !important; }
 #sbLock svg, #upLock svg { width: 12px; height: 12px; flex: 0 0 auto; }
-#sbLock[aria-pressed="true"], #upLock[aria-pressed="true"] { color: #1a1209; background: var(--copper); border-color: var(--copper); }
+#sbLock[aria-pressed="true"], #upLock[aria-pressed="true"] { color: var(--lk-1a1209); background: var(--copper); border-color: var(--copper); }
 #sbLock[aria-pressed="false"] .shk, #upLock[aria-pressed="false"] .shk { transform: translate(5px, -1.5px); }
 #upLock { display: inline-flex; align-items: center; gap: 5px; }
 .up-lockrow[hidden] { display: none; }
 .up-lockrow .up-lockhint { font-size: var(--fs-s); color: var(--muted); flex: 1 1 160px; }
 html.up-locked .up-ch .alt { display: none; }
-#songBar .sb-sec { flex: 0 0 auto; padding: 3px 6px; border-radius: 7px; background: rgba(226, 161, 90, .18); color: var(--copper); font-weight: 700; text-transform: capitalize; }
+#songBar .sb-sec { flex: 0 0 auto; padding: 3px 6px; border-radius: 7px; background: var(--lk-e2a15a-18); color: var(--copper); font-weight: 700; text-transform: capitalize; }
 #songBar .sb-line { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); }
-#songBar .sb-ch { display: inline-block; margin: 0 2px; padding: 1px 4px; border-radius: 5px; background: rgba(255,255,255,.07); color: var(--ink); font-weight: 700; }
-#songBar .sb-ch.on { background: var(--copper); color: #1a1209; }
-#songBar .sb-ch.flag::after, .up-ch.flag::after { content: "?"; display: inline-block; margin-left: 2px; padding: 0 3px; border-radius: 6px; background: #f08a24; color: #1a1209; font-size: .85em; font-weight: 800; }
+#songBar .sb-ch { display: inline-block; margin: 0 2px; padding: 1px 4px; border-radius: 5px; background: var(--lk-ffffff-07); color: var(--ink); font-weight: 700; }
+#songBar .sb-ch.on { background: var(--copper); color: var(--lk-1a1209); }
+#songBar .sb-ch.flag::after, .up-ch.flag::after { content: "?"; display: inline-block; margin-left: 2px; padding: 0 3px; border-radius: 6px; background: var(--lk-f08a24); color: var(--lk-1a1209); font-size: .85em; font-weight: 800; }
 #songBar .sb-alt { flex: 0 0 auto; color: var(--copper); font-weight: 700; }
-.ss .ss-chip.up-flag { box-shadow: 0 0 0 2px #f08a24; }
+.ss .ss-chip.up-flag { box-shadow: 0 0 0 2px var(--lk-f08a24); }
 html.lay-pad-port #songBar, html.lay-pad-land #songBar { height: 28px; font-size: var(--fs-m); }
 .up-pick .kp-box { max-width: 640px; display: flex; flex-direction: column; gap: 8px; }
 .up-pick .kp-box > * { flex: 0 0 auto; }
 .up-intro { margin: 0; font-size: var(--fs-m); color: var(--muted); line-height: 1.35; }
 .up-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .up-fields label { display: flex; flex-direction: column; gap: 3px; font-size: var(--fs-xs); color: var(--muted); font-weight: 700; min-width: 0; }
-.up-fields input, .up-paste textarea, .up-fallback textarea { width: 100%; box-sizing: border-box; min-width: 0; font: inherit; font-size: var(--fs-m); color: var(--ink); background: rgba(255,255,255,.06); border: 1px solid var(--line); border-radius: 9px; padding: 7px 8px; }
-.up-key { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 8px 12px; border: 2px solid var(--copper); border-radius: 12px; background: rgba(226,161,90,.10); }
+.up-fields input, .up-paste textarea, .up-fallback textarea { width: 100%; box-sizing: border-box; min-width: 0; font: inherit; font-size: var(--fs-m); color: var(--ink); background: var(--lk-ffffff-06); border: 1px solid var(--line); border-radius: 9px; padding: 7px 8px; }
+.up-key { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 8px 12px; border: 2px solid var(--copper); border-radius: 12px; background: var(--lk-e2a15a-1); }
 .up-key .uk-l { font-size: var(--fs-xs); font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
 .up-key .uk-k { font-family: Palatino, "Iowan Old Style", Georgia, serif; font-size: var(--fs-2xl); font-weight: 700; line-height: 1.05; color: var(--copper); }
 .up-key .uk-t { font-size: var(--fs-m); color: var(--muted); text-align: right; }
 /* v87: no key field or key display on the Upload form (song.key is still read and applied). */
 .up-key .uk-kbox[hidden] { display: none; }
 .up-key .uk-kbox[hidden] + .uk-t { text-align: left; }
-.up-review { border: 1px solid #f08a24; border-radius: 10px; padding: 6px 8px; font-size: var(--fs-m); }
+.up-review { border: 1px solid var(--lk-f08a24); border-radius: 10px; padding: 6px 8px; font-size: var(--fs-m); }
 .up-review[hidden] { display: none; }
-.up-review b { color: #f08a24; }
+.up-review b { color: var(--lk-f08a24); }
 .up-review .ur-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 4px; }
 .up-review button, .up-alts button { min-height: 30px; height: 30px; padding: 0 8px; font-size: var(--fs-m); border-radius: 8px; }
 .up-secs { max-height: 44vh; overflow: auto; border: 1px solid var(--line); border-radius: 10px; padding: 4px 6px; overscroll-behavior: contain; }
@@ -52,11 +52,11 @@ html.lay-pad-port #songBar, html.lay-pad-land #songBar { height: 28px; font-size
 .up-sec .us-h small { color: var(--muted); font-weight: 700; margin-left: 4px; }
 .up-chs { display: flex; flex-wrap: wrap; gap: 4px; }
 .up-ch { min-height: 30px; height: 30px; padding: 0 8px; font-size: var(--fs-m); font-weight: 700; border-radius: 8px; }
-.up-ch.on { background: var(--copper); color: #1a1209; border-color: transparent; }
+.up-ch.on { background: var(--copper); color: var(--lk-1a1209); border-color: transparent; }
 .up-ch .alt { font-size: var(--fs-xs); margin-left: 3px; color: var(--copper); }
-.up-ch.on .alt { color: #1a1209; }
-.up-alts { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; padding: 4px; border-radius: 8px; background: rgba(255,255,255,.05); font-size: var(--fs-s); align-items: center; }
-.up-alts button.on { background: var(--copper); color: #1a1209; }
+.up-ch.on .alt { color: var(--lk-1a1209); }
+.up-alts { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; padding: 4px; border-radius: 8px; background: var(--lk-ffffff-05); font-size: var(--fs-s); align-items: center; }
+.up-alts button.on { background: var(--copper); color: var(--lk-1a1209); }
 .up-ly { margin-top: 5px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: var(--fs-s); line-height: 1.25; white-space: pre; overflow-x: auto; }
 .up-ly .ly-c { color: var(--copper); font-weight: 700; }
 .up-ly .ly-t { color: var(--ink); }
@@ -68,10 +68,10 @@ html.lay-pad-port #songBar, html.lay-pad-land #songBar { height: 28px; font-size
 .up-lib .ul-h small { font-weight: 600; letter-spacing: 0; text-transform: none; }
 .up-lib .ul-list { list-style: none; margin: 0; padding: 3px; max-height: min(30vh, 210px); overflow-y: auto; overscroll-behavior: contain; border: 1px solid var(--line); border-radius: 10px; display: flex; flex-direction: column; gap: 3px; }
 .up-lib .ul-row { display: flex; align-items: stretch; gap: 4px; min-width: 0; flex: 0 0 auto; }
-.up-lib .ul-open { flex: 1 1 auto; min-width: 0; height: auto; min-height: 40px; padding: 4px 10px; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; text-align: left; border-radius: 9px; background: rgba(255,255,255,.04); border: 1px solid transparent; color: var(--ink); }
+.up-lib .ul-open { flex: 1 1 auto; min-width: 0; height: auto; min-height: 40px; padding: 4px 10px; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; text-align: left; border-radius: 9px; background: var(--lk-ffffff-04); border: 1px solid transparent; color: var(--ink); }
 .up-lib .ul-open b { font-size: var(--fs-m); font-weight: 700; line-height: 1.15; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .up-lib .ul-open span { font-size: var(--fs-xs); color: var(--muted); line-height: 1.15; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.up-lib .ul-row.on .ul-open { background: rgba(226,161,90,.16); border-color: var(--copper); }
+.up-lib .ul-row.on .ul-open { background: var(--lk-e2a15a-16); border-color: var(--copper); }
 .up-lib .ul-row.on .ul-open b { color: var(--copper); }
 .up-lib .ul-del { flex: 0 0 40px; width: 40px; min-height: 40px; height: auto; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 9px; color: var(--muted); background: transparent; border: 1px solid var(--line); }
 .up-lib .ul-del svg { width: 17px; height: 17px; }
@@ -82,22 +82,22 @@ html.lay-phone-land .up-lib .ul-open, html.lay-phone-land .up-lib .ul-del { min-
 /* v80: prompt switch (Simple / Simple and Full) next to Copy for AI, and the per-song version switch in My songs */
 .up-pv, .up-lib .ul-ver { display: inline-flex; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; flex: 0 0 auto; }
 .up-row .up-pv button, .up-lib .ul-ver button { min-height: 30px; height: 30px; padding: 0 8px; font-size: var(--fs-s); font-weight: 700; border: 0; border-radius: 0; background: transparent; color: var(--muted); }
-.up-row .up-pv button[aria-checked="true"], .up-lib .ul-ver button[aria-checked="true"] { background: var(--copper); color: #1a1209; }
+.up-row .up-pv button[aria-checked="true"], .up-lib .ul-ver button[aria-checked="true"] { background: var(--copper); color: var(--lk-1a1209); }
 .up-lib .ul-ver { align-self: center; }
 .up-lib .ul-ver button { height: 28px; min-height: 28px; padding: 0 6px; font-size: var(--fs-xs); }
-.up-row .up-ok { font-size: var(--fs-m); color: #8fd18f; font-weight: 700; }
+.up-row .up-ok { font-size: var(--fs-m); color: var(--lk-8fd18f); font-weight: 700; }
 /* v91: the action row on top of the Upload screen wraps cleanly */
 .up-actions { row-gap: 6px; }
 .up-actions > * { flex: 0 0 auto; }
 .up-paste textarea { min-height: 70px; resize: vertical; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: var(--fs-s); }
 .up-fallback[hidden], .up-err[hidden], .up-msg[hidden] { display: none; }
 .up-fallback textarea { min-height: 70px; font-size: var(--fs-xs); }
-.up-err { border: 1px solid #e0605a; background: rgba(224,96,90,.12); border-radius: 10px; padding: 6px 8px; font-size: var(--fs-m); color: #ffd0cc; }
+.up-err { border: 1px solid var(--lk-e0605a); background: var(--lk-e0605a-12); border-radius: 10px; padding: 6px 8px; font-size: var(--fs-m); color: var(--lk-ffd0cc); }
 .up-err ul { margin: 4px 0 0; padding-left: 18px; }
-.up-err code { font-size: var(--fs-s); color: #fff; }
-.up-msg { font-size: var(--fs-m); color: #8fd18f; font-weight: 700; }
+.up-err code { font-size: var(--fs-s); color: var(--lk-ffffff); }
+.up-msg { font-size: var(--fs-m); color: var(--lk-8fd18f); font-weight: 700; }
 /* v73: "Song loaded" line at the top of the panel, with its own New song button */
-.up-note { font-size: var(--fs-m); color: #8fd18f; font-weight: 700; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.up-note { font-size: var(--fs-m); color: var(--lk-8fd18f); font-weight: 700; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .up-note[hidden] { display: none; }
 /* v89: mode hint, multi-song summary, album line in My songs */
 .up-ask { font-size: var(--fs-s); color: var(--muted); line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: -2px; }
@@ -106,14 +106,14 @@ html.lay-phone-land .up-lib .ul-open, html.lay-phone-land .up-lib .ul-del { min-
 .up-msg .us-n { display: block; margin-top: 3px; overflow-wrap: anywhere; }   /* v112.13: grouped load notes */
 .up-msg .us-n[data-notes] { font-size: var(--fs-s); max-height: 132px; overflow-y: auto; overscroll-behavior: contain; }
 html.lay-phone-land .up-msg .us-n[data-notes] { max-height: 84px; }
-.up-msg .us-l + .us-l { font-weight: 600; color: #b9dcb9; }
+.up-msg .us-l + .us-l { font-weight: 600; color: var(--lk-b9dcb9); }
 .up-msg details { margin-top: 4px; font-weight: 600; color: var(--ink); }
-.up-msg summary { cursor: pointer; color: #8fd18f; font-weight: 700; }
+.up-msg summary { cursor: pointer; color: var(--lk-8fd18f); font-weight: 700; }
 .up-msg .us-list { list-style: none; margin: 4px 0 0; padding: 0 2px 0 0; max-height: 168px; overflow-y: auto; overscroll-behavior: contain; font-size: var(--fs-s); }
 html.lay-phone-land .up-msg .us-list { max-height: 120px; }
-.up-msg .us-list li { padding: 3px 0; border-top: 1px solid rgba(255,255,255,.06); overflow-wrap: anywhere; }
-.up-msg .us-list li.sk { color: #ffd0cc; }
-.up-msg .us-list li.fl { color: #f0c987; }
+.up-msg .us-list li { padding: 3px 0; border-top: 1px solid var(--lk-ffffff-06); overflow-wrap: anywhere; }
+.up-msg .us-list li.sk { color: var(--lk-ffd0cc); }
+.up-msg .us-list li.fl { color: var(--lk-f0c987); }
 .up-msg .us-list code { font-size: var(--fs-xs); }
 .up-lib .ul-open .ul-sub { display: flex; min-width: 0; max-width: 100%; }
 .up-lib .ul-open .ul-sub span { max-width: none; }
@@ -231,7 +231,7 @@ html.lay-phone-land .up-lib .ul-edit { min-height: 34px; }
 .up-lib .ul-list[hidden], .up-lib .ul-empty[hidden], .up-detail-home[hidden], .ud-head[hidden] { display: none; }
 .up-lib .ul-empty { font-size: var(--fs-m); color: var(--muted); padding: 6px 2px; }
 .up-lib .ul-detrow { display: block; flex: 0 0 auto; }
-.up-detail { margin: 0 0 4px; padding: 8px; border: 1px solid var(--copper); border-radius: 10px; background: rgba(226, 161, 90, .06); display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.up-detail { margin: 0 0 4px; padding: 8px; border: 1px solid var(--copper); border-radius: 10px; background: var(--lk-e2a15a-06); display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .up-detail .ud-head:not([hidden]) { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
 .up-detail .ud-note { font-size: var(--fs-s); color: var(--muted); text-align: right; }
 .up-detail .ud-note[hidden] { display: none; }
@@ -241,22 +241,22 @@ html.lay-phone-land .up-cols { display: grid; grid-template-columns: minmax(0, 1
 /* v105 (b): the next chord's yellow dot (same colour as the keyboard's next-key dot), top centre inside the
    suggested-chords cell and the matching chord-table button(s); it sits above the label and never moves it. */
 .nxdot { position: relative; }
-.nxd { position: absolute; left: 50%; top: 2px; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%; background: #c4853f;
-  box-shadow: 0 0 0 1.5px rgba(20, 12, 4, .45); pointer-events: none; z-index: 4; }
+.nxd { position: absolute; left: 50%; top: 2px; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%; background: var(--lk-c4853f);
+  box-shadow: 0 0 0 1.5px var(--lk-140c04-45); pointer-events: none; z-index: 4; }
 #palette .nxd { top: 3px; width: 7px; height: 7px; margin-left: -3.5px; }
 /* landscape phone: the grid chips are short, so the dot sits in the top 4px. v112.7: the label keeps the same 6px of
    padding, split 3px top + 3px bottom, so it is centred in its chip (it sat 3px low) and still clears the dot. */
-html.lay-phone-land #suggest .nxd { top: 0; width: 4px; height: 4px; margin-left: -2px; box-shadow: 0 0 0 1px rgba(20, 12, 4, .45); }
+html.lay-phone-land #suggest .nxd { top: 0; width: 4px; height: 4px; margin-left: -2px; box-shadow: 0 0 0 1px var(--lk-140c04-45); }
 html.lay-phone-land #suggest .ss-chip { padding-top: 3px; padding-bottom: 3px; }
 /* v105 (c): a short burst on the whole next key / chord-table button / grid cell when a new next chord is marked:
    brightness + an expanding warm ring (filter + box-shadow only: no layout shift); none with reduced motion. */
-@keyframes nxBurst { 0% { filter: brightness(1.75); box-shadow: 0 0 0 0 rgba(236, 178, 92, .95); } 60% { filter: brightness(1.25); } 100% { filter: none; box-shadow: 0 0 0 9px rgba(236, 178, 92, 0); } }
+@keyframes nxBurst { 0% { filter: brightness(1.75); box-shadow: 0 0 0 0 var(--lk-ecb25c-95); } 60% { filter: brightness(1.25); } 100% { filter: none; box-shadow: 0 0 0 9px var(--lk-ecb25c-0); } }
 .nxb, .kb .pad.nxb, #suggest .nxb, #palette button.nxb { animation: nxBurst .5s ease-out 1 !important; }
 @media (prefers-reduced-motion: reduce) { .nxb, .kb .pad.nxb, #suggest .nxb, #palette button.nxb { animation: none !important; } }
 /* v108 (2): the next chord outside Kids gets the Kids gold-pad mark (v71 #suggest.kids1 .ss-kidpad.nx): a 3px solid
    gold outline 1px out, pulsing with nxPulseO; the v105 dot and burst stay. Outline only: no layout shift. Reduced
    motion: the outline stays still. A tap flash (fxtap / kgtap) keeps its own animation. */
-#app #suggest .nxdot.nxdot, #app #palette button.nxdot { outline: 3px solid #c4853f; outline-offset: 1px; }
+#app #suggest .nxdot.nxdot, #app #palette button.nxdot { outline: 3px solid var(--lk-c4853f); outline-offset: 1px; }
 #app #suggest .nxdot.nxdot:not(.fxtap):not(.kgtap):not(.nxb), #app #palette button.nxdot:not(.kgtap):not(.nxb) { animation: nxPulseO 1.5s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { #app #suggest .nxdot.nxdot:not(.fxtap):not(.kgtap):not(.nxb), #app #palette button.nxdot:not(.kgtap):not(.nxb) { animation: none; } }
 /* v108 (3): Play along: the Kids tap flash (kgTap) on a chip that advanced the song, in both modes */
@@ -270,19 +270,19 @@ html.lay-phone-land #suggest .ss-chip { padding-top: 3px; padding-bottom: 3px; }
 .config-menu .cfg-tip { box-sizing: border-box; width: 0; min-width: 100%; margin: 0; padding: 2px 10px 6px; font-size: var(--fs-s); line-height: 1.35; color: var(--muted); white-space: normal; }
 .config-menu .cfg-tip[hidden] { display: none; }
 /* Pre-save validation panel (validate.js): flags grouped by layer, then Go back and fix / Save anyway */
-.up-val { border: 1px solid #f0c987; background: rgba(240,201,135,.10); border-radius: 10px; padding: 6px 8px; font-size: var(--fs-m); color: #f6e2bd; }
+.up-val { border: 1px solid var(--lk-f0c987); background: var(--lk-f0c987-1); border-radius: 10px; padding: 6px 8px; font-size: var(--fs-m); color: var(--lk-f6e2bd); }
 .up-val[hidden] { display: none; }
 .up-val .uv-g { margin-top: 5px; }
-.up-val .uv-h { font-weight: 700; color: #f0c987; font-size: var(--fs-s); }
+.up-val .uv-h { font-weight: 700; color: var(--lk-f0c987); font-size: var(--fs-s); }
 .up-val .uv-h small { font-weight: 600; color: var(--muted); }
 .up-val ul { margin: 2px 0 0; padding-left: 18px; max-height: 132px; overflow-y: auto; overscroll-behavior: contain; font-size: var(--fs-s); }
 html.lay-phone-land .up-val ul { max-height: 84px; }
 .up-val li { padding: 1px 0; overflow-wrap: anywhere; }
-.up-val li.uv-error { color: #ffd0cc; }
+.up-val li.uv-error { color: var(--lk-ffd0cc); }
 .up-val li.uv-info { color: var(--muted); }
 .up-val .uv-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 7px; }
 .up-val .uv-btns button { min-height: 34px; padding: 0 12px; font-size: var(--fs-m); border-radius: 9px; }
-.up-val #upValSave { background: var(--copper); color: #1a1209; }
+.up-val #upValSave { background: var(--copper); color: var(--lk-1a1209); }
 /* v112.11: Play along OFF (html.pa-off, set in gear.js paintPlayAlongBtn) = no guide. The next-chord marks are hidden: the
    yellow dot and gold outline on the keyboard (root key + chord keys), the yellow dot and gold outline on the marked grid
    chip and chord-table buttons, the new-mark burst, the dashed Play-starts-here chip, the off-screen arrow, the uploaded

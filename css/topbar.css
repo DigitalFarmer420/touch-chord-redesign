@@ -48,7 +48,7 @@ html.drawer-open #ctlToggle { border-color: var(--copper); color: var(--copper);
   width: 32px;
   height: 18px;
   border-radius: 9px;
-  background: #3a332b;
+  background: var(--lk-3a332b);
   flex: 0 0 auto;
   transition: background 120ms linear;
 }
@@ -60,12 +60,12 @@ html.drawer-open #ctlToggle { border-color: var(--copper); color: var(--copper);
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #cfc4b3;
+  background: var(--lk-cfc4b3);
   transition: left 120ms linear;
 }
 .simple-sw[aria-checked="true"] { color: var(--copper); border-color: var(--copper); }
 .simple-sw[aria-checked="true"] .knob { background: var(--copper); }
-.simple-sw[aria-checked="true"] .knob::after { left: 16px; background: #fff6e8; }
+.simple-sw[aria-checked="true"] .knob::after { left: 16px; background: var(--lk-fff6e8); }
 
 /* Configuration menu. */
 .config { position: relative; flex: 0 0 auto; }
@@ -87,7 +87,7 @@ html.drawer-open #ctlToggle { border-color: var(--copper); color: var(--copper);
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--bg-2);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 10px 30px var(--lk-000000-45);
   display: flex;
   flex-direction: column;
   gap: 4px;

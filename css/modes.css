@@ -13,9 +13,9 @@ html.simple .phase-track { display: none !important; }
 html.lay-pad-port .key-chip, html.lay-pad-land .key-chip { font-size: var(--fs-m); padding: 3px 12px; }
 html.lay-pad-port .key-row span, html.lay-pad-land .key-row span { font-size: var(--fs-m); padding: 2px 6px; }
 html.lay-phone-land .key-row { display: none; }
-.key-pick, .howto { position: fixed; inset: 0; z-index: 60; background: rgba(0,0,0,.82); display: flex; align-items: center; justify-content: center; padding: 16px; }
+.key-pick, .howto { position: fixed; inset: 0; z-index: 60; background: var(--lk-000000-82); display: flex; align-items: center; justify-content: center; padding: 16px; }
 .key-pick[hidden], .howto[hidden] { display: none; }
-.kp-box, .ht-box { background: #1a1612; box-shadow: 0 10px 40px rgba(0,0,0,.6); border: 1px solid var(--line); border-radius: 14px; padding: 14px; color: var(--ink); max-width: 560px; width: 100%; max-height: 90vh; overflow: auto; position: relative; }
+.kp-box, .ht-box { background: var(--lk-1a1612); box-shadow: 0 10px 40px var(--lk-000000-6); border: 1px solid var(--line); border-radius: 14px; padding: 14px; color: var(--ink); max-width: 560px; width: 100%; max-height: 90vh; overflow: auto; position: relative; }
 .kp-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-weight: 700; }
 .kp-roots { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 8px; }
 .kp-alts { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin: -2px 0 8px; }
@@ -25,14 +25,14 @@ html.lay-phone-land .key-row { display: none; }
 .kp-box button.on { background: var(--copper); color: var(--copper-ink); border-color: transparent; }
 .kp-auto { width: 100%; font-size: var(--fs-s); }
 .ht-bar { position: sticky; top: 0; height: 0; z-index: 3; display: flex; justify-content: flex-end; }
-.ht-x { background: #1a1612; }
+.ht-x { background: var(--lk-1a1612); }
 .kp-x, .ht-x { min-width: 36px; }
 .ht-box h2 { margin: 0 0 6px; font-size: var(--fs-l); }
 .ht-box h3 { margin: 14px 0 4px; color: var(--copper); font-size: var(--fs-m); }
 /* v42: picture-first How to, full width, scrollable */
 .howto { align-items: flex-start; padding: 8px; overflow: hidden; }
 .ht-box { max-width: 1000px; max-height: calc(100vh - 16px); max-height: calc(100dvh - 16px); overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
-.ht-box img { display: block; max-width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--line); margin: 6px 0; background: #0f0d0b; }
+.ht-box img { display: block; max-width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--line); margin: 6px 0; background: var(--lk-0f0d0b); }
 .ht-box .cap { margin: 2px 0 6px; color: var(--ink); }
 /* v110: one phone screenshot per section (360x780, spotlight style), centred, about half the screen tall at most */
 .ht-box img.ht-shot { width: min(100%, 560px, 140vh); width: min(100%, 560px, 140dvh); aspect-ratio: 1170 / 540; height: auto; margin: 8px auto; border-radius: 14px; }
@@ -41,33 +41,33 @@ html.lay-phone-land .key-row { display: none; }
 .ht-box ol.ht-steps { list-style: none; margin: 0; padding: 0; }
 .ht-box ol.ht-steps > li { margin: 0; padding: 0; }
 .ht-pill { display: inline-block; vertical-align: 2px; margin-left: 6px; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--copper);
-  color: var(--ink); background: rgba(200, 140, 70, .14); font-size: var(--fs-xs); font-weight: 700; line-height: 1.4; letter-spacing: .02em; white-space: nowrap; }
+  color: var(--ink); background: var(--lk-c88c46-14); font-size: var(--fs-xs); font-weight: 700; line-height: 1.4; letter-spacing: .02em; white-space: nowrap; }
 .ht-box p, .ht-box li { font-size: var(--fs-m); line-height: 1.45; }
 .ht-box ol, .ht-box ul { margin: 4px 0; padding-left: 20px; }
 /* v65: Welcome intro, sub-steps, yellow word links and the "Little words to know" box. */
 .ht-box .ht-thanks { margin-top: 8px; color: var(--muted); font-style: italic; }
-.ht-box a.ht-term { color: #f3c64f; font-weight: 700; text-decoration: underline dotted rgba(243,198,79,.7); text-underline-offset: 3px; -webkit-tap-highlight-color: transparent; }
-.ht-box a.ht-term:active { color: #ffe08a; }
+.ht-box a.ht-term { color: var(--lk-f3c64f); font-weight: 700; text-decoration: underline dotted var(--lk-f3c64f-7); text-underline-offset: 3px; -webkit-tap-highlight-color: transparent; }
+.ht-box a.ht-term:active { color: var(--lk-ffe08a); }
 .ht-box ol.ht-sub { list-style: decimal; margin: 4px 0 2px; padding-left: 22px; }
 .ht-box ol.ht-sub > li { margin: 3px 0; padding-left: 2px; }
-.ht-box ol.ht-sub > li::marker { color: #f3c64f; font-weight: 700; }
+.ht-box ol.ht-sub > li::marker { color: var(--lk-f3c64f); font-weight: 700; }
 /* v94: the strip's happy / sad faces, shown inline in How to step 4 */
 .ht-face { display: inline-flex; align-items: center; gap: 2px; vertical-align: -0.2em; }
 .ht-face svg { width: 1.15em; height: 1.15em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .ht-face svg.ar { width: .6em; height: .75em; }
 .ht-face svg .eye { fill: currentColor; stroke: none; }
-.ht-face-happy { color: #e2b15a; }
-.ht-face-sad { color: #8a7bc0; }
+.ht-face-happy { color: var(--lk-e2b15a); }
+.ht-face-sad { color: var(--lk-8a7bc0); }
 /* v67: every How to number is the vocabulary yellow, but plain text (not a link). */
-.ht-box .ht-num { color: #f3c64f; font-weight: 700; text-decoration: none; cursor: default; pointer-events: none; }
+.ht-box .ht-num { color: var(--lk-f3c64f); font-weight: 700; text-decoration: none; cursor: default; pointer-events: none; }
 .ht-box .ht-note { margin: 6px 0 6px; font-size: var(--fs-m); color: var(--muted); }
-.ht-words { margin-top: 18px; padding: 10px 12px 8px; border: 1px solid var(--line); border-top: 2px solid var(--copper); border-radius: 12px; background: rgba(226,161,90,.06); }
+.ht-words { margin-top: 18px; padding: 10px 12px 8px; border: 1px solid var(--line); border-top: 2px solid var(--copper); border-radius: 12px; background: var(--lk-e2a15a-06); }
 .ht-box .ht-words h3 { margin: 0 0 6px; }
 .ht-words dl { margin: 0; display: grid; gap: 6px; }
 .ht-words dl > div { display: grid; grid-template-columns: 92px 1fr; gap: 8px; align-items: baseline; padding: 4px 6px; border-radius: 8px; transition: background .6s; outline: none; }
-.ht-words dt { font-weight: 700; color: #f3c64f; font-size: var(--fs-m); }
+.ht-words dt { font-weight: 700; color: var(--lk-f3c64f); font-size: var(--fs-m); }
 .ht-words dd { margin: 0; font-size: var(--fs-m); line-height: 1.4; }
-.ht-words dl > div.ht-hit { background: rgba(243,198,79,.18); transition: background .15s; }
+.ht-words dl > div.ht-hit { background: var(--lk-f3c64f-18); transition: background .15s; }
 
 /* v31: chord-type gating */
 .kb .pad.nochord { opacity: 0.32; }
@@ -120,14 +120,14 @@ html.lay-pad-port .allkeys, html.lay-pad-land .allkeys { font-size: var(--fs-m);
 .kid-key { display: none; }
 html.simple .key-bar { display: none !important; }
 html.simple .kid-key { display: flex; flex-direction: column; gap: 6px; flex: 0 0 auto; }
-.kk-root { position: relative; display: flex; align-items: center; justify-content: space-between; height: var(--kk-h, 58px); border-radius: 14px; background: var(--bg-2, #221d17); border: 2px solid var(--copper); touch-action: none; cursor: grab; outline: none; overflow: hidden; }
+.kk-root { position: relative; display: flex; align-items: center; justify-content: space-between; height: var(--kk-h, 58px); border-radius: 14px; background: var(--bg-2, var(--lk-221d17)); border: 2px solid var(--copper); touch-action: none; cursor: grab; outline: none; overflow: hidden; }
 .kk-root:focus-visible { box-shadow: 0 0 0 2px var(--copper); }
 .kk-name { flex: 1 1 auto; text-align: center; font-family: Palatino, "Iowan Old Style", Georgia, serif; font-weight: 700; font-size: calc(var(--kk-fs, 34px) * var(--tx, 1)); line-height: 1; color: var(--ink); pointer-events: none; transition: transform .12s ease-out; }
 .kk-name.nudge-l { transform: translateX(-10px); } .kk-name.nudge-r { transform: translateX(10px); }
 .kk-arrow { flex: 0 0 auto; width: var(--kk-arrow, 36px); height: 100%; min-height: 0; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--copper); font-size: calc(var(--kk-fs, 34px) * .8); line-height: 1; touch-action: manipulation; }
 .kk-mode { display: flex; align-items: center; justify-content: center; gap: 8px; height: var(--kk-mh, 44px); min-height: 0; margin: 0; border-radius: 14px; border: 2px solid transparent; font-size: calc(var(--kk-mfs, 17px) * var(--tx, 1)); font-weight: 800; letter-spacing: .02em; touch-action: manipulation; }
-.kk-mode.major { background: #e2b15a; color: #2a1c0c; }
-.kk-mode.minor { background: #8a7bc0; color: #f7f3ff; }
+.kk-mode.major { background: var(--lk-e2b15a); color: var(--lk-2a1c0c); }
+.kk-mode.minor { background: var(--lk-8a7bc0); color: var(--lk-f7f3ff); }
 .kk-face svg { display: block; width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
 .kk-face svg .eye { fill: currentColor; stroke: none; }
 html.simple.lay-pad-land .kid-key, html.simple.lay-pad-port .kid-key { --kk-h: 96px; --kk-fs: 56px; --kk-arrow: 56px; --kk-mh: 64px; --kk-mfs: 24px; gap: 10px; }
@@ -156,16 +156,16 @@ html.simple .ss .ss-note .nn { font-size: calc(var(--ss-note) * var(--tx, 1)); }
 /* v52: Simple note buttons: raised round buttons instead of labels on a capsule. */
 html.simple .ss .ss-track { display: none; }
 html.simple .ss .ss-note { align-self: center; justify-self: center; width: var(--ss-nb, 54px); height: var(--ss-nb, 54px); border-radius: 50%;
-  background: rgba(245, 233, 210, .17); border: 1.5px solid rgba(245, 233, 210, .42); box-shadow: 0 3px 0 rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .14);
+  background: var(--lk-f5e9d2-17); border: 1.5px solid var(--lk-f5e9d2-42); box-shadow: 0 3px 0 var(--lk-000000-45), inset 0 1px 0 var(--lk-ffffff-14);
   transition: transform .08s ease-out, background-color .08s ease-out, box-shadow .08s ease-out; }
-html.simple .ss .ss-note.home { background: rgba(226, 177, 90, .30); border: 2.5px solid var(--copper); }
+html.simple .ss .ss-note.home { background: var(--lk-e2b15a-3); border: 2.5px solid var(--copper); }
 html.simple .ss .ss-note.home::before { display: none; }
-html.simple .ss .ss-note.press { transform: scale(.92); background: rgba(255, 244, 222, .42); box-shadow: 0 1px 0 rgba(0, 0, 0, .45); }
-html.simple .ss .ss-note.home.press { background: rgba(240, 196, 120, .55); }
+html.simple .ss .ss-note.press { transform: scale(.92); background: var(--lk-fff4de-42); box-shadow: 0 1px 0 var(--lk-000000-45); }
+html.simple .ss .ss-note.home.press { background: var(--lk-f0c478-55); }
 html.simple .ss .ss-chip { transition: transform .08s ease-out, filter .08s ease-out; }
 html.simple .ss .ss-chip.press { transform: scale(.92); filter: brightness(1.25); }
 html.simple .ss .ss-note.pulse { animation: ss-pulse .55s ease-in-out both; }
-@keyframes ss-pulse { 0%, 100% { transform: scale(1); } 45% { transform: scale(1.1); background-color: rgba(255, 244, 222, .40); } }
+@keyframes ss-pulse { 0%, 100% { transform: scale(1); } 45% { transform: scale(1.1); background-color: var(--lk-fff4de-4); } }
 @media (prefers-reduced-motion: reduce) { html.simple .ss .ss-note, html.simple .ss .ss-chip { transition: none; } html.simple .ss .ss-note.pulse { animation: none; } }
 /* Phone landscape: the mockup (844 x 390). */
 html.simple.lay-phone-land #app {
@@ -216,7 +216,7 @@ html.simple.lay-pad-port #app {
 /* Dark text on gold / green reads lighter than white on purple at the same size: same
    font size everywhere, one weight step heavier on the light chips. */
 .ss .ss-chip.major, .ss .ss-chip.color { font-weight: 800; }
-.ss .ss-chip.color { border-color: rgba(255,255,255,.75); }
+.ss .ss-chip.color { border-color: var(--lk-ffffff-75); }
 html.lay-phone-port #app { --ss-lbl: 18px; --ss-ico: 18px; --ss-arrow: 10px; --ss-fgap: 6px; }
 html.lay-pad-port #app, html.lay-pad-land #app { --ss-lbl: 38px; --ss-ico: 28px; --ss-arrow: 14px; --ss-fgap: 7px; }
 html.simple #app { --ss-ico: 30px; --ss-arrow: 14px; --ss-fgap: 7px; }
@@ -241,7 +241,7 @@ html.simple.lay-phone-port .ss .ss-chip { padding: 0 1px; border-radius: 10px; l
 /* v53: faint grid: 7 note columns x the row bands (green, gold, notes, purple, tension; 7x4 when
    the green row is collapsed). Inner dividers only, drawn in the gaps, behind chips and notes. */
 .ss .ss-gl { position: relative; z-index: 0; pointer-events: none; min-width: 0; min-height: 0; }
-.ss .ss-gl::after { content: ""; position: absolute; background: rgba(255, 255, 255, .05); }
+.ss .ss-gl::after { content: ""; position: absolute; background: var(--lk-ffffff-05); }
 .ss .ss-gc { grid-row: n; }
 .ss .ss-gc::after { top: 0; bottom: 0; width: 1px; right: calc(-0.5 * var(--ss-cgap) - 0.5px); }
 .ss .ss-gl.last::after { display: none; }
@@ -288,7 +288,7 @@ html.lay-phone-port .ss:not(.gutr), html.lay-pad-port:not(.simple) .ss:not(.gutr
 .ss .ss-chip, .ss .ss-note { margin-left: calc(var(--ss-cgap) / 2); margin-right: calc(var(--ss-cgap) / 2); }
 .ss .ss-gc::after { right: -0.5px; }
 .ss .ss-gn { grid-row: n; grid-column: 3 / 17; }
-.ss .ss-gn::before, .ss .ss-gn::after { content: ""; position: absolute; left: 0; right: 0; height: 1px; background: rgba(255, 255, 255, .05); }
+.ss .ss-gn::before, .ss .ss-gn::after { content: ""; position: absolute; left: 0; right: 0; height: 1px; background: var(--lk-ffffff-05); }
 .ss .ss-gn::before { top: calc(-0.5 * var(--ss-rg) - 0.5px); }
 .ss .ss-gn::after { bottom: calc(-0.5 * var(--ss-rg) - 0.5px); }
 .ss .ss-chip .rn { display: none; }
@@ -314,14 +314,14 @@ html:not(.simple) .ss .ss-chip { border-radius: var(--ss-cr, 10px); padding: 0 2
 html:not(.simple) .ss.stack .ss-chip { font-size: max(var(--fs-xs), calc((var(--ss-fs) - 2px) * var(--ss-k) * var(--tx, 1))); }
 html:not(.simple) .ss .ss-chip.press { transform: scale(.92); filter: brightness(1.25); }
 html:not(.simple) .ss .ss-note { align-self: stretch; justify-self: stretch; width: auto; height: auto; border-radius: var(--ss-cr, 10px);
-  background: rgba(245, 233, 210, .17); border: 1.5px solid rgba(245, 233, 210, .42); box-shadow: 0 3px 0 rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .14);
+  background: var(--lk-f5e9d2-17); border: 1.5px solid var(--lk-f5e9d2-42); box-shadow: 0 3px 0 var(--lk-000000-45), inset 0 1px 0 var(--lk-ffffff-14);
   color: var(--ink); transition: transform .08s ease-out, background-color .08s ease-out, box-shadow .08s ease-out; }
 html:not(.simple) .ss .ss-note .nn { font-size: calc(var(--ss-note) * var(--tx, 1)); }
 html:not(.simple) .ss .ss-note small { margin-top: 1px; }
-html:not(.simple) .ss .ss-note.home { background: rgba(226, 177, 90, .30); border: 2.5px solid var(--copper); color: var(--copper); }
+html:not(.simple) .ss .ss-note.home { background: var(--lk-e2b15a-3); border: 2.5px solid var(--copper); color: var(--copper); }
 html:not(.simple) .ss .ss-note.home::before { display: none; }
-html:not(.simple) .ss .ss-note.press { transform: scale(.92); background: rgba(255, 244, 222, .42); box-shadow: 0 1px 0 rgba(0, 0, 0, .45); }
-html:not(.simple) .ss .ss-note.home.press { background: rgba(240, 196, 120, .55); }
+html:not(.simple) .ss .ss-note.press { transform: scale(.92); background: var(--lk-fff4de-42); box-shadow: 0 1px 0 var(--lk-000000-45); }
+html:not(.simple) .ss .ss-note.home.press { background: var(--lk-f0c478-55); }
 @media (prefers-reduced-motion: reduce) { html:not(.simple) .ss .ss-note, html:not(.simple) .ss .ss-chip { transition: none; } }
 /* Phone landscape (panel 137 px tall as in v53): faces left, notes one and a half rows tall. */
 html:not(.simple).lay-phone-land #app { --ss-lbl: 28px; --ss-ico: 22px; --ss-arrow: 11px; --ss-fgap: 5px; --ss-rg: 3px; --ss-cgap: 4px; --ss-mid: 1.4fr; --ss-fs: 17px; --ss-note: 20px; --ss-small: 11px; --ss-rnfs: 11px; --ss-cr: 8px; }
@@ -357,7 +357,7 @@ html:not(.simple).lay-phone-port .ss .ss-chip .rn { display: none; }
    top of the Now column; elsewhere the top bar), Play / Stop and Next inside it. ===== */
 .prog { display: flex; align-items: stretch; gap: 6px; flex: 0 0 auto; min-width: 0; }
 .pg-sel { position: relative; display: flex; align-items: stretch; flex: 1 1 auto; min-width: 0; height: var(--pg-h, 40px); border-radius: 12px;
-  background: var(--bg-2, #221d17); border: 2px solid var(--copper); touch-action: none; cursor: grab; outline: none; overflow: hidden; box-sizing: border-box; }
+  background: var(--bg-2, var(--lk-221d17)); border: 2px solid var(--copper); touch-action: none; cursor: grab; outline: none; overflow: hidden; box-sizing: border-box; }
 .pg-sel:focus-visible { box-shadow: 0 0 0 2px var(--copper); }
 .pg-arrow { flex: 0 0 auto; width: var(--pg-arrow, 26px); height: auto; min-height: 0; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent;
   color: var(--copper); font-size: var(--pg-afs, 24px); line-height: 1; touch-action: manipulation; }
@@ -414,9 +414,9 @@ html.lay-pad-land:not(.simple) .prog, html.lay-pad-port:not(.simple) .prog { max
 html.lay-pad-land:not(.simple) .prog { margin-left: calc(var(--rail-w) + var(--gap) - 132px); }
 /* Step badges on the strip (1, 2, 3...); the playing step's chip lights like a press. */
 .ss .pg-badge { position: absolute; z-index: 3; left: 0; top: 0; box-sizing: border-box; min-width: 15px; height: 15px; padding: 0 3px;
-  border-radius: 8px; background: #f6ead0; color: #2a1c0c; border: 1px solid rgba(42, 28, 12, .55);
+  border-radius: 8px; background: var(--lk-f6ead0); color: var(--lk-2a1c0c); border: 1px solid var(--lk-2a1c0c-55);
   font-size: var(--fs-xs); font-weight: 800; line-height: 13px; text-align: center; white-space: nowrap; letter-spacing: -0.02em;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, .55); touch-action: none; cursor: pointer; }
+  box-shadow: 0 1px 2px var(--lk-000000-55); touch-action: none; cursor: pointer; }
 .ss .pg-badge.on { background: var(--copper); }
 html.simple .ss .pg-badge { min-width: 19px; height: 19px; line-height: 17px; font-size: var(--fs-s); border-radius: 10px; padding: 0 4px; }
 html.lay-phone-port:not(.simple) .ss .pg-badge { min-width: 14px; height: 14px; line-height: 12px; font-size: var(--fs-xs); padding: 0 2px; border-radius: 7px; }
@@ -504,10 +504,10 @@ html.simple .now-mix > .now-vol { flex: 1 1 0; min-width: 44px; }
 html.lay-phone-land.simple .now-mix > .now-vol { height: 16px; min-height: 16px; }
 /* v60: Config toggle. */
 .config-menu .cfg-toggle { display: flex; align-items: center; justify-content: space-between; gap: 12px; white-space: nowrap; }
-.cfg-toggle .tgl { position: relative; flex: 0 0 auto; width: 34px; height: 20px; border-radius: 10px; background: #3a332b; border: 1px solid var(--line); transition: background .15s; }
-.cfg-toggle .tgl::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #cfc4b2; transition: transform .15s; }
+.cfg-toggle .tgl { position: relative; flex: 0 0 auto; width: 34px; height: 20px; border-radius: 10px; background: var(--lk-3a332b); border: 1px solid var(--line); transition: background .15s; }
+.cfg-toggle .tgl::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--lk-cfc4b2); transition: transform .15s; }
 .cfg-toggle.on .tgl { background: var(--copper); border-color: transparent; }
-.cfg-toggle.on .tgl::after { transform: translateX(14px); background: #2a1c0c; }
+.cfg-toggle.on .tgl::after { transform: translateX(14px); background: var(--lk-2a1c0c); }
 /* v60: Simple Sustain in portrait gets a bigger label and a pedal icon (box unchanged). */
 html.simple.lay-phone-port #sustainBtn, html.simple.lay-pad-port #sustainBtn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
 html.simple.lay-phone-port #sustainBtn { font-size: calc(24px * var(--tx, 1)); }
@@ -540,47 +540,47 @@ html.lay-phone-port:not(.simple) .pg-btn { width: 38px; height: 40px; }  /* v59:
 /* Last-resort squeeze (one long name in a narrow column, e.g. B\266d7sus4 at 667 px): no side padding. */
 html:not(.simple) .ss.tight .ss-chip.sq { padding-left: 0; padding-right: 0; }
 .ss .ss-chip.pg-on { transform: scale(.92); filter: brightness(1.25); }
-.ss .ss-note.pg-on { transform: scale(.92); background: rgba(255, 244, 222, .42); box-shadow: 0 1px 0 rgba(0, 0, 0, .45); }
-.ss .ss-note.home.pg-on { background: rgba(240, 196, 120, .55); }
+.ss .ss-note.pg-on { transform: scale(.92); background: var(--lk-fff4de-42); box-shadow: 0 1px 0 var(--lk-000000-45); }
+.ss .ss-note.home.pg-on { background: var(--lk-f0c478-55); }
 
 
 /* v68 "next chord" hint (full mode): pulsing gold outline + root dot, distinct from the lit fill */
 .kb .pad.nx:not(.black) { position: relative; }
 .kb .pad.nx::after { content: ""; position: absolute; inset: 1px; border-radius: inherit; pointer-events: none; z-index: 3;
-  box-shadow: inset 0 0 0 3px #c4853f, inset 0 0 0 5px rgba(20, 12, 4, .35); animation: nxPulse 1.5s ease-in-out infinite; }
+  box-shadow: inset 0 0 0 3px var(--lk-c4853f), inset 0 0 0 5px var(--lk-140c04-35); animation: nxPulse 1.5s ease-in-out infinite; }
 .kb .pad.nx-root::before { content: ""; position: absolute; left: 50%; top: 9px; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%;
-  background: #c4853f; box-shadow: 0 0 0 1.5px rgba(20, 12, 4, .45); pointer-events: none; z-index: 4; }
+  background: var(--lk-c4853f); box-shadow: 0 0 0 1.5px var(--lk-140c04-45); pointer-events: none; z-index: 4; }
 /* v79 Kids tap-to-advance: a quick gold flash on the tapped gold pad / key and on the new gold */
-@keyframes kgTap { 0% { filter: brightness(1.8); box-shadow: 0 0 0 0 rgba(236, 178, 92, .95); } 100% { filter: none; box-shadow: 0 0 0 10px rgba(236, 178, 92, 0); } }
+@keyframes kgTap { 0% { filter: brightness(1.8); box-shadow: 0 0 0 0 var(--lk-ecb25c-95); } 100% { filter: none; box-shadow: 0 0 0 10px var(--lk-ecb25c-0); } }
 @keyframes kgTapR { 0% { filter: brightness(1.8); } 100% { filter: none; } }
 #suggest.kids1 .ss-kidpad.kgtap, html.simple #suggest.kids1 .ss-kidpad.kgtap, .kb .pad.kgtap { animation: kgTap .4s ease-out 1 !important; }
 @media (prefers-reduced-motion: reduce) { #suggest.kids1 .ss-kidpad.kgtap, html.simple #suggest.kids1 .ss-kidpad.kgtap, .kb .pad.kgtap { animation: kgTapR .4s ease-out 1 !important; } }
 /* v93: the Kids tap flash in full mode (chip tap, Next, Play song): same flash + expanding ring, a little
    smaller and shorter; paint-only (filter + box-shadow), so nothing moves; reduced motion = the flash only */
-@keyframes fxTap { 0% { filter: brightness(1.55); box-shadow: 0 0 0 0 rgba(236, 178, 92, .8); } 100% { filter: none; box-shadow: 0 0 0 7px rgba(236, 178, 92, 0); } }
+@keyframes fxTap { 0% { filter: brightness(1.55); box-shadow: 0 0 0 0 var(--lk-ecb25c-8); } 100% { filter: none; box-shadow: 0 0 0 7px var(--lk-ecb25c-0); } }
 @keyframes fxTapR { 0% { filter: brightness(1.4); } 100% { filter: none; } }
 html:not(.simple) #suggest:not(.kids1) .fxtap { animation: fxTap .32s ease-out 1; }
 @media (prefers-reduced-motion: reduce) { html:not(.simple) #suggest:not(.kids1) .fxtap { animation: fxTapR .32s ease-out 1; } }
 /* v99: full mode: the grid cell Play would sound next: thin dashed warm-white outline, a touch brighter, and a
    gentle grow-and-pulse (the scale property only, so no layout shift). Reduced motion: the outline stays still. */
 @keyframes laPulse { 0%, 100% { scale: 1; filter: brightness(1.08); } 50% { scale: 1.035; filter: brightness(1.16); } }
-html:not(.simple) #suggest:not(.kids1) .la-play { outline: 1.5px dashed rgba(255, 236, 205, .62); outline-offset: 2px; filter: brightness(1.08); animation: laPulse 2.2s ease-in-out infinite; }
-html:not(.simple):not(.pa-off) #suggest:not(.kids1) .ss-note.la-play { background-color: rgba(255, 244, 222, .14); }
+html:not(.simple) #suggest:not(.kids1) .la-play { outline: 1.5px dashed var(--lk-ffeccd-62); outline-offset: 2px; filter: brightness(1.08); animation: laPulse 2.2s ease-in-out infinite; }
+html:not(.simple):not(.pa-off) #suggest:not(.kids1) .ss-note.la-play { background-color: var(--lk-fff4de-14); }
 html:not(.simple) #suggest:not(.kids1) .la-play.fxtap { animation: fxTap .32s ease-out 1; }
 @media (prefers-reduced-motion: reduce) { html:not(.simple) #suggest:not(.kids1) .la-play { animation: none; scale: none; } html:not(.simple) #suggest:not(.kids1) .la-play.fxtap { animation: fxTapR .32s ease-out 1; } }
-.ss .ss-chip.nx, .ss .ss-note.nx { outline: 2px solid #c4853f; outline-offset: 1px; animation: nxPulseO 1.5s ease-in-out infinite; }
+.ss .ss-chip.nx, .ss .ss-note.nx { outline: 2px solid var(--lk-c4853f); outline-offset: 1px; animation: nxPulseO 1.5s ease-in-out infinite; }
 html.simple .nx::after, html.simple .nx::before { display: none; }
 html.simple .ss .nx { outline: none; animation: none; }
-.nx-arrow { position: fixed; z-index: 50; width: 22px; height: 22px; border-radius: 50%; background: rgba(20, 14, 8, .82); color: #c4853f;
-  border: 1.5px solid #c4853f; font-size: var(--fs-xs); line-height: 19px; text-align: center; pointer-events: none; animation: nxPulse 1.5s ease-in-out infinite; }
+.nx-arrow { position: fixed; z-index: 50; width: 22px; height: 22px; border-radius: 50%; background: var(--lk-140e08-82); color: var(--lk-c4853f);
+  border: 1.5px solid var(--lk-c4853f); font-size: var(--fs-xs); line-height: 19px; text-align: center; pointer-events: none; animation: nxPulse 1.5s ease-in-out infinite; }
 .nx-arrow[hidden] { display: none; }
 @keyframes nxPulse { 0%, 100% { opacity: .6; } 50% { opacity: 1; } }
 /* v73: uploaded song NEXT chord (replaces the sequence numbers): thin, softly pulsing gold outline */
-@keyframes upNxSoft { 0%, 100% { outline-color: rgba(196, 133, 63, .5); } 50% { outline-color: rgba(196, 133, 63, .95); } }
-#suggest .upnx, #songBar .sb-ch.upnx, #upSecs .up-ch.upnx, html.simple #suggest .upnx { outline: 1.5px solid rgba(196, 133, 63, .8); outline-offset: 1px; animation: upNxSoft 1.8s ease-in-out infinite; }
+@keyframes upNxSoft { 0%, 100% { outline-color: var(--lk-c4853f-5); } 50% { outline-color: var(--lk-c4853f-95); } }
+#suggest .upnx, #songBar .sb-ch.upnx, #upSecs .up-ch.upnx, html.simple #suggest .upnx { outline: 1.5px solid var(--lk-c4853f-8); outline-offset: 1px; animation: upNxSoft 1.8s ease-in-out infinite; }
 #suggest.kids1 .ss-kidpad.nx.nx, html.simple #suggest.kids1 .ss-kidpad.nx.nx { outline-width: 2px; animation: upNxSoft 1.8s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { #suggest .upnx, #songBar .upnx, #upSecs .upnx, #suggest.kids1 .ss-kidpad.nx.nx { animation: none; } }
-@keyframes nxPulseO { 0%, 100% { outline-color: rgba(196, 133, 63, .45); } 50% { outline-color: rgba(196, 133, 63, 1); } }
+@keyframes nxPulseO { 0%, 100% { outline-color: var(--lk-c4853f-45); } 50% { outline-color: var(--lk-c4853f-1); } }
 @media (prefers-reduced-motion: reduce) { .kb .pad.nx::after, .ss .nx, .nx-arrow { animation: none; } }
 
 /* v70 Kids strip: one big basic triad chip; the rest of the board stays built but hidden */
@@ -604,7 +604,7 @@ html.lay-phone-port:not(.simple) #suggest.kids1 .ss-kidpads { grid-auto-rows: mi
 
 /* v70: master Volume on the main screen, beside the transport (Next) button, every mode */
 .pg-btns { align-items: center; }
-.pg-vol { display: flex; align-items: center; gap: 4px; flex: 1 1 auto; min-width: 0; height: 100%; padding: 0 4px 0 6px; color: var(--muted, #b9ad9a); }
+.pg-vol { display: flex; align-items: center; gap: 4px; flex: 1 1 auto; min-width: 0; height: 100%; padding: 0 4px 0 6px; color: var(--muted, var(--lk-b9ad9a)); }
 .pg-vol svg { flex: 0 0 auto; width: 16px; height: 16px; }
 .pg-vol input { flex: 1 1 auto; min-width: 0; width: 100%; margin: 0; accent-color: var(--copper); }
 .pg-vol b { display: none; }
@@ -628,19 +628,19 @@ html:not(.simple) .now-col > .now-mix { order: 1; }   /* full mode orders the co
 .now-mix > .now-vol .pg-vol svg { display: block; width: 15px; height: 15px; }
 html.lay-phone-land .now-mix > .now-vol, html.lay-phone-port:not(.simple) .now-mix > .now-vol { height: 16px; min-height: 16px; }
 html.lay-phone-land .now-mix > .now-vol .pg-vol svg, html.lay-phone-port:not(.simple) .now-mix > .now-vol .pg-vol svg { width: 12px; height: 12px; }
-.pg-btn.pg-song.on { background: var(--copper); color: #1a1209; border-color: var(--copper); }
+.pg-btn.pg-song.on { background: var(--copper); color: var(--lk-1a1209); border-color: var(--copper); }
 
 /* v71 Kids next-note hint on the seven pads (both modes) */
 #suggest.kids1 .ss-kidpad { position: relative; overflow: visible; }
-#suggest.kids1 .ss-kidpad.nx, html.simple #suggest.kids1 .ss-kidpad.nx { outline: 3px solid #c4853f; outline-offset: 1px; animation: nxPulseO 1.5s ease-in-out infinite; }
+#suggest.kids1 .ss-kidpad.nx, html.simple #suggest.kids1 .ss-kidpad.nx { outline: 3px solid var(--lk-c4853f); outline-offset: 1px; animation: nxPulseO 1.5s ease-in-out infinite; }
 #suggest.kids1 .ss-kidpad.nx-root::before, html.simple #suggest.kids1 .ss-kidpad.nx-root::before { content: ""; display: block; position: absolute; left: 50%; top: 3px; width: 7px; height: 7px; margin-left: -3.5px;
-  border-radius: 50%; background: #c4853f; box-shadow: 0 0 0 1.5px rgba(20, 12, 4, .5); pointer-events: none; }
+  border-radius: 50%; background: var(--lk-c4853f); box-shadow: 0 0 0 1.5px var(--lk-140c04-5); pointer-events: none; }
 @media (prefers-reduced-motion: reduce) { #suggest.kids1 .ss-kidpad.nx { animation: none; } }
 
 /* v112 Play along hint: one small pill just above the keyboard (or near the bottom without one); 2 s; never takes a tap */
 .pa-hint { position: fixed; z-index: 60; left: 50%; top: 0; transform: translateX(-50%); width: max-content; max-width: calc(100vw - 24px); box-sizing: border-box;
-  padding: 7px 14px; border-radius: 999px; background: #2a1f14; color: #f3e6cf; border: 1.5px solid #c4853f; font-size: var(--fs-m); font-weight: 600;
-  line-height: 1.25; text-align: center; box-shadow: 0 4px 14px rgba(0, 0, 0, .45); pointer-events: none; opacity: 0; transition: opacity .18s; }
+  padding: 7px 14px; border-radius: 999px; background: var(--lk-2a1f14); color: var(--lk-f3e6cf); border: 1.5px solid var(--lk-c4853f); font-size: var(--fs-m); font-weight: 600;
+  line-height: 1.25; text-align: center; box-shadow: 0 4px 14px var(--lk-000000-45); pointer-events: none; opacity: 0; transition: opacity .18s; }
 .pa-hint.on { opacity: 1; }
 .pa-hint.compact { padding: 2px 10px; font-size: var(--fs-s); line-height: 1.2; border-width: 1px; }   /* v112.2: fits a gap between rows */
 .pa-hint[hidden] { display: none; }
@@ -648,18 +648,18 @@ html.lay-phone-land .now-mix > .now-vol .pg-vol svg, html.lay-phone-port:not(.si
    gold numbered marker) with a card: Next / Skip, Done on the last step. */
 .tour { position: fixed; inset: 0; z-index: 80; }
 .tour[hidden] { display: none; }
-.tour-dim { position: absolute; inset: 0; background: rgba(0, 0, 0, .6); }
-.tour-hole { position: absolute; border-radius: 12px; box-shadow: 0 0 0 200vmax rgba(0, 0, 0, .6), 0 0 14px 4px rgba(0, 0, 0, .35) inset;
-  outline: 2px dashed #c4853f; outline-offset: 3px; pointer-events: none; }
-.tour-num { position: absolute; width: 24px; height: 24px; border-radius: 50%; background: #c4853f; color: #1d140b; font-weight: 800; font-size: var(--fs-m);
-  display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 2px rgba(20, 12, 4, .6); pointer-events: none; }
-.tour-card { position: absolute; box-sizing: border-box; width: min(336px, calc(100vw - 24px)); background: #241a11; color: #f3e6cf;
-  border: 1.5px solid #c4853f; border-radius: 14px; padding: 14px 14px 10px; box-shadow: 0 8px 28px rgba(0, 0, 0, .5); }
+.tour-dim { position: absolute; inset: 0; background: var(--lk-000000-6); }
+.tour-hole { position: absolute; border-radius: 12px; box-shadow: 0 0 0 200vmax var(--lk-000000-6), 0 0 14px 4px var(--lk-000000-35) inset;
+  outline: 2px dashed var(--lk-c4853f); outline-offset: 3px; pointer-events: none; }
+.tour-num { position: absolute; width: 24px; height: 24px; border-radius: 50%; background: var(--lk-c4853f); color: var(--lk-1d140b); font-weight: 800; font-size: var(--fs-m);
+  display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 2px var(--lk-140c04-6); pointer-events: none; }
+.tour-card { position: absolute; box-sizing: border-box; width: min(336px, calc(100vw - 24px)); background: var(--lk-241a11); color: var(--lk-f3e6cf);
+  border: 1.5px solid var(--lk-c4853f); border-radius: 14px; padding: 14px 14px 10px; box-shadow: 0 8px 28px var(--lk-000000-5); }
 .tour-text { font-size: var(--fs-l); line-height: 1.35; margin: 0 0 12px; }
 .tour-foot { display: flex; align-items: center; gap: 8px; }
 .tour-step { flex: 1 1 auto; font-size: var(--fs-s); opacity: .75; }
-.tour-btn { min-height: 40px; padding: 0 16px; border-radius: 10px; font: inherit; font-weight: 700; border: 1px solid #c4853f; background: transparent; color: #f3e6cf; cursor: pointer; }
-.tour-btn.pri { background: #c4853f; color: #1d140b; }
+.tour-btn { min-height: 40px; padding: 0 16px; border-radius: 10px; font: inherit; font-weight: 700; border: 1px solid var(--lk-c4853f); background: transparent; color: var(--lk-f3e6cf); cursor: pointer; }
+.tour-btn.pri { background: var(--lk-c4853f); color: var(--lk-1d140b); }
 /* v112: two more rows (Show hints, Help > Tour): keep the gear menu on screen in landscape; it scrolls when taller */
 .config-menu { max-height: calc(100vh - 72px); max-height: calc(100dvh - 72px); overflow-y: auto; overscroll-behavior: contain; }
 .config-menu > * { flex-shrink: 0; }
