@@ -60,7 +60,7 @@ function build() {
   hello.appendChild(h("h1", "kv-title", "Touch&nbsp;Chord"));
   hello.appendChild(h("div", "kv-notes", emo("\uD83C\uDFB5\uD83C\uDFB9\uD83C\uDFB5")));
   var go = btn("kv-go", "<span class=\"kv-tri\"></span>", "Start");
-  go.addEventListener("click", function () { unlock(); kv.log.push("hello"); show(state.kidsSong && KV_SONGS[state.kidsSong] && songName() === state.kidsSong ? "play" : "songs"); });
+  go.addEventListener("click", function () { unlock(); kv.log.push("hello"); var p = state.kidsSong && KV_SONGS[state.kidsSong] && songName() === state.kidsSong; if (p) bootResume(); show(p ? "play" : "songs"); });
   hello.appendChild(go);
   hello.appendChild(h("div", "kv-tip", emo("\uD83D\uDD08") + "<span>No sound? Turn the volume up. Touch Chord plays even with the iPhone silent switch on.</span>"));
   // b. Songs
@@ -134,8 +134,14 @@ function buildCards() {
     els.cards.appendChild(c);
   });
 }
+// rd7 (Noff rd6 #4): a reload in Kids opens Hello as before; Start (or picking the same song) then resumes the saved step.
+function bootResume() {
+  var w = kv.bootWalk; kv.bootWalk = null;
+  if (w && !w.end && w.name === songName()) { progWalkTo(w); kv.log.push("resume:" + w.t); }
+}
 function pickSong(i, fresh) {
   hideReward();
+  if (!fresh && i === prog.idx) bootResume(); else kv.bootWalk = null;
   if (fresh || i !== prog.idx) progSet(i);
   state.kidsSong = songName(); scheduleSave();
   kv.log.push("song:" + state.kidsSong);
@@ -187,6 +193,7 @@ function enter(boot) {
   if (ix >= 0 && ix !== prog.idx) progSet(ix);
   var kept = ix >= 0 && (walked || !!state.kidsSong);   // rd5.1: a song the child played (or was playing in Simple) is kept
   if (kv.resume && ix >= 0) progWalkTo(kv.resume);   // mode switch: the song picks up where it left off
+  kv.bootWalk = boot && ix >= 0 && state.kidsWalk && state.kidsWalk.name === want && !state.kidsWalk.end ? state.kidsWalk : null;   // rd7: kept for Start
   kv.resume = null;
   var sk = KIDS_SONG_KEY[songName()], ak = activeKey();
   if (sk && (!ak || ak.pc !== 0 || ak.mode !== "major")) applySongKey(sk[0], sk[1]);   // the Kids piano is C..B: the song's own key

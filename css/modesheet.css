@@ -96,9 +96,11 @@ html.look-fade *, html.look-fade *::before, html.look-fade *::after { transition
 html.simple:not(.tc-classic) #styles button[data-style="kids"] { display: none !important; }
 
 /* ---------- Expert: one-time note for an old Full-layout setup ---------- */
-.x-note { position: fixed; z-index: 62; left: 50%; transform: translateX(-50%); top: calc(var(--x-top-b, 56px) + 8px); display: flex; align-items: center; gap: 10px;
+/* rd7 (Uiux spec for Noff rd6 #5): a toast just under the top bar; taps go through it (only its ✕ takes them) */
+.x-note { position: fixed; z-index: 62; left: 50%; transform: translateX(-50%); top: calc(var(--x-top-b, 56px) + 4px); pointer-events: none; transition: opacity .35s ease; display: flex; align-items: center; gap: 10px;
   max-width: calc(100% - 24px); box-sizing: border-box; padding: 8px 8px 8px 14px; border-radius: 14px; background: #2f8f83; color: #fff; font: 700 14px/1.25 Nunito, system-ui, sans-serif; box-shadow: 0 8px 22px rgba(0,0,0,.35); }
-.x-note-x { flex: none; width: 36px; height: 36px !important; min-height: 0 !important; border-radius: 18px; border: 0; background: rgba(255,255,255,.2); color: #fff; font-size: 14px; padding: 0; }
+.x-note.out { opacity: 0; }
+.x-note-x { pointer-events: auto; flex: none; width: 36px; height: 36px !important; min-height: 0 !important; border-radius: 18px; border: 0; background: rgba(255,255,255,.2); color: #fff; font-size: 14px; padding: 0; }
 /* the classic app's button base (copper .on, borders) must not reach the sheet */
 .ms-wrap .ms-row, .ms-wrap .ms-row.on { background: transparent !important; color: var(--ms-ink) !important; border-color: var(--ms-line) !important; box-shadow: none !important; }
 .ms-wrap .ms-row.ms-danger { color: var(--ms-danger) !important; }

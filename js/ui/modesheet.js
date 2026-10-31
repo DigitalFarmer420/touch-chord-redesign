@@ -160,10 +160,10 @@ export function paintSheet() {
   Array.prototype.forEach.call(sheet.querySelectorAll("#msLook button"), function (b) {
     var o = b.dataset.look === pick; b.classList.toggle("on", o); b.setAttribute("aria-checked", o ? "true" : "false"); b.disabled = simple;
   });
-  sheet.querySelector(".ms-look").classList.toggle("dis", simple);
-  sheet.querySelector(".ms-lsub").textContent = simple ? "For Kids and Expert. Simple's Lamp look is coming next." : pick === "auto" ? "Auto: Day 7:00\u201319:00, Lamp at night" : "";
+  sheet.querySelector(".ms-look").hidden = simple;   // rd7 (Uiux): no Look row in Simple until Simple has a Lamp look
+  sheet.querySelector(".ms-lsub").textContent = pick === "auto" ? "Auto: Day 7:00\u201319:00, Lamp at night" : "";
   $("msUpload").hidden = m !== "expert";
-  $("msNote").textContent = m === "kids" ? "Kids: hold the chip 1 second to open (grown-up step)" : m === "simple" ? "No more Simple on/off toggle. Its extra controls now live in Expert." : "";
+  $("msNote").textContent = m === "kids" ? "Kids: hold the chip 1 second to open (grown-up step)" : "";   // rd7 (Uiux): no permanent Simple footer
 }
 export function sheetOpen() { return !!wrap && !wrap.hidden; }
 export function openModeSheet(open) {

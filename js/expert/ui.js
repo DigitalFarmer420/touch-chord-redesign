@@ -151,7 +151,7 @@ function build() {
   top.appendChild(el("button", "x-b x-style", "<span class=\"x-sl\">Pop</span><span class=\"x-car\">\u25be</span>", { id: "xStyle", "aria-haspopup": "listbox", "aria-expanded": "false", "aria-label": "Style" }));
   top.appendChild(el("span", "x-slot"));
   var chip = makeChip("expert", "xModeChip"); chip.classList.add("x-b"); top.appendChild(chip);   // rd6: the mode chip (was the gold Expert button)
-  top.appendChild(el("button", "x-b x-help", "?", { id: "xHelp", "aria-label": "How to" }));
+  top.appendChild(el("button", "x-b x-help", HELP_SVG, { id: "xHelp", "aria-label": "How to" }));   // rd7 (Uiux): the same "?" circle as Simple
   var tog = el("div", "x-seg x-tog", "<button type=\"button\" data-v=\"song\" role=\"tab\">\u266c Song</button><button type=\"button\" data-v=\"prog\" role=\"tab\">\u25a6 Progressions</button>", { id: "xTog", role: "tablist", "aria-label": "Song or progressions" });
   var go = el("div", "x-go", null, { id: "xGo" });
   go.appendChild(el("button", "x-b x-next", "Next \u279c", { id: "xNext", "aria-label": "Next chord" }));
@@ -537,9 +537,22 @@ function showDenseNote() {
   var n = el("div", "x-note", "<span class=\"x-note-t\">Simple's dense layout lives in Expert now</span>", { id: "xDenseNote", role: "status" });
   var x = el("button", "x-note-x", "\u2715", { "aria-label": "Dismiss" }); x.addEventListener("click", dropDenseNote); n.appendChild(x);
   document.body.appendChild(n); xLog.denseNote = "shown";
+  // rd7: it never blocks play: taps pass through it, and it fades out after NOTE_MS or on the first tap anywhere
+  noteT = setTimeout(function () { fadeDenseNote("time"); }, NOTE_MS);
+  window.addEventListener("pointerdown", noteTap, true);
 }
-function dropDenseNote() { var n = $("xDenseNote"); if (n) n.remove(); }
+export const NOTE_MS = 6000;
+var noteT = 0;
+function noteTap(e) { if (e.target && e.target.closest && e.target.closest(".x-note-x")) return; fadeDenseNote("tap"); }
+function fadeDenseNote(why) {
+  var n = $("xDenseNote"); clearTimeout(noteT); noteT = 0; window.removeEventListener("pointerdown", noteTap, true);
+  if (!n || n.classList.contains("out")) return;
+  xLog.denseGone = why; n.classList.add("out"); setTimeout(function () { n.remove(); }, 400);
+}
+function dropDenseNote() { clearTimeout(noteT); noteT = 0; window.removeEventListener("pointerdown", noteTap, true); var n = $("xDenseNote"); if (n) { xLog.denseGone = xLog.denseGone || "x"; n.remove(); } }
 
+// rd7: the classic top bar's "?" icon (index.html #howtoBtn), so Expert's matches it
+const HELP_SVG = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r="0.6" fill="currentColor"/></svg>';
 // Boot (from main.js, after the app's own boot: saved settings applied, first song set).
 export function boot() {
   pref = prefFromUrl(location.search, loadPref());
