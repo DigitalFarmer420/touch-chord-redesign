@@ -143,7 +143,7 @@ test('Mode: Kids view = Kids, Simple switch = Simple, else Expert when on (not t
   assert.equal(M.expertStyleFix({ kv: false, style: 'kids', simple: false, on: true }), 'pop');
   assert.equal(M.expertStyleFix({ kv: true, style: 'kids', simple: false, on: false }), null);
   assert.equal(M.expertStyleFix({ kv: false, style: 'kids', simple: false, on: false }), null);
-  assert.equal(M.expertStyleFix({ kv: false, style: 'kids', simple: true, on: true }), null);
+  assert.equal(M.expertStyleFix({ kv: false, style: 'kids', simple: true, on: true }), 'pop');   // rd6: no Kids style in Simple either
   assert.equal(M.expertStyleFix({ kv: false, style: 'jazz', simple: false, on: true }), null);
   assert.equal(M.modeOf({ kv: false, style: 'jazz', simple: true, on: true }), 'simple');
   assert.equal(M.modeOf({ kv: false, style: 'jazz', simple: false, on: true }), 'expert');
@@ -155,10 +155,11 @@ test('Mode switch targets: Kids opens the Kids view; leaving Kids goes back to t
   assert.deepEqual(M.modeTarget({ style: 'rnb', simple: false }, 'kids', 'rnb'), { kv: true, style: null, simple: null, on: false });
   assert.deepEqual(M.modeTarget({ style: 'kids', simple: false }, 'simple', null), { kv: false, style: 'pop', simple: true, on: false });
 });
-test('Expert pref: Lamplight default, own store key, ?expert=1/0', () => {
+test('Expert pref: Auto default (rd6; was Lamplight), own store key, ?expert=1/0', () => {
   assert.equal(M.EXPERT_STORE, 'touchChord.expert.v1');
-  assert.deepEqual(M.parsePref('{}'), { v: 1, on: false, look: 'lamp' });
-  assert.deepEqual(M.parsePref('nope'), { v: 1, on: false, look: 'lamp' });
+  assert.deepEqual(M.parsePref('{}'), { v: 1, on: false, look: 'auto' });
+  assert.deepEqual(M.parsePref('nope'), { v: 1, on: false, look: 'auto' });
+  assert.deepEqual(M.parsePref('{"on":true,"look":"lamp"}'), { v: 1, on: true, look: 'lamp' });   // a saved Lamp is kept
   assert.deepEqual(M.parsePref('{"on":true,"look":"day"}'), { v: 1, on: true, look: 'day' });
   assert.equal(M.prefFromUrl('?test=1&expert=1', M.expertDefaults()).on, true);
   assert.equal(M.prefFromUrl('?expert=0', { v: 1, on: true, look: 'lamp' }).on, false);

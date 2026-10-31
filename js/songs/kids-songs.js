@@ -14,3 +14,17 @@ export const KIDS_SONG_KEY = {
   "Kids Itsy Bitsy Spider": ["C", "major"],
   "Kids Head Shoulders Knees and Toes": ["C", "major"],
 };
+// rd6 (Noff Info): a Kids song must have lyrics: at least one line, every line with words and markers. The Kids play
+// screen also refuses a blank lyrics box (kids/view.js show() goes back to the song list). Returns the problems found.
+export function kidsSongProblems(names, lyrics) {
+  var L = lyrics || KIDS_LYRICS, out = [];
+  (names || Object.keys(L)).forEach(function (n) {
+    var ls = L[n];
+    if (!Array.isArray(ls) || !ls.length) { out.push(n + ": no lyrics"); return; }
+    ls.forEach(function (ln, i) {
+      if (!ln || typeof ln.text !== "string" || !ln.text.trim()) out.push(n + ": line " + (i + 1) + " is empty");
+      else if (!Array.isArray(ln.markers) || !ln.markers.length) out.push(n + ": line " + (i + 1) + " has no markers");
+    });
+  });
+  return out;
+}
