@@ -14,7 +14,7 @@ import { nextHintSpec } from "../ui/next.js?v=112.13";
 import { setHintAvoid } from "../ui/hints.js?v=112.13";
 import { progFeel, progSteps, progNumerals } from "../songs/presets.js?v=112.13";
 import { upSelected, upCurStep, upNextStep } from "../songs/song.js?v=112.13";
-import { state, shared, fingers, loop } from "../state.js?v=112.13";
+import { state, shared, fingers, loop, scheduleSave } from "../state.js?v=112.13";
 import { accSym } from "../theory/spelling.js?v=112.13";
 import { Theory } from "../theory/index.js?v=112.13";
 import { paintKeyChip, keyLabel } from "../ui/keychip.js?v=112.13";
@@ -27,7 +27,7 @@ import { setExpert as setKidsViewOff, setModeHandler, kidsStartOver, setTheme as
 import { setSimple } from "../ui/layout.js?v=112.13";
 import { libSetVer } from "../songs/library.js?v=112.13";
 import { secLyrics } from "../songs/fullchart.js?v=112.13";
-import { makeChip, configureSheet, openModeSheet, bootSheet, paintSheet, sheetOpen } from "../ui/modesheet.js?v=112.13";
+import { KEYS_CHOICES, makeChip, configureSheet, openModeSheet, bootSheet, paintSheet, sheetOpen } from "../ui/modesheet.js?v=112.13";
 import { registerLook, lookApplyNow, lookShown } from "../ui/look.js?v=112.13";   // redesign-dev: the Kids view (kids-build) is the switch's Kids
 import { EXPERT_STORE, parsePref, prefFromUrl, modeOf, modeTarget, typeBarInit, typeBarReduce, typeBarLabel, TYPEBAR_HOLD_MS,
   sourceInit, sourceReduce, progDots, lyricNow, STYLE_MENU, styleName, expertWindowKeys, expertStyleFix, fullToExpert, chartFor } from "./model.js?v=112.13";
@@ -61,6 +61,27 @@ function loadPref() { var raw = null; try { raw = localStorage.getItem(EXPERT_ST
 function srcCtx() { return { hasSong: !!shared.U, songSelected: upSelected() }; }
 function isLand() { var c = document.documentElement.classList; return c.contains("lay-phone-land") || c.contains("lay-pad-land"); }
 function click(sel) { var b = typeof sel === "string" ? document.querySelector(sel) : sel; if (b) b.click(); return !!b; }
+
+// ---------- rd13: Keys (Octave · Full · Buttons) ----------
+// One pick per device: the saved keyboard layout (touchChord.settings.v1 "layout", which the old Layout tab also sets).
+// octave / piano (the same one-octave window) = Octave, full = Full, fourths = Buttons. Kids and Simple ignore it
+// (they always play the one-octave window, pads.js effectiveLayout), so it is kept across mode switches and reloads.
+const KEYS_LAYOUT = { octave: "octave", full: "full", buttons: "fourths" };
+export function keysPick() { return state.layout === "full" ? "full" : state.layout === "fourths" ? "buttons" : "octave"; }
+function keysLabel(k) { for (var i = 0; i < KEYS_CHOICES.length; i++) if (KEYS_CHOICES[i][0] === k) return KEYS_CHOICES[i][1]; return k; }
+export function setKeys(k) {
+  if (!KEYS_LAYOUT[k]) return;
+  xLog.keys = (xLog.keys || []).concat(k);
+  if (keysPick() !== k) { click("#layouts button[data-layout=\"" + KEYS_LAYOUT[k] + "\"]"); scheduleSave(0); }
+  paintKeysChip(); if (sheetOpen()) paintSheet();
+  if (active) setTimeout(function () { placeBadges(); }, 0);
+}
+function nextKeys() { var i = 0; KEYS_CHOICES.forEach(function (c, j) { if (c[0] === keysPick()) i = j; }); return KEYS_CHOICES[(i + 1) % KEYS_CHOICES.length][0]; }
+function paintKeysChip() {
+  var c = $("xKeysChip"); if (!c) return; var k = keysPick();
+  c.dataset.keys = k; c.innerHTML = "<span class=\"x-kci\" aria-hidden=\"true\">↻</span>" + keysLabel(k);
+  c.setAttribute("aria-label", "Keys: " + keysLabel(k) + ". Tap for " + keysLabel(nextKeys()));
+}
 
 // ---------- mode ----------
 export function expertActive() { return active; }
@@ -126,7 +147,7 @@ function paintMode() {
   paintSimpleLook();
   syncChart();
   if (sheetOpen()) paintSheet();
-  if (on) paint();
+  if (on) { paint(); paintKeysChip(); }
 }
 // rd6: uploaded songs: Simple plays the easy chart, Expert the Full chart (a one-chart song plays it in both). Set on every
 // mode switch, load and song change; the per-song Simple / Full pick in My songs still works until the next one.
@@ -191,6 +212,8 @@ function build() {
   }
   mini.appendChild(whites); mini.appendChild(blacks);
   [top, tog, go, song, list, ctl, scrim, smenu, ksheet].forEach(function (n) { app.insertBefore(n, nowCol); });
+  // rd13: the Keys chip on the play panel's top-right corner (one tap = the next of Octave / Full / Buttons)
+  var kw = document.querySelector(".kb-wrap"); if (kw) kw.appendChild(el("button", "x-kchip", "", { id: "xKeysChip" }));
   // Sound sheet extras (inside the existing Sound pane; shown only in Expert): a Vol slider that drives #volume.
   var vol = el("label", "x-volrow", "<span>Vol</span><input id=\"xVol\" type=\"range\" min=\"0\" max=\"100\" step=\"1\" aria-label=\"Volume\"><b id=\"xVolVal\"></b>");
   $("paneSound").appendChild(vol);
@@ -487,6 +510,8 @@ function wireAll() {
   });
   $("xScrim").addEventListener("click", function () { closeAll(); });
   $("xFull").addEventListener("click", function () { click("#allKeys"); schedule(); });
+  $("xKeysChip").addEventListener("click", function () { closeAll(); setKeys(nextKeys()); });
+  $("layouts").addEventListener("click", function () { setTimeout(paintKeysChip, 0); });   // the Sound ▸ Layout tab sets the same pick
   $("xSound").addEventListener("click", function () {
     if (document.documentElement.classList.contains("x-ctl-on")) closeAll(); else { closeAll("ctl"); setCtlSheet(true); }
   });
@@ -631,6 +656,7 @@ export function boot() {
       else { pref.look = v; savePref(); lookApplyNow("expert"); paintMode(); }
     },
     isDay: function (m) { return lookShown(m) === "day"; },
+    keysGet: keysPick, keysSet: setKeys,
     startOver: startOver
   });
   placeTog();
@@ -641,4 +667,4 @@ export function boot() {
   if (oldFull) { xLog.oldFull = true; showDenseNote(); }
   setTimeout(function () { if (active) { placeTog(); placeSheets(); fitStrip(); placeBadges(); fitNowSymbol(); } }, 60);
 }
-if (/[?&]test=1(&|$)/.test(location.search)) window.__xmode = { log: xLog, mode: function () { return currentMode(); }, chart: chartState, scrollSel: scrollStyleSel, pref: function () { return Object.assign({}, pref); } };
+if (/[?&]test=1(&|$)/.test(location.search)) window.__xmode = { log: xLog, mode: function () { return currentMode(); }, chart: chartState, scrollSel: scrollStyleSel, pref: function () { return Object.assign({}, pref); }, keys: keysPick, setKeys: setKeys };

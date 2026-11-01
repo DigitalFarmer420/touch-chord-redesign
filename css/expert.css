@@ -331,3 +331,11 @@ html.expert.pa-off .kb.piano .pad.x-arrow-teal::after { display: none !important
 
 /* rd5 (Uiux): landscape phone Style list - more rows below; a cut last row + bottom fade while more rows are below */
 html.expert .x-menu.x-more { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), rgba(0,0,0,.3)); mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), rgba(0,0,0,.3)); }
+/* rd13: the Keys chip (Octave / Full / Buttons) on the play panel's top-right corner; one tap = the next view.
+   The panel keeps its grid row height in all three views. */
+html:not(.expert) #xKeysChip { display: none !important; }
+html.expert .kb-wrap { position: relative; }
+html.expert #xKeysChip { position: absolute; z-index: 5; top: 0; right: 0; height: 26px; min-height: 0; padding: 0 9px 0 7px; display: inline-flex; align-items: center; gap: 4px;
+  border: 1.5px solid #6b5320; border-radius: 0 16px 0 12px; background: #1E1914; color: var(--x-gold); font: 700 12px Nunito, system-ui, sans-serif; letter-spacing: .2px; box-shadow: none; }
+html.expert #xKeysChip .x-kci { font-size: 13px; line-height: 1; }
+html.expert.lay-pad-port #xKeysChip, html.expert.lay-pad-land #xKeysChip { height: 32px; font-size: 14px; padding: 0 12px 0 10px; }
