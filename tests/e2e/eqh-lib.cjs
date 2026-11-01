@@ -4,7 +4,7 @@
 module.exports = function eqhAudit(opt) {
   opt = opt || {}; var tol = opt.tol == null ? 1 : opt.tol, GAP = opt.gap || 24;
   var SKIP = '#pads, #pads *, #suggest *, #kvPads *, .kv-pads *, #xPList .x-prow *, #dev-badge, .x-note, #howto *, .ht-shot';
-  var UNIT = '.seg, [role=radiogroup], [role=tablist], .ms-seg, .ms-pair';
+  var UNIT = '.seg, .x-seg, [role=radiogroup], [role=tablist], .ms-seg, .ms-pair';   // rd14: + .x-seg (the Song | Progressions track)
   var SEL = 'button, select, [role=button], input[type=text], input[type=search], .now-card, ' + UNIT + (opt.extra ? ', ' + opt.extra : '');
   function vis(e) { if (!e.getClientRects().length) return false; if (e.closest('[hidden]')) return false; var cs = getComputedStyle(e);
     if (cs.visibility === 'hidden' || cs.display === 'none') return false; for (var x = e; x && x.nodeType === 1; x = x.parentElement) { var c = getComputedStyle(x); if (+c.opacity < 0.05) return false; } return true; }
@@ -14,7 +14,10 @@ module.exports = function eqhAudit(opt) {
   var units = all.filter(function (e) { var u = e.parentElement && e.parentElement.closest(UNIT); return !(u && all.indexOf(u) >= 0); });
   // a control that only wraps other controls (a bar) is not itself a control in the row
   units = units.filter(function (e) { return !units.some(function (o) { return o !== e && e.contains(o); }) || e.matches(UNIT); });
-  var R = units.map(function (e) { var r = e.getBoundingClientRect(); return { e: e, l: r.left, r: r.right, t: r.top, b: r.bottom, h: r.height, w: r.width }; })
+  // rd14: the outer box (a visible outline counts, e.g. a segment track's ring), not only the border box
+  function outer(e) { var r = e.getBoundingClientRect(), cs = getComputedStyle(e), o = cs.outlineStyle !== 'none' ? Math.max(0, parseFloat(cs.outlineWidth) + parseFloat(cs.outlineOffset)) : 0;
+    return { left: r.left - o, right: r.right + o, top: r.top - o, bottom: r.bottom + o, width: r.width + 2 * o, height: r.height + 2 * o }; }
+  var R = units.map(function (e) { var r = outer(e); return { e: e, l: r.left, r: r.right, t: r.top, b: r.bottom, h: r.height, w: r.width }; })
     .filter(function (x) { return x.h >= 16 && x.w >= 16 && x.b > 0 && x.t < innerHeight && x.r > 0 && x.l < innerWidth; });
   function ov(a, b) { return Math.min(a.b, b.b) - Math.max(a.t, b.t); }
   var nb = R.map(function () { return []; });

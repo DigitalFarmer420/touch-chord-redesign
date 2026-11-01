@@ -219,6 +219,20 @@ Tests: unit rd8.test.js (+ rd7 updated); e2e tests/e2e/rd8.cjs; rd6 / rd7 update
 Tests: unit rd9.test.js; e2e tests/e2e/rd9.cjs (lyrics vs beats, end of song, all round trips, banner geometry and a
 tap through it plays the chip); rd6 / rd7 / rd8 banner checks updated for no ✕.
 
+## rd14 (Keys chip off the keys; Song | Progressions track 44px) - badge v112.13-rd14
+1. Med (Noff + Uiux): the rd13 Keys chip sat on the keys (780x360 Buttons: all of the top-right Ab; upright: its top
+   third; landscape: the top of B / top C) and took their taps, and crowded the enable-sound pill. Expert's keyboard
+   panel now has a header strip (28px upright phones, 24px short landscape, 32px iPad) with the chip at its right end
+   and the pill at its left; the panel keeps its height (the keys start lower; the chord grid and pads do not move).
+   Found by the new hit test: in short landscape Buttons a key's note label overhung the key above and took its taps
+   (rd13 too); labels no longer take taps in Expert.
+2. Uiux: the Song | Progressions track is 44px outside (38px segments, 3px padding), exactly as Next / Play; the eqh
+   audit measures outer boxes (outline included) and treats the track (.x-seg) as one control.
+3. Accepted as-is: a held key's note stops when the Keys view changes (Noff Low); Start over resets Keys to Octave.
+Tests: tests/e2e/rd14.cjs (every key, 5x5 points 5px in, hit-tests to the key at 360x780, 384x832, 412x915, 780x360,
+1180x820 x Octave / Full / Buttons x Day / Lamp; chip in the strip, clear of the pill; panel + grid = rd13; track).
+rd10-rd12 pixel checks also mask Expert's keyboard panel; rd13's chip position check follows the strip.
+
 ## rd13 (Expert Keys switch + equal-height rows on phones) - badge v112.13-rd13
 1. Why Expert showed buttons: Expert draws the saved keyboard layout (touchChord.settings.v1 "layout"). "fourths" (the
    4x6 note-button grid) is restored from a setup that picked Fourths in the old Layout segment (classic Full screen,

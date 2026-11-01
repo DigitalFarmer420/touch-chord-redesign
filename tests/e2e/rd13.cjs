@@ -136,7 +136,7 @@ const sounding = p => p.evaluate(() => (__xMarks.sounding() || []).slice().sort(
   // 3. chip cycles; sheet and chip agree; panel height and the chord grid stay put; saved per device
   for (const [w, h] of [[360, 780], [1180, 820]]) { const T = `${w}x${h}`, D = R.data[T] = {};
     const p = await open(b, w, h, XS()); let k0 = await kb(p); const seen = [];
-    F(k0.chip && Math.abs(k0.chip.x + k0.chip.w - (k0.wrap.x + k0.wrap.w)) <= 1 && Math.abs(k0.chip.y - k0.wrap.y) <= 1, `${T}: chip not on the panel's top-right corner ${JSON.stringify([k0.chip, k0.wrap])}`);
+    F(k0.chip && k0.wrap.x + k0.wrap.w - (k0.chip.x + k0.chip.w) >= 0 && k0.wrap.x + k0.wrap.w - (k0.chip.x + k0.chip.w) <= 8 && k0.chip.y - k0.wrap.y >= 0 && k0.chip.y - k0.wrap.y <= 4, `${T}: chip not at the panel's top right ${JSON.stringify([k0.chip, k0.wrap])}`);   // rd14: in the header strip's right end
     for (let i = 0; i < 3; i++) { const k = await kb(p); seen.push(k.pick);
       F(JSON.stringify(k.wrap) === JSON.stringify(k0.wrap) && JSON.stringify(k.grid) === JSON.stringify(k0.grid), `${T} ${k.pick}: panel / grid moved ${JSON.stringify([k.wrap, k.grid])} vs ${JSON.stringify([k0.wrap, k0.grid])}`);
       F(k.chip && k.chip.t === LAB[k.pick], `${T}: chip says ${k.chip && k.chip.t} for ${k.pick}`);

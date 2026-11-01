@@ -32,6 +32,7 @@ const SUITE = [   // [name, file, args]  (both phone sizes each: the tests loop 
   ['rd11', 'rd11.cjs', []],   // rd11: Look helper line in 3 sheets, Day sus chip plum + AA, iPad lyric chip top-aligned, contrast 820x1180 + 1180x820, Lamp = rd10 outside the song bar (RD10 env)
   ['rd12', 'rd12.cjs', []],   // rd12: tablet lyric lines 16px (Simple + Expert, Day + Lamp), title as rd11, phones pixel-identical to rd11 (RD11 env)
   ['rd13', 'rd13.cjs', []],   // rd13: Expert Keys row + chip (cycle, persistence, defaults, panel height, slide / snap-back, root-left, same sound), Kids / Simple untouched; equal-height rows at 360x780 / 384x832 / 412x915
+  ['rd14', 'rd14.cjs', []],   // rd14: Keys header strip - every key's area hit-tests to the key (never the chip / pill) in 3 views x 5 sizes; panel and pads = rd13 (RD13 env); track 44 = Next / Play
 ];
 const only = process.env.ONLY ? process.env.ONLY.split(',') : null;
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.webp': 'image/webp', '.json': 'application/json', '.png': 'image/png' };

@@ -331,16 +331,33 @@ html.expert.pa-off .kb.piano .pad.x-arrow-teal::after { display: none !important
 
 /* rd5 (Uiux): landscape phone Style list - more rows below; a cut last row + bottom fade while more rows are below */
 html.expert .x-menu.x-more { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), rgba(0,0,0,.3)); mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), rgba(0,0,0,.3)); }
-/* rd13: the Keys chip (Octave / Full / Buttons) on the play panel's top-right corner; one tap = the next view.
-   The panel keeps its grid row height in all three views. */
+/* rd13: the Keys chip (Octave / Full / Buttons); one tap = the next view.
+   rd14 (Noff + Uiux Med): the keyboard panel has a slim header strip (--x-kh: 28px upright phones, 24px short landscape,
+   32px iPad) above the keys, with the chip at its right end and the "Tap anywhere to enable sound" pill at its left,
+   so no key sits under either. The panel keeps its grid row height: the keys start lower, the pads above stay put. */
 html:not(.expert) #xKeysChip { display: none !important; }
-html.expert .kb-wrap { position: relative; }
-html.expert #xKeysChip { position: absolute; z-index: 5; top: 0; right: 0; height: 26px; min-height: 0; padding: 0 9px 0 7px; display: inline-flex; align-items: center; gap: 4px;
-  border: 1.5px solid #6b5320; border-radius: 0 16px 0 12px; background: #1E1914; color: var(--x-gold); font: 700 12px Nunito, system-ui, sans-serif; letter-spacing: .2px; box-shadow: none; }
+html.expert #app { --x-kh: 28px; }
+html.expert.lay-phone-land #app { --x-kh: 24px; }
+html.expert.lay-pad-port #app, html.expert.lay-pad-land #app { --x-kh: 32px; }
+html.expert .kb-wrap { position: relative; padding-top: var(--x-kh); }
+html.expert #xKeysChip { position: absolute; z-index: 5; top: 2px; right: 6px; height: calc(var(--x-kh) - 4px); min-height: 0; padding: 0 10px 0 8px; display: inline-flex; align-items: center; gap: 4px;
+  border: 1.5px solid #6b5320; border-radius: 999px; background: #1E1914; color: var(--x-gold); font: 700 12px Nunito, system-ui, sans-serif; letter-spacing: .2px; box-shadow: none; }
 html.expert #xKeysChip .x-kci { font-size: 13px; line-height: 1; }
-html.expert.lay-pad-port #xKeysChip, html.expert.lay-pad-land #xKeysChip { height: 32px; font-size: 14px; padding: 0 12px 0 10px; }
+html.expert.lay-phone-land #xKeysChip { font-size: 11px; padding: 0 8px 0 7px; }
+html.expert.lay-pad-port #xKeysChip, html.expert.lay-pad-land #xKeysChip { font-size: 14px; padding: 0 12px 0 10px; }
+html.expert #unlock { top: 3px; left: 8px; transform: none; height: calc(var(--x-kh) - 6px); line-height: calc(var(--x-kh) - 6px); padding: 0 10px; box-sizing: border-box;
+  font-size: 12px; max-width: calc(100% - 128px); overflow: hidden; text-overflow: ellipsis; box-shadow: none; }
+html.expert.lay-phone-land #unlock { font-size: 11px; }
+html.expert.lay-pad-port #unlock, html.expert.lay-pad-land #unlock { font-size: 14px; }
 /* rd13 (Uiux, Galaxy S25 upright): every control in a row shares the row's height (44px bars and buttons; the Now row
    is the 60px source row). Phones held upright only; the base button height (--ctrl 38px) no longer shrinks them. */
 html.expert.lay-phone-port #xTop, html.expert.lay-phone-port #xGo, html.expert.lay-phone-port #xSrc:not(.x-mode-song) { align-items: stretch; }
 html.expert.lay-phone-port #xTop > .x-b, html.expert.lay-phone-port #xGo > .x-b, html.expert.lay-phone-port #xSrc .x-pbar { height: auto; min-height: 0; align-self: stretch; }
 html.expert.lay-phone-port #xTop .x-help { height: auto; min-height: 0; align-self: stretch; }
+/* rd14 (Uiux): the Song | Progressions track itself is 44px (its segments 38px inside, 3px padding), exactly as Next / Play. */
+html.expert.lay-phone-port #xTog { height: 44px; align-self: start; padding: 3px; border: 0; box-sizing: border-box; }
+html.expert.lay-phone-port #xTog button { height: 38px; min-height: 0; }
+html.expert.lay-phone-port #xGo > .x-b { height: 44px; align-self: start; }
+/* rd14: a key's note label never takes a tap meant for the key under it (short landscape Buttons: the label overhangs
+   the key above). The key itself still gets the press (pads.js listens on the key). */
+html.expert #pads .pad .nm { pointer-events: none; }
