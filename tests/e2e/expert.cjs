@@ -236,7 +236,13 @@ const SUS = { '360x780': [108, 52], '820x1180': [230, 72], '1180x820': [206, 84]
     });
     const STY = ['pop', 'jazz', 'rnb', 'ballad', 'reggae', 'funk', 'yogaDeep', 'country'];
     const lastChord = () => p3.evaluate(() => { const l = window.__L.filter(x => x.m.length > 1); window.__L = []; return l.length ? l[l.length - 1].m : null; });
-    const chk = async (what, snd) => { await p3.waitForTimeout(60); const r = await p3.evaluate(s => window.__chk(s), snd);
+    // rd14: a busy machine can hold the marks' repaint (a 0 ms observer timer + a 120 ms interval) past the first look; the
+    // chord still rings for PREVIEW_MS (1600 ms), so look again every 100 ms for up to 600 ms more before failing, and say
+    // what the app itself thinks is sounding when it does fail (rd14 driver: one such miss at 555 s vs 403 s normally).
+    D.marksLate = D.marksLate || [];
+    const chk = async (what, snd) => { await p3.waitForTimeout(60); let r = await p3.evaluate(s => window.__chk(s), snd);
+      for (let t = 0; r.out.length && snd && t < 6; t++) { await p3.waitForTimeout(100); r = await p3.evaluate(s => window.__chk(s), snd); if (!r.out.length) D.marksLate.push(`${tag} ${what} +${(t + 1) * 100}ms`); }
+      if (r.out.length) r.out.push(`app sounding ${JSON.stringify(await p3.evaluate(() => window.__xMarks ? window.__xMarks.sounding() : null))}`);
       F(!r.lab.length, `${what}: key labels match the pitches (window ${r.lo}) ${r.lab.join('; ')}`);
       F(!r.out.length, `${what}: every pitch class of the sounding ${JSON.stringify(r.snd)} and next ${JSON.stringify(r.nx)} chords is marked: ${r.out.join('; ')}`); return r; };
     D.marks = {};
@@ -264,7 +270,7 @@ const SUS = { '360x780': [108, 52], '820x1180': [230, 72], '1180x820': [206, 84]
       const g = await p3.evaluate(() => { const c = [...document.querySelectorAll('#suggest .ss-chip')].find(x => /^G\b/.test(x.textContent.trim()) && x.getClientRects().length); if (c) { window.__chip = c; window.__pd(c, 99); } return !!c; });
       if (g) { await p3.waitForTimeout(300); await p3.screenshot({ path: path.join(SHOTS, `${tag}-holdG.png`) }); await p3.evaluate(() => window.__pd(window.__chip, 99, 'pointerup')); } }
     F(!errs3.length, 'marks: no page errors ' + errs3.join(' | ')); await c3.close();
-    console.log(`${tag}: ${R.fails.filter(f => f.startsWith(tag)).length} fails`);
+    console.log(`${tag}: ${R.fails.filter(f => f.startsWith(tag)).length} fails${D.marksLate && D.marksLate.length ? ' (marks late: ' + D.marksLate.join('; ') + ')' : ''}`);
   }
   // rd5 (Uiux, landscape phone): the open Style list shows every row that fits; if it still scrolls, the last visible row is
   // cut part way (and fades) and the list scrolls to the 8th. Portrait / iPad: all 8 rows fully visible.
