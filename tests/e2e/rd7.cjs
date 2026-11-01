@@ -164,7 +164,7 @@ async function eraseHold(p) { await p.evaluate(() => document.getElementById('ms
       await done(p, tag);
       const q = await open(b, w, h, SET.simple); const s = await geo(q, '#howtoBtn'); await done(q, tag + ' simple');
       D.help = { expert: x, simple: s };
-      F(x.svg && !x.txt && Math.abs(x.w - x.h) < 0.6 && Math.abs(x.w - s.w) < 0.6 && Math.abs(x.h - s.h) < 0.6 && (x.rad === '50%' || parseFloat(x.rad) >= x.w / 2 - 0.5), `${tag}: Expert ? ${JSON.stringify(x)} vs Simple ${JSON.stringify(s)}`);
+      F(x.svg && !x.txt && Math.abs(x.w - x.h) < 0.6 && (h < 400 ? Math.abs(x.w - 36) < 0.6 /* rd15: short-landscape Expert top bar draws the ? at 36px (44px tap area) */ : (Math.abs(x.w - s.w) < 0.6 && Math.abs(x.h - s.h) < 0.6)) && (x.rad === '50%' || parseFloat(x.rad) >= x.w / 2 - 0.5), `${tag}: Expert ? ${JSON.stringify(x)} vs Simple ${JSON.stringify(s)}`);
     }
     console.log(T, R.fails.length);
   }
