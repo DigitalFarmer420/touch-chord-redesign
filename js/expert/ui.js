@@ -86,7 +86,8 @@ function placeKeysChip() {
 }
 function paintKeysChip() {
   var c = $("xKeysChip"); if (!c) return; var k = keysPick();
-  c.dataset.keys = k; c.innerHTML = "<span class=\"x-kci\" aria-hidden=\"true\">↻</span>" + keysLabel(k);
+  c.dataset.keys = k; // rd16 (Uiux): the full-width column button reads "Keys: Octave ↻" (a setting you cycle); the chip keeps "↻ Octave"
+  c.innerHTML = "<span class=\"x-kci x-kci-a\" aria-hidden=\"true\">↻</span><span class=\"x-kpre\">Keys: </span><span class=\"x-kv\">" + keysLabel(k) + "</span><span class=\"x-kci x-kci-b\" aria-hidden=\"true\">↻</span>";
   c.setAttribute("aria-label", "Keys: " + keysLabel(k) + ". Tap for " + keysLabel(nextKeys()));
 }
 

@@ -109,7 +109,7 @@ const kb = p => p.evaluate(() => { const q = s => { const e = document.querySele
   const pads = [...document.querySelectorAll('#pads .pad')].map(e => { const r = e.getBoundingClientRect(); return { m: +e.dataset.midi, x: r.left + r.width / 2, y: r.top + r.height / 2, held: e.classList.contains('held') }; });
   const c = document.getElementById('xKeysChip'), cv = c && c.getClientRects().length && getComputedStyle(c).display !== 'none';
   let ls = null; try { ls = JSON.parse(localStorage.getItem('touchChord.settings.v1')).settings.layout; } catch (e) {}
-  return { pick: window.__xmode && __xmode.keys(), cls: document.getElementById('pads').className, n: pads.length, pads, wrap: q('.kb-wrap'), grid: q('.next-card'), chip: cv ? { t: c.textContent.replace('\u21bb', '').trim(), ...q('#xKeysChip') } : null, ls, win: window.__kbWin ? __kbWin().lo : null }; });
+  return { pick: window.__xmode && __xmode.keys(), cls: document.getElementById('pads').className, n: pads.length, pads, wrap: q('.kb-wrap'), grid: q('.next-card'), chip: cv ? { t: c.innerText.replace(/\u21bb/g, '').replace(/^\s*Keys:\s*/, '').trim(), raw: c.innerText.replace(/\s+/g, ' ').trim(), land: document.documentElement.classList.contains('lay-phone-land'), ...q('#xKeysChip') } : null, ls, win: window.__kbWin ? __kbWin().lo : null }; });
 async function chipHold(p, name, fn) { const r = await p.evaluate(n => { const e = [...document.querySelectorAll('#suggest .ss-chip')].find(x => x.getClientRects().length && x.textContent.replace(/\s+/g, '').startsWith(n)); if (!e) return null; const q = e.getBoundingClientRect(); return { x: q.left + q.width / 2, y: q.top + q.height / 2 }; }, name);
   if (!r) return null; await p.__cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: r.x, y: r.y }] }); await p.waitForTimeout(350);
   const v = await fn(); await p.__cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }); await p.waitForTimeout(120); return v; }
@@ -140,6 +140,7 @@ const sounding = p => p.evaluate(() => (__xMarks.sounding() || []).slice().sort(
     for (let i = 0; i < 3; i++) { const k = await kb(p); seen.push(k.pick);
       F(JSON.stringify(k.wrap) === JSON.stringify(k0.wrap) && JSON.stringify(k.grid) === JSON.stringify(k0.grid), `${T} ${k.pick}: panel / grid moved ${JSON.stringify([k.wrap, k.grid])} vs ${JSON.stringify([k0.wrap, k0.grid])}`);
       F(k.chip && k.chip.t === LAB[k.pick], `${T}: chip says ${k.chip && k.chip.t} for ${k.pick}`);
+      F(k.chip && k.chip.raw === (k.chip.land ? `Keys: ${LAB[k.pick]} \u21bb` : `\u21bb ${LAB[k.pick]}`), `${T}: rd16 chip label "${k.chip && k.chip.raw}" (land ${k.chip && k.chip.land})`);
       if (CMP) await p.screenshot({ path: path.join(CMP, `${T}-expert-${k.pick}.png`) });
       await tap(p, '#xKeysChip'); await p.waitForTimeout(400); }
     const k3 = await kb(p); seen.push(k3.pick); D.cycle = seen;

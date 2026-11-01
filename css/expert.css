@@ -377,6 +377,11 @@ html.expert.lay-phone-land:not(.x-types-open) #xCtl .x-full, html.expert.lay-pho
 html.expert.lay-phone-land #xCtl #xKeysChip { position: static; grid-column: 1 / -1; height: auto; min-height: 0; width: 100%; justify-content: center; border-radius: 12px; font-size: 12.5px;
   background: var(--x-surface); border: 1.5px solid var(--x-line); color: var(--x-ink); }
 html.expert.lay-phone-land #xCtl #xKeysChip .x-kci { color: var(--x-gold); }
+/* rd16 (Uiux): column button = "Keys: Octave ↻"; the header chip (upright phones, iPad) = "↻ Octave" */
+html.expert #xKeysChip .x-kpre, html.expert #xKeysChip .x-kci-b { display: none; }
+html.expert.lay-phone-land #xCtl #xKeysChip .x-kpre { display: inline; white-space: pre; }
+html.expert.lay-phone-land #xCtl #xKeysChip .x-kci-b { display: inline; margin-left: 2px; }
+html.expert.lay-phone-land #xCtl #xKeysChip .x-kci-a { display: none; }
 html.expert.lay-phone-land.x-types-open #xCtl #xKeysChip { display: none; }   /* the Type table needs the column; the Keys row in Settings still switches */
 /* rd15: a key's note label is clipped to its key (it never pokes past the key's edge, so no tap at an edge reaches another target). */
 html.expert #pads.fourths .pad { overflow: hidden; }
