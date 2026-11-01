@@ -138,7 +138,11 @@ async function lampOpen(b, base, w, h, setup, look) {
   // 2. phones pixel-identical to rd11 (Simple Day / Lamp, Expert), start and a song with lyrics
   if (RD11) for (const [w, h] of PHONES) { const T = `${w}x${h}`, D = R.data[T] = {};
     for (const [m, look] of [['simple', 'day'], ['simple', 'lamp'], ['expert', 'day'], ['expert', 'lamp']]) { const shots = [];
-      for (const base of [URL, RD11]) { const p = await lampOpen(b, base, w, h, SET[m], look); const one = [await p.screenshot(RD13M(p))]; await song(p); one.push(await p.screenshot(RD13M(p))); shots.push(one); await p.context().close(); }
+      for (const base of [URL, RD11]) { const p = await lampOpen(b, base, w, h, SET[m], look);
+        // rd15: short-landscape Expert's right-hand column (SUSTAIN 40, the Keys button) and the 36px "?" changed on purpose: compare left of the column
+        const cut = m === 'expert' && w > h && h < 500 ? await p.evaluate(() => Math.floor(document.getElementById('sustainBtn').getBoundingClientRect().left) - 1) : 0;
+        const opt = () => Object.assign(RD13M(p), cut ? { clip: { x: 0, y: 0, width: cut, height: h } } : {});
+        const one = [await p.screenshot(opt())]; await song(p); one.push(await p.screenshot(opt())); shots.push(one); await p.context().close(); }
       const same = shots[0].map((s, i) => s.equals(shots[1][i])); D[`${m} ${look}`] = same; F(same.every(Boolean), `${T} ${m} ${look}: differs from rd11 (${same})`);
       if (!same.every(Boolean)) shots.forEach((one, k) => one.forEach((s, i) => fs.writeFileSync(path.join(OUT, `rd12-${T}-${m}-${look}-${k ? 'rd11' : 'rd12'}-${i}.png`), s)));
       if (CMP && T === '360x780' && m === 'simple' && look === 'day') fs.writeFileSync(path.join(CMP, `360x780-simple-day-after.png`), shots[0][1]);
