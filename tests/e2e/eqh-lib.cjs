@@ -3,14 +3,17 @@
 // between). Returns the rows (chains of neighbours) whose heights differ by more than tol px.
 module.exports = function eqhAudit(opt) {
   opt = opt || {}; var tol = opt.tol == null ? 1 : opt.tol, GAP = opt.gap || 24;
-  var SKIP = '#pads, #pads *, #suggest *, #kvPads *, .kv-pads *, #xPList .x-prow *, #dev-badge, .x-note, #howto *, .ht-shot';
+  var SKIP = '#pads, #pads *, #suggest *, #kvPads *, .kv-pads *, #xPList .x-prow *, #dev-badge, .x-note, #howto *, .ht-shot, html.simple #songBar';   // rd15: Simple's song strip is a display (no tap action in Simple)
   var UNIT = '.seg, .x-seg, [role=radiogroup], [role=tablist], .ms-seg, .ms-pair';   // rd14: + .x-seg (the Song | Progressions track)
   var SEL = 'button, select, [role=button], input[type=text], input[type=search], .now-card, ' + UNIT + (opt.extra ? ', ' + opt.extra : '');
   function vis(e) { if (!e.getClientRects().length) return false; if (e.closest('[hidden]')) return false; var cs = getComputedStyle(e);
     if (cs.visibility === 'hidden' || cs.display === 'none') return false; for (var x = e; x && x.nodeType === 1; x = x.parentElement) { var c = getComputedStyle(x); if (+c.opacity < 0.05) return false; } return true; }
   function name(e) { var t = (e.getAttribute('aria-label') || e.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 22);
     return e.tagName.toLowerCase() + (e.id ? '#' + e.id : '') + (typeof e.className === 'string' && e.className.trim() ? '.' + e.className.trim().split(/\s+/).slice(0, 2).join('.') : '') + (t ? ' "' + t + '"' : ''); }
-  var all = Array.prototype.filter.call(document.querySelectorAll(SEL), function (e) { return !e.matches(SKIP) && vis(e); });
+  // rd15: a control behind an open sheet's dim layer is not in a row with the sheet's controls (it cannot be tapped)
+  var DIM = '.ms-dim, #xScrim:not(.x-clear)';
+  function behindDim(e) { var r = e.getBoundingClientRect(), c = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return !!(c && !e.contains(c) && c.closest(DIM)); }
+  var all = Array.prototype.filter.call(document.querySelectorAll(SEL), function (e) { return !e.matches(SKIP) && vis(e) && !behindDim(e); });
   var units = all.filter(function (e) { var u = e.parentElement && e.parentElement.closest(UNIT); return !(u && all.indexOf(u) >= 0); });
   // a control that only wraps other controls (a bar) is not itself a control in the row
   units = units.filter(function (e) { return !units.some(function (o) { return o !== e && e.contains(o); }) || e.matches(UNIT); });

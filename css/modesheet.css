@@ -112,3 +112,5 @@ html.simple:not(.tc-classic) #styles button[data-style="kids"] { display: none !
 .ms-wrap .ms-mode button:not(.on), .ms-wrap .ms-seg button:not(.on) { background: transparent !important; color: var(--ms-ink) !important; }
 /* rd13 (equal heights, phones upright): Simple's mode chip is as tall as "?" next to it (44px). */
 html.lay-phone-port header.topbar .mode-chip { height: 44px; }
+/* rd15 (equal heights, short landscape): Simple's mode chip is as tall as the Style row and "?" beside it (44px; was 40). */
+html.simple.lay-phone-land header.topbar .mode-chip { height: 44px; }

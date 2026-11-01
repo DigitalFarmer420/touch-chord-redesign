@@ -187,7 +187,7 @@ html.kv-lamp .kv-glow { background: radial-gradient(260px 260px at 50% 36%, rgba
 html.lay-phone-land .kv-scr { padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left)); }
 html.lay-phone-land .kv-top { height: 60px; gap: 8px; }
 html.lay-phone-land .kv-top .kv-home { width: 60px; height: 60px; }
-html.lay-phone-land .kv-top .mode-chip { height: 52px; }
+html.lay-phone-land .kv-top .mode-chip { height: 60px; }   /* rd15: = Home, the song line and Happy / Sad (60px); was 52 */
 html.lay-phone-land .kv-chip { display: none; }
 html.lay-phone-land .kv-top .kv-lyr { flex: 1; min-width: 0; margin: 0; height: 60px; font-size: 24px; padding: 0 14px; }
 html.lay-phone-land .kv-top .kv-lyr .kv-l2 { display: none; }
@@ -196,7 +196,7 @@ html.lay-phone-land .kv-mid { flex-direction: row; margin-top: 10px; gap: 12px; 
 html.lay-phone-land .kv-pads { flex: 1; grid-template-columns: repeat(7, 1fr); grid-auto-rows: 96px; }
 html.lay-phone-land .kv-pad .kv-n { font-size: 30px; }
 html.lay-phone-land .kv-ctl { margin: 0; height: 96px; gap: 8px; align-items: center; width: 234px; flex: none; }
-html.lay-phone-land .kv-playbtn { width: 88px; height: 88px; }
+html.lay-phone-land .kv-playbtn { width: 96px; height: 96px; }   /* rd15: = Next (96px); was 88 */
 html.lay-phone-land .kv-ctl .kv-next { height: 96px; }
 html.lay-phone-land .kv-piano { margin: 10px 0 0; --bkh: .56; min-height: 100px; }
 html.lay-phone-land .kv-title { margin-top: 24px; font-size: 34px; }

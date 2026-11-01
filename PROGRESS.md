@@ -219,6 +219,26 @@ Tests: unit rd8.test.js (+ rd7 updated); e2e tests/e2e/rd8.cjs; rd6 / rd7 update
 Tests: unit rd9.test.js; e2e tests/e2e/rd9.cjs (lyrics vs beats, end of song, all round trips, banner geometry and a
 tap through it plays the chip); rd6 / rd7 / rd8 banner checks updated for no ✕.
 
+## rd15 (short landscape: keys get their height back; one-height top bar) - badge v112.13-rd15
+1. Noff Med: at 780x360 in Expert Buttons rd14's 24px header strip left 17px rows (6px gaps). Uiux's design: phones held
+   sideways (lay-phone-land: 780x360, 844x390, 915x412, 740x360) have no keyboard header strip; the Keys chip is a
+   full-width "↻ <view>" button in the right-hand column under Full Range / Sound (SUSTAIN 46 -> 40px and Type 40 -> 36px
+   pay for it, so the column still ends with the chord grid; Full Range / Sound / Keys 28px at 360px tall, 32px taller);
+   the enable-sound pill floats over the keys again (pointer-events: none: a tap on it presses and sounds the key under
+   it, and that first tap enables sound); Buttons row gaps 2px. Buttons rows: 25.5px at every short-landscape size
+   (rd14 16.5, rd13 21.5); Octave / Full keys 67px (rd14 52). Key labels are clipped to their keys (Buttons). Upright
+   phones and iPad keep rd14's strip exactly. While the Type table is open in short landscape the column has no room for
+   the Keys button (Settings > Keys still switches).
+2. Uiux Low: the short-landscape Expert top bar is one height, 36px (Key, Style, the Song | Progressions track, ◆ Expert,
+   and "?" drawn at 36px with an invisible 44px tap ring that stops at ◆ Expert's edge). The equal-height audit now also
+   runs at 780x360, 844x390, 915x412 for Kids / Simple / Expert, Day and Lamp; rows it found and fixed: Expert top bar
+   (32/32/36/36/44 -> 36); Expert Now card 30 -> 32 (= song bar, Next, Play); Simple mode chip 40 -> 44 (= Style row, ?);
+   Kids mode chip 52 -> 60 (= Home, song line, Happy / Sad); Kids Play 88 -> 96 (= Next). Audit rule changes (not fixes):
+   a control behind an open sheet's dim layer is not in a row with the sheet's controls (Kids chip vs the sheet's close
+   button), and Simple's song strip (#songBar, no tap action in Simple) is not a control.
+Tests: tests/e2e/rd15.cjs (the above at the 4 short-landscape sizes x 3 views x Day / Lamp, with RD14=<5517105> for the
+key heights; upright / iPad boxes = rd14; eqh in short landscape). rd14.cjs's strip checks apply off short landscape.
+
 ## rd14 (Keys chip off the keys; Song | Progressions track 44px) - badge v112.13-rd14
 1. Med (Noff + Uiux): the rd13 Keys chip sat on the keys (780x360 Buttons: all of the top-right Ab; upright: its top
    third; landscape: the top of B / top C) and took their taps, and crowded the enable-sound pill. Expert's keyboard

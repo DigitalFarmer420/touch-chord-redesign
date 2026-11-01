@@ -124,8 +124,9 @@ const ov = (a, b) => a && b && a.l < b.r && b.l < a.r && a.t < b.b && b.t < a.b;
       D[k + (hour === 12 ? '' : ' lamp')] = { keys: g.n, points: g.pts, bad: g.bad.length, strip: Math.round(g.keysTop - g.wrap.t) };
       F(g.n >= 12 && g.pts === g.n * 25, `${tag}: ${g.n} keys / ${g.pts} points`);
       F(!g.bad.length, `${tag}: ${g.bad.length} key points not on their key: ${g.bad.slice(0, 6).join('; ')}`);
-      F(g.chip && g.chip.b <= g.keysTop + 0.5 && g.chip.t >= g.wrap.t - 0.5 && g.chip.r <= g.wrap.r + 0.5, `${tag}: chip not in the strip above the keys ${JSON.stringify([g.chip, g.keysTop, g.wrap])}`);
-      F(g.pill && !ov(g.pill, g.chip) && g.pill.b <= g.keysTop + 0.5, `${tag}: enable-sound pill ${JSON.stringify(g.pill)} vs chip ${JSON.stringify(g.chip)} keys top ${g.keysTop}`);
+      const land = w > h && h < 500;   // rd15: short landscape has no header strip (the chip is in the right-hand column; rd15.cjs checks it)
+      if (!land) F(g.chip && g.chip.b <= g.keysTop + 0.5 && g.chip.t >= g.wrap.t - 0.5 && g.chip.r <= g.wrap.r + 0.5, `${tag}: chip not in the strip above the keys ${JSON.stringify([g.chip, g.keysTop, g.wrap])}`);
+      if (!land) F(g.pill && !ov(g.pill, g.chip) && g.pill.b <= g.keysTop + 0.5, `${tag}: enable-sound pill ${JSON.stringify(g.pill)} vs chip ${JSON.stringify(g.chip)} keys top ${g.keysTop}`);
       // after the pill is gone (sound on) the keys still never sit under the chip
       if (hour === 12 && RD13) { const q = await open(b, w, h, XS(k), '?test=1&hour=12'); await q.goto(RD13 + '?test=1&hour=12'); await q.waitForTimeout(1300); const g0 = await hit(q);
         F(JSON.stringify(g0.wrap) === JSON.stringify(g.wrap) && JSON.stringify(g0.grid) === JSON.stringify(g.grid), `${tag}: panel / grid moved vs rd13 ${JSON.stringify([g.wrap, g.grid])} vs ${JSON.stringify([g0.wrap, g0.grid])}`);

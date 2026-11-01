@@ -77,6 +77,13 @@ export function setKeys(k) {
   if (active) setTimeout(function () { placeBadges(); }, 0);
 }
 function nextKeys() { var i = 0; KEYS_CHOICES.forEach(function (c, j) { if (c[0] === keysPick()) i = j; }); return KEYS_CHOICES[(i + 1) % KEYS_CHOICES.length][0]; }
+// rd15 (Uiux): in short landscape the keyboard has no header strip; the chip is a full-width button in the right-hand
+// column under Full Range / Sound. Everywhere else it sits at the right end of the keyboard's header strip (rd14).
+function placeKeysChip() {
+  var c = $("xKeysChip"), land = document.documentElement.classList.contains("lay-phone-land");
+  var to = land ? $("xCtl") : document.querySelector(".kb-wrap");
+  if (c && to && c.parentNode !== to) to.appendChild(c);
+}
 function paintKeysChip() {
   var c = $("xKeysChip"); if (!c) return; var k = keysPick();
   c.dataset.keys = k; c.innerHTML = "<span class=\"x-kci\" aria-hidden=\"true\">↻</span>" + keysLabel(k);
@@ -214,6 +221,7 @@ function build() {
   [top, tog, go, song, list, ctl, scrim, smenu, ksheet].forEach(function (n) { app.insertBefore(n, nowCol); });
   // rd13: the Keys chip on the play panel's top-right corner (one tap = the next of Octave / Full / Buttons)
   var kw = document.querySelector(".kb-wrap"); if (kw) kw.appendChild(el("button", "x-kchip", "", { id: "xKeysChip" }));
+  placeKeysChip(); if (window.MutationObserver) new MutationObserver(placeKeysChip).observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
   // Sound sheet extras (inside the existing Sound pane; shown only in Expert): a Vol slider that drives #volume.
   var vol = el("label", "x-volrow", "<span>Vol</span><input id=\"xVol\" type=\"range\" min=\"0\" max=\"100\" step=\"1\" aria-label=\"Volume\"><b id=\"xVolVal\"></b>");
   $("paneSound").appendChild(vol);

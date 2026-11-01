@@ -361,3 +361,30 @@ html.expert.lay-phone-port #xGo > .x-b { height: 44px; align-self: start; }
 /* rd14: a key's note label never takes a tap meant for the key under it (short landscape Buttons: the label overhangs
    the key above). The key itself still gets the press (pads.js listens on the key). */
 html.expert #pads .pad .nm { pointer-events: none; }
+/* rd15 (Noff Med + Uiux): short landscape (phone held sideways, under 500px tall) has no keyboard header strip, so the keys
+   get the panel's full height back. The Keys chip is a full-width "↻ <view>" button in the right-hand column under
+   Full Range / Sound (SUSTAIN 46 -> 40px pays for it; the column does not grow), and the enable-sound pill floats over
+   the keys again with pointer-events: none, so a tap on it plays the key under it (that first tap enables sound).
+   Buttons rows: 2px gaps (rows ~25px at 360px tall, were 17). Upright phones and iPad keep rd14's strip. */
+html.expert.lay-phone-land #app { --x-kh: 2px; --x-sus-h: 40px; }
+html.expert.lay-phone-land .kb-wrap { padding-bottom: 2px; border-radius: 12px; }
+html.expert.lay-phone-land #pads.fourths { gap: 2px; }
+html.expert.lay-phone-land #unlock { top: 8px; left: 50%; transform: translateX(-50%); height: 22px; line-height: 22px; max-width: calc(100% - 24px); pointer-events: none; z-index: 6; box-shadow: 0 2px 8px rgba(0,0,0,.35); }
+html.expert.lay-phone-land:not(.x-types-open) #xCtl { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: 36px minmax(0, 32px) minmax(0, 32px);
+  gap: var(--x-g); align-content: start; }
+html.expert.lay-phone-land:not(.x-types-open) #xCtl .x-type { grid-column: 1 / -1; height: auto; }
+html.expert.lay-phone-land:not(.x-types-open) #xCtl .x-full, html.expert.lay-phone-land:not(.x-types-open) #xCtl .x-sound { height: auto; min-height: 0; }
+html.expert.lay-phone-land #xCtl #xKeysChip { position: static; grid-column: 1 / -1; height: auto; min-height: 0; width: 100%; justify-content: center; border-radius: 12px; font-size: 12.5px;
+  background: var(--x-surface); border: 1.5px solid var(--x-line); color: var(--x-ink); }
+html.expert.lay-phone-land #xCtl #xKeysChip .x-kci { color: var(--x-gold); }
+html.expert.lay-phone-land.x-types-open #xCtl #xKeysChip { display: none; }   /* the Type table needs the column; the Keys row in Settings still switches */
+/* rd15: a key's note label is clipped to its key (it never pokes past the key's edge, so no tap at an edge reaches another target). */
+html.expert #pads.fourths .pad { overflow: hidden; }
+/* rd15 (Uiux Low): the short-landscape top bar is one height, 36px: Key, Style, the Song | Progressions track, ◆ Expert and
+   the ? circle (drawn 36px; its tap area stays 44px through an invisible ring that does not reach its neighbour). */
+html.expert.lay-phone-land #xTop { align-items: center; }
+html.expert.lay-phone-land #xTop > .x-b, html.expert.lay-phone-land #xTop .mode-chip, html.expert.lay-phone-land #xTog { height: 36px; min-height: 0; align-self: center; box-sizing: border-box; }
+html.expert.lay-phone-land #xTop .x-help { flex: 0 0 36px; width: 36px; height: 36px; min-width: 36px; min-height: 0; position: relative; overflow: visible; margin: 0 4px 0 4px; }
+html.expert.lay-phone-land #xTop .x-help::after { content: ""; position: absolute; left: -5px; top: -5px; right: -5px; bottom: -5px; border-radius: 50%; }
+/* rd15: the Now card is the same height as the song bar, Next and Play beside it (32px; was 30). */
+html.expert.lay-phone-land .now-col > .now-card { flex: 0 0 32px !important; min-height: 32px; height: 32px; }
