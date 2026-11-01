@@ -223,7 +223,7 @@ tap through it plays the chip); rd6 / rd7 / rd8 banner checks updated for no ✕
 1. Noff Med: at 780x360 in Expert Buttons rd14's 24px header strip left 17px rows (6px gaps). Uiux's design: phones held
    sideways (lay-phone-land: 780x360, 844x390, 915x412, 740x360) have no keyboard header strip; the Keys chip is a
    full-width "↻ <view>" button in the right-hand column under Full Range / Sound (SUSTAIN 46 -> 40px and Type 40 -> 36px
-   pay for it, so the column still ends with the chord grid; Full Range / Sound / Keys 28px at 360px tall, 32px taller);
+   pay for it, so the column still ends with the chord grid; SUSTAIN keeps a 44px tap area through an invisible ring; Full Range / Sound / Keys 28px at 360px tall, 32px taller);
    the enable-sound pill floats over the keys again (pointer-events: none: a tap on it presses and sounds the key under
    it, and that first tap enables sound); Buttons row gaps 2px. Buttons rows: 25.5px at every short-landscape size
    (rd14 16.5, rd13 21.5); Octave / Full keys 67px (rd14 52). Key labels are clipped to their keys (Buttons). Upright

@@ -57,6 +57,10 @@ const SUS = { '360x780': [108, 52], '820x1180': [230, 72], '1180x820': [206, 84]
     // 5. decision 3: Sustain size, far left, row order Sustain, Type, Full Range, Sound
     const sus = rs['#sustainBtn'], ty = await r('#xType'), fr = await r('#xFull'), so = await r('#xSound'); D.sus = sus;
     if (SUS[tag]) F(Math.abs(sus.w - SUS[tag][0]) <= 3 && Math.abs(sus.h - SUS[tag][1]) <= 3, `Sustain ${Math.round(sus.w)}x${Math.round(sus.h)} = ${SUS[tag]}`);
+    else if (w > h && h < 500) {   // rd15 (Uiux): short landscape draws SUSTAIN 40px tall to fit the Keys button; its tap area stays >= 44px
+      const tapH = await p.evaluate(() => { const e = document.getElementById('sustainBtn'), q = e.getBoundingClientRect(), cx = q.left + q.width / 2, cy = q.top + q.height / 2, on = y => { const t = document.elementFromPoint(cx, y); return !!(t && t.closest('#sustainBtn')); };
+        let a = 0, z = 0; while (on(cy - a - 0.5) && a < 40) a += 0.5; while (on(cy + z + 0.5) && z < 40) z += 0.5; return a + z + 0.5; });
+      D.susTap = tapH; F(sus.w >= 108 && sus.h >= 40 && tapH >= 44, `Sustain at least 108x40 drawn with a 44px tap area (${Math.round(sus.w)}x${Math.round(sus.h)}, tap ${tapH})`); }
     else F(sus.w >= 108 && sus.h >= 44, `Sustain at least 108x44 (${Math.round(sus.w)}x${Math.round(sus.h)})`);
     if (!land) F(sus.l < ty.l && ty.l < fr.l && fr.l < so.l && sus.l <= 20, 'row order [Sustain][Type][Full Range][Sound], Sustain far left');
     else F(sus.b <= ty.t + 0.5 && ty.b <= fr.t + 0.5 && fr.l < so.l, 'landscape column: Sustain first, then Type, then Full Range / Sound');

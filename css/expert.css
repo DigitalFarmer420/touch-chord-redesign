@@ -388,3 +388,7 @@ html.expert.lay-phone-land #xTop .x-help { flex: 0 0 36px; width: 36px; height: 
 html.expert.lay-phone-land #xTop .x-help::after { content: ""; position: absolute; left: -5px; top: -5px; right: -5px; bottom: -5px; border-radius: 50%; }
 /* rd15: the Now card is the same height as the song bar, Next and Play beside it (32px; was 30). */
 html.expert.lay-phone-land .now-col > .now-card { flex: 0 0 32px !important; min-height: 32px; height: 32px; }
+/* rd15: SUSTAIN is drawn 40px tall in short landscape but keeps a 44px tap area (2px above and below; the 5px gaps to the
+   rows around it stay clear, so no neighbour's tap area is reached). */
+html.expert.lay-phone-land #sustainBtn { position: relative; overflow: visible; }
+html.expert.lay-phone-land #sustainBtn::before { content: ""; position: absolute; left: -2px; right: -2px; top: -4px; bottom: auto; width: auto; height: calc(100% + 8px);   /* the 2px border + 2px */ margin: 0; pointer-events: auto; background: none; opacity: 1; }
