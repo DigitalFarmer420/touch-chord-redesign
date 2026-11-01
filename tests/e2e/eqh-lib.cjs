@@ -11,7 +11,7 @@ module.exports = function eqhAudit(opt) {
   function name(e) { var t = (e.getAttribute('aria-label') || e.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 22);
     return e.tagName.toLowerCase() + (e.id ? '#' + e.id : '') + (typeof e.className === 'string' && e.className.trim() ? '.' + e.className.trim().split(/\s+/).slice(0, 2).join('.') : '') + (t ? ' "' + t + '"' : ''); }
   // rd15: a control behind an open sheet's dim layer is not in a row with the sheet's controls (it cannot be tapped)
-  var DIM = '.ms-dim, #xScrim:not(.x-clear)';
+  var DIM = '.ms-dim, .ms-cdim, #xScrim:not(.x-clear)';   // the sheet's dim and the Start over confirm's dim
   function behindDim(e) { var r = e.getBoundingClientRect(), c = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return !!(c && !e.contains(c) && c.closest(DIM)); }
   var all = Array.prototype.filter.call(document.querySelectorAll(SEL), function (e) { return !e.matches(SKIP) && vis(e) && !behindDim(e); });
   var units = all.filter(function (e) { var u = e.parentElement && e.parentElement.closest(UNIT); return !(u && all.indexOf(u) >= 0); });
