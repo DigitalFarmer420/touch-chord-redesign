@@ -219,6 +219,24 @@ Tests: unit rd8.test.js (+ rd7 updated); e2e tests/e2e/rd8.cjs; rd6 / rd7 update
 Tests: unit rd9.test.js; e2e tests/e2e/rd9.cjs (lyrics vs beats, end of song, all round trips, banner geometry and a
 tap through it plays the chip); rd6 / rd7 / rd8 banner checks updated for no ✕.
 
+## rd13 (Expert Keys switch + equal-height rows on phones) - badge v112.13-rd13
+1. Why Expert showed buttons: Expert draws the saved keyboard layout (touchChord.settings.v1 "layout"). "fourths" (the
+   4x6 note-button grid) is restored from a setup that picked Fourths in the old Layout segment (classic Full screen,
+   or Expert's Sound > Layout tab, labelled "Fourths"), and Expert had no visible switch for it.
+2. Keys: Settings row "Keys" (Octave / Full / Buttons), first under Playing, Expert only; a chip on the play panel's
+   top-right corner shows the pick and one tap moves to the next. One pick per device = the saved layout (octave /
+   piano = Octave, full = Full, fourths = Buttons; nothing saved = Octave), so it survives reloads and mode switches;
+   Kids and Simple keep their one-octave keys. The Sound > Layout tab sets the same pick. The panel keeps its grid
+   row (same height in all three). Sound is unchanged (a chord sounds the same notes in every view).
+   Fix found by the new test: Expert's Octave window draws 12 keys (C..B) but slid as if it had 13, so a chord moved
+   to the window's top edge had its top note one key past the drawn keys (dark). The slide now uses the drawn span.
+3. Equal heights (Galaxy S25 upright; 360x780, 384x832, 412x915; Kids, Simple, Expert; Day and Lamp; every screen,
+   sheet and panel in tests/e2e/eqh-states.cjs): rows fixed - Expert top bar (Key / Style 38 -> 44 = Expert chip / ?),
+   Expert row 2 (Next / Play 38 -> 44 = Song | Progressions), Expert row 3 (progression picker 38 -> 60 = Now card),
+   Simple top bar (mode chip 40 -> 44 = ?). Kids had none. Phones held upright only (lay-phone-port).
+Tests: tests/e2e/rd13.cjs (Keys row / chip / cycle / persistence / defaults / panel height / slide + snap-back /
+root-left / same sound / Kids + Simple untouched; equal heights 144 screens, eqh-lib.cjs); rd6 expects the Keys row.
+
 ## rd12 (Uiux Low: tablet lyric size) - badge v112.13-rd12
 1. Simple's lyric rows on iPad (lay-pad-port / lay-pad-land) were 14px on 18px rows: now 16px on 22px rows (the
    2-3 row block grows 12px, the rd11 section chip follows the row height). The medium tablet size (600-767px wide,

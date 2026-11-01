@@ -339,3 +339,8 @@ html.expert #xKeysChip { position: absolute; z-index: 5; top: 0; right: 0; heigh
   border: 1.5px solid #6b5320; border-radius: 0 16px 0 12px; background: #1E1914; color: var(--x-gold); font: 700 12px Nunito, system-ui, sans-serif; letter-spacing: .2px; box-shadow: none; }
 html.expert #xKeysChip .x-kci { font-size: 13px; line-height: 1; }
 html.expert.lay-pad-port #xKeysChip, html.expert.lay-pad-land #xKeysChip { height: 32px; font-size: 14px; padding: 0 12px 0 10px; }
+/* rd13 (Uiux, Galaxy S25 upright): every control in a row shares the row's height (44px bars and buttons; the Now row
+   is the 60px source row). Phones held upright only; the base button height (--ctrl 38px) no longer shrinks them. */
+html.expert.lay-phone-port #xTop, html.expert.lay-phone-port #xGo, html.expert.lay-phone-port #xSrc:not(.x-mode-song) { align-items: stretch; }
+html.expert.lay-phone-port #xTop > .x-b, html.expert.lay-phone-port #xGo > .x-b, html.expert.lay-phone-port #xSrc .x-pbar { height: auto; min-height: 0; align-self: stretch; }
+html.expert.lay-phone-port #xTop .x-help { height: auto; min-height: 0; align-self: stretch; }

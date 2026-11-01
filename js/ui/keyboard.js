@@ -6,7 +6,7 @@ import { state, fingers, padsEl, shared } from "../state.js?v=112.13";
 import { wrap12 } from "../theory/quality.js?v=112.13";
 import { paintKeyChip } from "./keychip.js?v=112.13";
 import { kidsHintItem } from "./next.js?v=112.13";
-import { computeSpec, effectiveLayout, renderKeys, paintPads, kbKidsPtr } from "./pads.js?v=112.13";
+import { computeSpec, effectiveLayout, renderKeys, paintPads, kbKidsPtr, winKeysNow } from "./pads.js?v=112.13";
 import { KB_RESET_MS, tonicLow } from "./kbmath.js?v=112.13";
 import { stripHeldNow } from "./strip.js?v=112.13";
 // ---- v83 one-octave window ----
@@ -28,6 +28,9 @@ export function kbBorrowKey(pc, midi, deg) {
   if (!k || state.allKeys) return false;
   return !keyDegrees(k).some(function (d) { return d.pc === pc; });
 }
+// rd13: the window's top key above its left key: 12 for the classic 13-key window; Expert draws 12 keys (C..B), so 11
+// (a slid chord's top note was one key past the drawn keys and stayed dark).
+function kbSpan() { var n = winKeysNow(); return (n || 13) - 1; }
 export function kbWindowMode() { var l = effectiveLayout(); return l === "octave" || l === "piano"; }
 // v85 Full: fixed keys, never re-anchored. Kids G3..F5 (55..77, as v81), other styles C4..C6 (60..84, v81 Piano).
 export function kbFullMode() { return effectiveLayout() === "full"; }
@@ -107,15 +110,15 @@ export function kbWantLow(force) {
   if (!kbLast || !kbLast.length) {
     var ak = activeKey(), pc = ak ? ak.pc : wrap12(state.keyRoot || 0);
     var T = state.style === "kids" ? 55 + wrap12(pc - 7) : tonicLow(pc);
-    if (S.every(function (m) { return m >= T && m <= T + 12; })) return T;   // v84: the tonic (Kids: when the gold fits)
+    if (S.every(function (m) { return m >= T && m <= T + kbSpan(); })) return T;   // v84: the tonic (Kids: when the gold fits)
   }
   // kb-fix: chips are rooted C4..B4 by pitch class now, so move the 13-key window only as far as needed to
   // show the whole chord (a chord that already fits stays put; else its top or bottom note at the edge);
   // a chord wider than the window (slash bass far below): from its lowest note, as before.
   var sMn = Math.min.apply(null, S), sMx = Math.max.apply(null, S), cur = shared.kbWinLow;
-  if (state.style !== "kids" && cur != null && sMx - sMn <= 12) {
-    if (sMn >= cur && sMx <= cur + 12) return cur;
-    return sMn < cur ? sMn : sMx - 12;
+  if (state.style !== "kids" && cur != null && sMx - sMn <= kbSpan()) {
+    if (sMn >= cur && sMx <= cur + kbSpan()) return cur;
+    return sMn < cur ? sMn : sMx - kbSpan();
   }
   return sMn;
 }

@@ -129,6 +129,7 @@ function addFourths() {
 export var padSpan;
 var winKeys = 0;   // Expert redesign: window key count override (0 = the classic 13); set by js/expert/ui.js
 export function setWinKeys(n) { winKeys = n | 0; }
+export function winKeysNow() { return winKeys; }
 export function octaveSpan() {
   return 1; // v38: Simple is always one octave (C..B); keys widen to fill
 }
