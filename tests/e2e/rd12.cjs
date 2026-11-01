@@ -9,7 +9,10 @@ const R = { fails: [], data: {} }; const F = (c, m) => { if (!c) R.fails.push(m)
 const V13 = fs.readFileSync(path.join(__dirname, '../fixtures/upload/anh-v13.json'), 'utf8');
 const V12 = fs.readFileSync(path.join(__dirname, '../fixtures/upload/anh-v12.json'), 'utf8');
 const SLK = 'touchChord.simpleLook.v1', LK = look => ({ ls: { [SLK]: { v: 1, look } } });
-const FREEZE = '*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}#dev-badge{visibility:hidden!important}';
+const FREEZE = '*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}#dev-badge{visibility:hidden!important}#xKeysChip{visibility:hidden!important}';
+// rd13 changed on purpose: the phone top rows (Simple's mode chip 40 -> 44px, Expert's top bar / Next / Play / picker
+// heights) and Expert's Keys chip; the pixel checks against older builds hide the chip and mask those rows.
+const RD13M = p => ({ mask: [p.locator('header.topbar'), p.locator('#xTop'), p.locator('#xGo'), p.locator('#xSrc')] });
 const CONTRAST = function (groups) {
   function parse(c) { const m = c.match(/rgba?\(([^)]+)\)/); if (!m) return null; const p = m[1].split(/[ ,\/]+/).filter(Boolean).map(Number); return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 }; }
   function over(f, b) { const a = f.a + b.a * (1 - f.a); if (!a) return { r: 0, g: 0, b: 0, a: 0 }; return { r: (f.r * f.a + b.r * b.a * (1 - f.a)) / a, g: (f.g * f.a + b.g * b.a * (1 - f.a)) / a, b: (f.b * f.a + b.b * b.a * (1 - f.a)) / a, a }; }
@@ -135,7 +138,7 @@ async function lampOpen(b, base, w, h, setup, look) {
   // 2. phones pixel-identical to rd11 (Simple Day / Lamp, Expert), start and a song with lyrics
   if (RD11) for (const [w, h] of PHONES) { const T = `${w}x${h}`, D = R.data[T] = {};
     for (const [m, look] of [['simple', 'day'], ['simple', 'lamp'], ['expert', 'day'], ['expert', 'lamp']]) { const shots = [];
-      for (const base of [URL, RD11]) { const p = await lampOpen(b, base, w, h, SET[m], look); const one = [await p.screenshot()]; await song(p); one.push(await p.screenshot()); shots.push(one); await p.context().close(); }
+      for (const base of [URL, RD11]) { const p = await lampOpen(b, base, w, h, SET[m], look); const one = [await p.screenshot(RD13M(p))]; await song(p); one.push(await p.screenshot(RD13M(p))); shots.push(one); await p.context().close(); }
       const same = shots[0].map((s, i) => s.equals(shots[1][i])); D[`${m} ${look}`] = same; F(same.every(Boolean), `${T} ${m} ${look}: differs from rd11 (${same})`);
       if (!same.every(Boolean)) shots.forEach((one, k) => one.forEach((s, i) => fs.writeFileSync(path.join(OUT, `rd12-${T}-${m}-${look}-${k ? 'rd11' : 'rd12'}-${i}.png`), s)));
       if (CMP && T === '360x780' && m === 'simple' && look === 'day') fs.writeFileSync(path.join(CMP, `360x780-simple-day-after.png`), shots[0][1]);

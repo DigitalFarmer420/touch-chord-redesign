@@ -14,7 +14,10 @@ const R = { fails: [], data: {} }; const F = (c, m) => { if (!c) R.fails.push(m)
 const V13 = fs.readFileSync(path.join(__dirname, '../fixtures/upload/anh-v13.json'), 'utf8');
 const V12 = fs.readFileSync(path.join(__dirname, '../fixtures/upload/anh-v12.json'), 'utf8');
 const SLK = 'touchChord.simpleLook.v1', LK = look => ({ ls: { [SLK]: { v: 1, look } } });
-const FREEZE = '*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}#dev-badge{visibility:hidden!important}';
+const FREEZE = '*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}#dev-badge{visibility:hidden!important}#xKeysChip{visibility:hidden!important}';
+// rd13 changed on purpose: the phone top rows (Simple's mode chip 40 -> 44px, Expert's top bar / Next / Play / picker
+// heights) and Expert's Keys chip; the pixel checks against older builds hide the chip and mask those rows.
+const RD13M = p => ({ mask: [p.locator('header.topbar'), p.locator('#xTop'), p.locator('#xGo'), p.locator('#xSrc')] });
 const CONTRAST = function (groups) {
   function parse(c) { const m = c.match(/rgba?\(([^)]+)\)/); if (!m) return null; const p = m[1].split(/[ ,\/]+/).filter(Boolean).map(Number); return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 }; }
   function over(f, b) { const a = f.a + b.a * (1 - f.a); if (!a) return { r: 0, g: 0, b: 0, a: 0 }; return { r: (f.r * f.a + b.r * b.a * (1 - f.a)) / a, g: (f.g * f.a + b.g * b.a * (1 - f.a)) / a, b: (f.b * f.a + b.b * b.a * (1 - f.a)) / a, a }; }
@@ -196,10 +199,10 @@ async function sheetContrast(p) { await p.addScriptTag({ content: 'window.__cont
         const ctx = await b.newContext({ viewport: { width: w, height: h } });
         await ctx.addInitScript(`try{if(!sessionStorage.getItem('x')){sessionStorage.setItem('x',1);localStorage.clear();localStorage.setItem('touchChord.tour.v1','done');localStorage.setItem('touchChord.settings.v1',JSON.stringify({v:1,settings:${JSON.stringify(SET.simple.s)}}));localStorage.setItem('${SLK}','{"v":1,"look":"lamp"}');}}catch(e){}`);
         const p = await ctx.newPage(); await p.goto(base + '?test=1&hour=12'); await p.waitForTimeout(1300); await p.addStyleTag({ content: FREEZE }); await p.waitForTimeout(300);
-        const one = [await p.screenshot()];
+        const one = [await p.screenshot(RD13M(p))];
         await p.evaluate(t => __upload.load(t), V13); await p.waitForTimeout(600); await p.evaluate(() => { for (let i = 0; i < 9; i++) document.querySelector('#prog .pg-step').click(); }); await p.waitForTimeout(600);
         // rd11 moved the iPad lyric chip on purpose (Day and Lamp); mask the song bar there, rd11.cjs checks it.
-        one.push(await p.screenshot(w >= 768 && h >= 768 ? { mask: [p.locator('#songBar')] } : {})); shots.push(one); await ctx.close();
+        one.push(await p.screenshot(w >= 768 && h >= 768 ? { mask: [p.locator('#songBar'), ...RD13M(p).mask] } : RD13M(p))); shots.push(one); await ctx.close();
       }
       // rd12 made tablet lyric rows taller (16px text), which moves everything below the song bar on purpose: on iPad
       // sizes only the start screen (no song bar) is compared now; rd12.cjs checks the lyric block, phones stay compared in full.
