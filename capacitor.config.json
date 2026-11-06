@@ -1,0 +1,12 @@
+{
+  "appId": "com.digitalfarmer.touchchord.rd17test",
+  "appName": "Touch Chord rd17 Test",
+  "webDir": "www",
+  "android": {
+    "path": "android"
+  },
+  "server": {
+    "androidScheme": "https",
+    "hostname": "localhost"
+  }
+}
