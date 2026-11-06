@@ -3,21 +3,25 @@
 //     In Kids it opens only after a 1-second press-and-hold (a filling bar shows the progress; a short tap only shows a
 //     small "hold" tip). In Simple and Expert one tap opens it.
 //   - The sheet is the same in every mode, in this order: Mode (Kids / Simple / Expert, a short hint under each), then
-//     Playing: Play along, Show hints, Chord numbers, Look (Auto · Day · Lamp), [Expert only: Upload a song],
-//     How to & tour, Start over. Rows drive the app's own controls (#playAlongBtn, #paHintsBtn, #progNumsBtn, #uploadBtn,
-//     #howtoBtn, #tourBtn), so nothing behaves differently from before.
+//     Playing: Play along, Show hints, Chord numbers, Look (Auto · Day · Lamp), [Kids only (rd17): How to & tour],
+//     Start over. Rows drive the app's own controls (#playAlongBtn, #paHintsBtn, #progNumsBtn, #tourBtn; How to opens
+//     the How to dialog), so nothing behaves differently from before.
 // The Expert view (js/expert/ui.js) configures it: the current mode, the switch, Start over and the looks.
 import { state } from "../state.js?v=112.13";
 import { APP_VERSION } from "../version.js?v=112.13";
 import { LOOK_CHOICES, LOOK_LABELS } from "./lookmath.js?v=112.13";
+import { openHowto } from "./helpmenu.js?v=112.13";
 
 export const MODES = [["kids", "Kids", "big & easy", "\u2605"], ["simple", "Simple", "chords + key", "\u25D0"], ["expert", "Expert", "everything", "\u25C6"]];
-export const SHEET_ROWS = ["mode", "keys", "playAlong", "hints", "nums", "look", "upload", "help", "reset"];   // the one order (upload: Expert only)
+// rd17 (Uiux, one home per control): no Keys row (the keyboard bar cycles it), no Upload row (the Song tab is its home),
+// How to & tour only in Kids (Simple and Expert have the "?" menu).
+export const SHEET_ROWS = ["mode", "playAlong", "hints", "nums", "look", "help", "reset"];   // the one order (help: Kids only)
 export const KIDS_HOLD_MS = 1000;
 export const msLog = { opens: [], shortTaps: 0, holds: 0, switches: [] };
-var cfg = { mode: function () { return "expert"; }, setMode: null, startOver: null, lookGet: null, lookSet: null, isDay: null, keysGet: null, keysSet: null };
-// rd13: Expert's Keys row (Octave · Full · Buttons), the first row under Playing; shown only in Expert.
-export const KEYS_CHOICES = [["octave", "Octave"], ["full", "Full"], ["buttons", "Buttons"]];
+var cfg = { mode: function () { return "expert"; }, setMode: null, startOver: null, lookGet: null, lookSet: null, isDay: null };
+// rd13: the Keys views (Octave · Keyboard · Buttons), cycled by the Expert keyboard bar chip (expert/ui.js).
+// rd17: "Full" is called "Keyboard" (the saved value stays "full"); the Settings Keys row is gone.
+export const KEYS_CHOICES = [["octave", "Octave"], ["full", "Keyboard"], ["buttons", "Buttons"]];
 export function configureSheet(o) { Object.keys(o).forEach(function (k) { cfg[k] = o[k]; }); }
 var wrap = null, sheet = null, confirmEl = null, tipEl = null, tipT = 0;
 // The sheet opens under the finger that held the Kids chip: the click its lift makes must not land on the sheet
@@ -90,14 +94,11 @@ function build() {
     + "<div class=\"ms-lbl\" data-row=\"mode\">Mode</div><div class=\"ms-mode\" id=\"msMode\" role=\"radiogroup\" aria-label=\"Mode\">"
     + MODES.map(function (m) { return "<button type=\"button\" role=\"radio\" data-mode=\"" + m[0] + "\"><b>" + m[1] + "</b><small>" + m[2] + "</small></button>"; }).join("") + "</div>"
     + "<div class=\"ms-lbl\">Playing</div>"
-    + "<div class=\"ms-row ms-keys\" data-row=\"keys\"><span class=\"ms-t\">Keys<small>What you play on</small></span><span class=\"ms-seg\" id=\"msKeys\" role=\"radiogroup\" aria-label=\"Keys\">"
-    + KEYS_CHOICES.map(function (k) { return "<button type=\"button\" role=\"radio\" data-keys=\"" + k[0] + "\">" + k[1] + "</button>"; }).join("") + "</span></div>"
     + "<button type=\"button\" class=\"ms-row ms-sw\" role=\"switch\" data-row=\"playAlong\" data-proxy=\"playAlongBtn\" id=\"msPlayAlong\"><span class=\"ms-t\">Play along<small>Tap the marked chord to move on</small></span><span class=\"ms-tg\" aria-hidden=\"true\"></span></button>"
     + "<button type=\"button\" class=\"ms-row ms-sw\" role=\"switch\" data-row=\"hints\" data-proxy=\"paHintsBtn\" id=\"msHints\"><span class=\"ms-t\">Show hints<small class=\"ms-hsub\">A tip when a tap misses the marked chord</small></span><span class=\"ms-tg\" aria-hidden=\"true\"></span></button>"
     + "<button type=\"button\" class=\"ms-row ms-sw\" role=\"switch\" data-row=\"nums\" data-proxy=\"progNumsBtn\" id=\"msNums\"><span class=\"ms-t\">Chord numbers<small>Step numbers on the song's chords</small></span><span class=\"ms-tg\" aria-hidden=\"true\"></span></button>"
     + "<div class=\"ms-row ms-look\" data-row=\"look\"><span class=\"ms-t\">Look<small class=\"ms-lsub\"></small></span><span class=\"ms-seg\" id=\"msLook\" role=\"radiogroup\" aria-label=\"Look\">"
     + LOOK_CHOICES.map(function (l) { return "<button type=\"button\" role=\"radio\" data-look=\"" + l + "\">" + LOOK_LABELS[l] + "</button>"; }).join("") + "</span></div>"
-    + "<button type=\"button\" class=\"ms-row ms-go\" data-row=\"upload\" data-act=\"upload\" id=\"msUpload\"><span class=\"ms-t\">Upload a song</span><span class=\"ms-chev\" aria-hidden=\"true\">\u203a</span></button>"
     + "<div class=\"ms-row ms-help\" data-row=\"help\"><span class=\"ms-t\">How to &amp; tour</span><span class=\"ms-pair\"><button type=\"button\" data-act=\"howto\" id=\"msHowto\">How to</button><button type=\"button\" data-act=\"tour\" id=\"msTour\">Tour</button></span></div>"
     + "<button type=\"button\" class=\"ms-row ms-go ms-danger\" data-row=\"reset\" data-act=\"reset\" id=\"msReset\"><span class=\"ms-t\">Start over<small>Asks first; your songs stay</small></span><span class=\"ms-chev\" aria-hidden=\"true\">\u203a</span></button>"
     + "<div class=\"ms-note\" id=\"msNote\"></div>"
@@ -140,13 +141,12 @@ function onClick(e) {
     var p = $(b.dataset.proxy); if (p) p.click();
     paintSheet(); return;
   }
-  if (b.dataset.keys) { if (cfg.keysSet) cfg.keysSet(b.dataset.keys); paintSheet(); return; }
   if (b.dataset.look) { var m = cfg.mode(); if (!cfg.lookSet) return; cfg.lookSet(m, b.dataset.look); paintSheet(); return; }
   var act = b.dataset.act;
   if (act === "reset") { confirmEl.hidden = false; return; }
-  if (act === "upload" || act === "howto" || act === "tour") {
+  if (act === "howto" || act === "tour") {
     openModeSheet(false);
-    var id = act === "upload" ? "uploadBtn" : act === "howto" ? "howtoBtn" : "tourBtn", n = $(id); if (n) n.click();
+    if (act === "howto") openHowto(); else { var n = $("tourBtn"); if (n) n.click(); }
   }
 }
 function setSw(b, on, dis) { b.classList.toggle("on", !!on); b.setAttribute("aria-checked", on ? "true" : "false"); b.disabled = !!dis; b.classList.toggle("dis", !!dis); }
@@ -167,10 +167,7 @@ export function paintSheet() {
   });
   sheet.querySelector(".ms-look").hidden = false;
   sheet.querySelector(".ms-lsub").textContent = pick === "auto" ? "Auto: Day 7:00\u201319:00, Lamp at night" : "";
-  $("msUpload").hidden = m !== "expert";
-  var kp = cfg.keysGet ? cfg.keysGet() : null;
-  sheet.querySelector(".ms-keys").hidden = m !== "expert";
-  Array.prototype.forEach.call(sheet.querySelectorAll("#msKeys button"), function (b) { var o = b.dataset.keys === kp; b.classList.toggle("on", o); b.setAttribute("aria-checked", o ? "true" : "false"); });
+  sheet.querySelector(".ms-help").hidden = m !== "kids";   // rd17: Simple / Expert use the "?" menu
   $("msNote").textContent = m === "kids" ? "Kids: hold the chip 1 second to open (grown-up step)" : "";   // rd7 (Uiux): no permanent Simple footer
 }
 export function sheetOpen() { return !!wrap && !wrap.hidden; }

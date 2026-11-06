@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Touch Chord rd17 Test</string>
+    <string name="title_activity_main">Touch Chord rd17 Test</string>
+    <string name="package_name">com.digitalfarmer.touchchord.rd17test</string>
+    <string name="custom_url_scheme">com.digitalfarmer.touchchord.rd17test</string>
+    <string name="build_kind">unfinished rd17 evaluation, debug-signed, not a store release</string>
+</resources>

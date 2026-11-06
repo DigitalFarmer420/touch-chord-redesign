@@ -7,9 +7,15 @@
     "check-version": "python3 tools/check-version.py",
     "test:unit": "node --test tests/unit/",
     "test:smoke": "node tests/e2e/run.cjs",
-    "test": "npm run check-version && npm run test:unit && npm run test:smoke"
+    "test": "npm run check-version && npm run test:unit && npm run test:smoke",
+    "cap:stage": "node tools/stage-capacitor-www.mjs",
+    "cap:sync": "node tools/stage-capacitor-www.mjs && cap sync android && node tools/mark-android-wip.mjs",
+    "android:assembleDebug": "node tools/stage-capacitor-www.mjs && cap sync android && node tools/mark-android-wip.mjs && cd android && ./gradlew assembleDebug --no-daemon"
   },
   "devDependencies": {
+    "@capacitor/android": "8.6.0",
+    "@capacitor/cli": "8.6.0",
+    "@capacitor/core": "8.6.0",
     "playwright-core": "1.64.0"
   }
 }

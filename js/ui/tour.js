@@ -4,7 +4,7 @@ import { state } from "../state.js?v=112.13";
 import { paHintHide } from "./hints.js?v=112.13";
 
 // v112 first-launch Kids tour: 6 steps in the v110 spotlight look. Runs once after the fresh Kids + Twinkle load,
-// saved as done on Skip / Done (its own storage key: Factory reset keeps it); Help > Tour (gear menu) replays it.
+// saved as done on Skip / Done (its own storage key: Factory reset keeps it); the "?" menu (Simple / Expert) or Settings > How to & tour (Kids) replays it.
 const TOUR_KEY = "touchChord.tour.v1";
 const TOUR = [
   { sel: null, text: "Hi! Let's play Twinkle Twinkle Little Star." },
@@ -12,7 +12,7 @@ const TOUR = [
   { sel: "#pads .pad.nx-root", text: "Or tap the gold key on the piano. This works too." },
   { sel: "#kidsLyr", text: "The words light up as you go." },
   { sel: "#prog .pg-song", text: "Tap Play to hear the whole song." },
-  { sel: "#prog .pg-sel", text: "Pick another song here. There are 6!" }
+  { sel: "#prog .pg-sel", text: "Pick another song here." }
 ];
 export var tourI;
 export const tourLog = { runs: 0, done: 0, skipped: 0, steps: [] };
