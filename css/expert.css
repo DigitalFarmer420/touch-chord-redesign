@@ -31,6 +31,7 @@ html.expert #nxArrow { display: none !important; }
 html.expert #app {
   --x-g: 6px; --x-now-w: 78px; --x-sus-w: 108px; --x-row: 44px; --x-src-h: 60px; --x-ctl-h: 52px; --x-chip-r: 12px; --x-fs: 15px; --x-pal-h: 92px; --x-grid-h: 236px;
   display: grid !important; gap: var(--x-g) !important; padding: 10px 8px calc(6px + env(safe-area-inset-bottom)) !important;
+  --x-sus-w: calc((100% - 2 * var(--x-g)) / 3);   /* rd17 (Uiux): SUSTAIN, All notes, Sound = three equal buttons (Type moved to the keyboard bar) */
   grid-template-columns: var(--x-now-w) calc(var(--x-sus-w) - var(--x-now-w) - var(--x-g)) minmax(0, 1fr) auto !important;
   grid-template-rows: var(--x-row) var(--x-row) var(--x-src-h) var(--x-grid-h) var(--x-ctl-h) minmax(0, 1fr) !important;
   grid-template-areas: "xtop xtop xtop xtop" "xtog xtog xtog xgo" "now xsrc xsrc xsrc" "grid grid grid grid" "sus sus xctl xctl" "kb kb kb kb" !important;
@@ -42,7 +43,7 @@ html.expert.x-types-open #app {
   grid-template-areas: "xtop xtop xtop xtop" "xtog xtog xtog xgo" "now xsrc xsrc xsrc" "grid grid grid grid" "sus sus xctl xctl" "sus sus pal pal" "kb kb kb kb" !important;
 }
 /* iPad portrait (820x1180) */
-html.expert.lay-pad-port #app { --x-g: 10px; --x-now-w: 150px; --x-sus-w: 230px; --x-row: 64px; --x-src-h: 88px; --x-ctl-h: 72px; --x-chip-r: 16px; --x-fs: 21px; --x-pal-h: 140px; --x-grid-h: 400px; padding: 16px 16px 12px !important; }
+html.expert.lay-pad-port #app { --x-g: 10px; --x-now-w: 150px; --x-row: 64px; --x-src-h: 88px; --x-ctl-h: 72px; --x-chip-r: 16px; --x-fs: 21px; --x-pal-h: 140px; --x-grid-h: 400px; padding: 16px 16px 12px !important; }
 html.expert.lay-pad-port.x-types-open #app { --x-grid-h: 380px; }
 /* Landscape (iPad 1180x820 mockup n; phone 780x360 follows it): top bar with the toggle, NOW + song + Next + Play,
    grid on the left with a right-hand column (Sustain first, then Type, then Full Range / Sound), keys under all. */
@@ -190,24 +191,20 @@ html.expert #xCtl .x-tcol .x-lbl { font-size: 9.5px; letter-spacing: .8px; }
 html.expert #xCtl .x-tv { font: 600 17px Fredoka, Nunito, system-ui, sans-serif; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 html.expert #xCtl .x-type.held .x-tv { color: var(--x-next-l); }
 html.expert.x-types-open #xCtl .x-type { border: 2px solid var(--x-gold); } html.expert.x-types-open #xCtl .x-type .x-car { color: var(--x-gold); }
-html.expert #xCtl .x-full { flex: 1; white-space: normal; text-align: center; font-size: 12.5px; line-height: 1.1; padding: 0 4px; }
+html.expert #xCtl .x-full { flex: 1; white-space: nowrap; text-align: center; font-size: 12.5px; line-height: 1.1; padding: 0 4px; }
 html.expert #xCtl .x-full.on { background: var(--x-gold); color: #3B2600; border-color: transparent; }
 html.expert #xCtl .x-sound { flex: 1; flex-direction: column; gap: 0; font-size: 13px; line-height: 1.1; padding: 0 4px; }
 html.expert #xCtl .x-sound small { font-size: 10px; color: var(--x-muted); white-space: nowrap; letter-spacing: -.01em; }   /* rd2 (Uiux #4): >= 10px */
 html.expert #xCtl .x-sound.open { border-color: var(--x-gold); }
 html.expert.lay-pad-port #xCtl .x-type { flex-basis: 170px; } html.expert.lay-pad-port #xCtl .x-tv { font-size: 24px; }
 html.expert.lay-pad-port #xCtl .x-full, html.expert.lay-pad-port #xCtl .x-sound { font-size: 18px; } html.expert.lay-pad-port #xCtl .x-sound small { font-size: 12px; }
-/* landscape right column: Type on its own row, then Full Range + Sound */
-html.expert.lay-pad-land #xCtl, html.expert.lay-phone-land #xCtl { flex-wrap: wrap; align-content: flex-start; }
-html.expert.lay-pad-land:not(.x-types-open) #xCtl .x-type, html.expert.lay-phone-land:not(.x-types-open) #xCtl .x-type { flex: 1 0 100%; height: var(--x-ctl-h); }
-html.expert.lay-pad-land:not(.x-types-open) #xCtl .x-full, html.expert.lay-pad-land:not(.x-types-open) #xCtl .x-sound,
-html.expert.lay-phone-land:not(.x-types-open) #xCtl .x-full, html.expert.lay-phone-land:not(.x-types-open) #xCtl .x-sound { height: calc(var(--x-ctl-h) - 8px); }
-html.expert.lay-pad-land.x-types-open #xCtl, html.expert.lay-phone-land.x-types-open #xCtl { flex-wrap: nowrap; align-content: stretch; }
-html.expert.lay-pad-land.x-types-open #xCtl .x-type, html.expert.lay-phone-land.x-types-open #xCtl .x-type { flex: 1 1 auto; }
-html.expert.lay-phone-land #xCtl .x-type { padding: 0 8px; } html.expert.lay-phone-land #xCtl .x-tv { font-size: 15px; }
+/* landscape right column. rd17: iPad = All notes + Sound side by side (Type is in the keyboard bar); short landscape = the
+   rd17 grid at the end of this file (All notes | Sound, then Type | Keys). */
+html.expert.lay-pad-land #xCtl { flex-wrap: wrap; align-content: flex-start; }
+html.expert.lay-pad-land:not(.x-types-open) #xCtl .x-full, html.expert.lay-pad-land:not(.x-types-open) #xCtl .x-sound { height: calc(var(--x-ctl-h) - 8px); }
+html.expert.lay-pad-land.x-types-open #xCtl { flex-wrap: nowrap; align-content: stretch; }
 html.expert.lay-phone-land #xCtl .x-full { font-size: 11px; } html.expert.lay-phone-land #xCtl .x-sound { font-size: 11.5px; } html.expert.lay-phone-land #xCtl .x-sound small { font-size: 10px; }
 html.expert.lay-phone-land #sustainBtn { font-size: 15px !important; }
-html.expert.lay-pad-land #xCtl .x-tv { font-size: 21px; }
 
 /* ---------- chord-type table, docked (decisions 2, 4, 9) ---------- */
 html.expert #chords { display: flex !important; margin: 0 !important; padding: 4px !important; min-height: 0; box-sizing: border-box; border-radius: 14px;
@@ -315,8 +312,8 @@ html.expert .kb.piano .black.x-pclit { background: #8a6a1a !important; }
 html.expert #suggest .ss-chip.pg-on, html.expert #suggest .ss-note.pg-on { background: var(--x-gold) !important; color: #3B2600 !important; box-shadow: inset 0 0 0 3px var(--x-gold-deep) !important; filter: none; }
 html.expert:not(.pa-off) #app #suggest .nxdot.nxdot, html.expert:not(.pa-off) #app #suggest .ss-chip.nx, html.expert:not(.pa-off) #app #suggest .ss-note.nx,
 html.expert:not(.pa-off) #app #palette button.nxdot { outline: 3px dashed var(--x-next-l) !important; outline-offset: -1px !important; }
-/* rd2 (Uiux #4): the phone-portrait Sound button is too narrow for "FX·Layout·Loop" at 10px, so the caption is dropped there */
-html.expert:not(.lay-pad-port):not(.lay-pad-land):not(.lay-phone-land) #xCtl .x-sound small { display: none; }
+/* rd2 (Uiux #4) hid the phone-portrait caption ("FX·Layout·Loop" did not fit); rd17: the button is a third wide and the
+   caption is "FX · Loop", which fits at 10px, so it shows everywhere. */
 /* rd3 (Noff rd2 Med): a sounding / next note outside the 12-key window marks its same-name key inside it, gold or teal as
    usual, plus a small arrow (up = the note is above the keys, down = below), as the Kids view arrows */
 html.expert .kb.piano .pad.x-pclit { outline: 3px solid var(--x-gold-deep) !important; outline-offset: -3px !important; box-shadow: none !important; }
@@ -370,11 +367,7 @@ html.expert.lay-phone-land #app { --x-kh: 2px; --x-sus-h: 40px; }
 html.expert.lay-phone-land .kb-wrap { padding-bottom: 2px; border-radius: 12px; }
 html.expert.lay-phone-land #pads.fourths { gap: 2px; }
 html.expert.lay-phone-land #unlock { top: 8px; left: 50%; transform: translateX(-50%); height: 22px; line-height: 22px; max-width: calc(100% - 24px); pointer-events: none; z-index: 6; box-shadow: 0 2px 8px rgba(0,0,0,.35); }
-html.expert.lay-phone-land:not(.x-types-open) #xCtl { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: 36px minmax(0, 32px) minmax(0, 32px);
-  gap: var(--x-g); align-content: start; }
-html.expert.lay-phone-land:not(.x-types-open) #xCtl .x-type { grid-column: 1 / -1; height: auto; }
-html.expert.lay-phone-land:not(.x-types-open) #xCtl .x-full, html.expert.lay-phone-land:not(.x-types-open) #xCtl .x-sound { height: auto; min-height: 0; }
-html.expert.lay-phone-land #xCtl #xKeysChip { position: static; grid-column: 1 / -1; height: auto; min-height: 0; width: 100%; justify-content: center; border-radius: 12px; font-size: 12.5px;
+html.expert.lay-phone-land #xCtl #xKeysChip { position: static; height: auto; min-height: 0; width: 100%; justify-content: center; border-radius: 12px; font-size: 12px;
   background: var(--x-surface); border: 1.5px solid var(--x-line); color: var(--x-ink); }
 html.expert.lay-phone-land #xCtl #xKeysChip .x-kci { color: var(--x-gold); }
 /* rd16 (Uiux): column button = "Keys: Octave ↻"; the header chip (upright phones, iPad) = "↻ Octave" */
@@ -382,7 +375,6 @@ html.expert #xKeysChip .x-kpre, html.expert #xKeysChip .x-kci-b { display: none;
 html.expert.lay-phone-land #xCtl #xKeysChip .x-kpre { display: inline; white-space: pre; }
 html.expert.lay-phone-land #xCtl #xKeysChip .x-kci-b { display: inline; margin-left: 2px; }
 html.expert.lay-phone-land #xCtl #xKeysChip .x-kci-a { display: none; }
-html.expert.lay-phone-land.x-types-open #xCtl #xKeysChip { display: none; }   /* the Type table needs the column; the Keys row in Settings still switches */
 /* rd15: a key's note label is clipped to its key (it never pokes past the key's edge, so no tap at an edge reaches another target). */
 html.expert #pads.fourths .pad { overflow: hidden; }
 /* rd15 (Uiux Low): the short-landscape top bar is one height, 36px: Key, Style, the Song | Progressions track, ◆ Expert and
@@ -397,3 +389,61 @@ html.expert.lay-phone-land .now-col > .now-card { flex: 0 0 32px !important; min
    rows around it stay clear, so no neighbour's tap area is reached). */
 html.expert.lay-phone-land #sustainBtn { position: relative; overflow: visible; }
 html.expert.lay-phone-land #sustainBtn::before { content: ""; position: absolute; left: -2px; right: -2px; top: -4px; bottom: auto; width: auto; height: calc(100% + 8px);   /* the 2px border + 2px */ margin: 0; pointer-events: auto; background: none; opacity: 1; }
+
+/* ---------- rd17 (Uiux, the user: one home per control) ----------
+   Upright phones and iPad: the keyboard's top bar is the keyboard's own controls - "Type: Auto ▾" at its left (the same
+   tap-to-open / 0.3 s hold-to-peek chord-type table), the Keys cycle "↻ Octave" at its right. The bar is 38px; both are
+   drawn 30px tall and keep a 44px+ tap area through an invisible ring that reaches up into the empty gap above the panel
+   (never down onto the keys, never sideways onto each other). The enable-sound pill floats over the keys and lets taps
+   through (as in short landscape since rd15). */
+html.expert:not(.lay-phone-land) #app { --x-kh: 38px; }
+html.expert .kb-wrap > #xType, html.expert .kb-wrap > #xKeysChip { position: absolute; z-index: 5; top: 4px; height: calc(var(--x-kh) - 8px); min-height: 0; box-sizing: border-box; overflow: visible; }
+html.expert .kb-wrap > #xType::after, html.expert .kb-wrap > #xKeysChip::after { content: ""; position: absolute; left: -3px; right: -3px; top: calc(-4px - var(--x-g)); bottom: -4px; border-radius: 0; }
+html.expert .kb-wrap > #xType { left: 6px; max-width: calc(100% - 132px); display: inline-flex; align-items: center; justify-content: flex-start; gap: 4px; padding: 0 10px 0 11px;
+  border: 1.5px solid #6b5320; border-radius: 999px; background: #1E1914; color: #F4EAD9; font: 700 12.5px Nunito, system-ui, sans-serif; letter-spacing: .2px; }
+html.expert .kb-wrap > #xKeysChip { right: 6px; }
+html.expert #xType .x-tcol { display: inline-flex; flex-direction: row; align-items: baseline; min-width: 0; line-height: 1; }
+html.expert #xType .x-tcol .x-lbl { font: inherit; letter-spacing: inherit; text-transform: none; color: #B9A890; }
+html.expert #xType .x-tsep { color: #B9A890; white-space: pre; }
+html.expert #xType .x-tv { font: inherit; color: inherit; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+html.expert .kb-wrap > #xType .x-car { color: var(--x-gold); font-size: 12px; }
+html.expert .kb-wrap > #xType.held .x-tv { color: #4FB3A5; }
+html.expert.x-types-open .kb-wrap > #xType { border-color: var(--x-gold); }
+html.expert.lay-pad-port .kb-wrap > #xType, html.expert.lay-pad-land .kb-wrap > #xType { font-size: 14px; padding: 0 12px 0 13px; }
+html.expert:not(.lay-phone-land) #unlock { top: calc(var(--x-kh) + 8px); left: 50%; transform: translateX(-50%); height: 22px; line-height: 22px; max-width: calc(100% - 24px);
+  pointer-events: none; z-index: 6; box-shadow: 0 2px 8px rgba(0,0,0,.35); }
+html.expert.lay-pad-port #unlock, html.expert.lay-pad-land #unlock { height: 26px; line-height: 26px; }
+/* the row above the keyboard: three equal buttons (SUSTAIN | All notes | Sound); labels never wrap.
+   All notes (was Full Range) carries a state line under it, like SUSTAIN's "hold": "in key only" / "all 12". */
+html.expert #xCtl .x-full { flex-direction: column; gap: 0; line-height: 1.1; }
+html.expert #xCtl .x-full small { font-size: 10px; font-weight: 700; color: var(--x-muted); white-space: nowrap; }
+html.expert #xCtl .x-full.on small { color: #5a3a00; }
+html.expert.lay-pad-port #xCtl .x-full small, html.expert.lay-pad-land #xCtl .x-full small { font-size: 12px; }
+html.expert #xCtl .x-full, html.expert #xCtl .x-sound { flex: 1 1 0; min-width: 0; }
+html.expert #xCtl .x-sound span { white-space: nowrap; }
+/* Short landscape (under 500px tall, no bar): the right-hand column under SUSTAIN is All notes | Sound, then Type | Keys,
+   each half width, in the same order as the bar. The Type | Keys row stays with the chord-type table open (Settings no
+   longer has a Keys row). */
+html.expert.lay-phone-land #xCtl { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: repeat(2, minmax(0, 44px)); gap: var(--x-g); align-content: start; }
+html.expert.lay-phone-land.x-types-open #app { --x-ctl-h: 64px; }
+html.expert.lay-phone-land.x-types-open #xCtl { grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 4px; align-content: stretch; }
+html.expert.lay-phone-land #xCtl > .x-full { grid-area: 1 / 1; } html.expert.lay-phone-land #xCtl > .x-sound { grid-area: 1 / 2; }
+html.expert.lay-phone-land #xCtl > #xType { grid-area: 2 / 1; } html.expert.lay-phone-land #xCtl > #xKeysChip { grid-area: 2 / 2; }
+html.expert.lay-phone-land #xCtl > .x-b, html.expert.lay-phone-land #xCtl > #xKeysChip { height: auto; min-height: 0; }
+html.expert.lay-phone-land #xCtl > #xType { justify-content: center; gap: 3px; padding: 0 5px; font: 700 12px Nunito, system-ui, sans-serif; border-radius: 12px; }
+html.expert.lay-phone-land #xCtl > #xType .x-tcol .x-lbl, html.expert.lay-phone-land #xCtl > #xType .x-tsep { color: var(--x-muted); }
+html.expert.lay-phone-land #xCtl > #xType.held .x-tv { color: var(--x-next-l); }
+html.expert.lay-phone-land.x-types-open #xCtl > #xType { border: 2px solid var(--x-gold); } html.expert.lay-phone-land.x-types-open #xCtl > #xType .x-car { color: var(--x-gold); }
+html.expert.lay-phone-land #xCtl #xKeysChip { padding: 0 5px; gap: 2px; }
+html.expert.lay-phone-land #xCtl .x-full { font-size: 11.5px; }
+/* Sound popup: no Layout tab (the keyboard bar is the one home for Keys; #layouts stays in the page, hidden) */
+html.expert:not(.tc-classic) #ctl .ctl-tabs button[data-tab="key"] { display: none !important; }
+/* rd17 (Low at 360): the Sound tab's Voicing heading had no room above its slider and the Band label used the classic
+   light ink on the Day sheet (barely visible). Both use the Expert colours now, with space under the sound tiles. */
+html.expert.x-ctl-on #ctl .sound-layer { margin-top: 12px; align-items: center; }
+html.expert.x-ctl-on #ctl .vhead { color: var(--x-muted); font-size: 12px; font-weight: 700; line-height: 1.2; margin: 0 0 6px; }
+html.expert.x-ctl-on #ctl .vhead b { color: var(--x-ink); }
+html.expert.x-ctl-on #ctl .band-wrap { margin-top: 10px; }
+html.expert.x-ctl-on #ctl .band-row span { color: var(--x-ink); font-weight: 700; }
+html.expert.x-ctl-on #ctl .band-row b { color: var(--x-ink); }
+html.expert.x-ctl-on #ctl .band-wrap.off .band-row b { color: var(--x-muted); }

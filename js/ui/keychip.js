@@ -1,5 +1,6 @@
 // Key chip / key row (Full mode key picker).
 import { activeKey, keyDegrees, keyMainNames, keyAltNames, namePc, keyRootName, setKeySpell } from "../keys.js?v=112.13";
+import { toggleHelpMenu } from "./helpmenu.js?v=112.13";
 import { paintKidKey } from "../kids.js?v=112.13";
 import { state, scheduleSave, shared } from "../state.js?v=112.13";
 import { Theory } from "../theory/index.js?v=112.13";
@@ -190,7 +191,7 @@ export function wireKeyPick() {
   // v113 (5) port: the Key chip picker flow is retired (the chip is hidden); every mode uses the root + Major/Minor control.
   var ht = document.getElementById("howto");
   function closeHt() { ht.hidden = true; }
-  document.getElementById("howtoBtn").addEventListener("click", function () { ht.hidden = false; ht.querySelector(".ht-x").focus(); });
+  document.getElementById("howtoBtn").addEventListener("click", function (e) { toggleHelpMenu(e.currentTarget); });   // rd17: "?" opens How to / Tour
   ht.querySelector(".ht-x").addEventListener("click", closeHt);
   // v65: yellow words scroll the dialog (not the page, no hash change) to their entry in
   // "Little words to know" and light it briefly. Works the same on phones (touch) and desktop.
