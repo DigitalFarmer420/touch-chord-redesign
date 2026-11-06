@@ -159,15 +159,17 @@ const SUS = { '1180x820': [206, 84] };   // rd17: portrait SUSTAIN is a third of
     await p.evaluate(() => document.querySelector('#msMode [data-mode=expert]').click()); await p.waitForTimeout(400);
     F(await p.evaluate(() => document.documentElement.classList.contains('expert') && !document.documentElement.classList.contains('kv') && document.querySelector('#styles .on').dataset.style === 'jazz'), 'Kids view Expert: back to Expert in the last style (Jazz), Kids view closed');
     F(await p.evaluate(() => JSON.parse(localStorage.getItem('touchChord.expert.v1')).on === true), 'Expert choice saved in its own store');
-    // rd2 (Uiux #5): one mark per key - sounding = solid gold outline, next chord = teal dashed only on keys not sounding, no copper next-box
-    const km = async () => p.evaluate(() => [...document.querySelectorAll('#pads .pad')].map(e => { const st = getComputedStyle(e), a = getComputedStyle(e, '::after');
-      return { m: +e.dataset.midi, held: e.classList.contains('held'), nx: e.classList.contains('nx'), os: st.outlineStyle, oc: st.outlineColor, box: a.content !== 'none' && a.display !== 'none' && a.boxShadow !== 'none' }; }).filter(k => k.held || k.nx));
+    // rd17: dashed next-outlines are off. The root preview dot stays; sounding keys keep the warm gold outline; no copper next-box.
+    const km = async () => p.evaluate(() => [...document.querySelectorAll('#pads .pad')].map(e => { const st = getComputedStyle(e), a = getComputedStyle(e, '::after'), b = getComputedStyle(e, '::before');
+      return { m: +e.dataset.midi, held: e.classList.contains('held'), nx: e.classList.contains('nx'), root: e.classList.contains('nx-root'), os: st.outlineStyle, oc: st.outlineColor, box: a.content !== 'none' && a.display !== 'none' && a.boxShadow !== 'none', dot: e.classList.contains('nx-root') && b.content !== 'none' && b.display !== 'none' }; }).filter(k => k.held || k.nx));
     let marks = await km(); D.keyMarksRest = marks;
-    F(marks.some(k => k.nx) && marks.filter(k => k.nx && !k.held).every(k => k.os === 'dashed' && !k.box), 'at rest: next-chord keys teal dashed only (no copper box)');
+    F(marks.some(k => k.nx) && marks.filter(k => k.nx && !k.held).every(k => k.os === 'none' && !k.box) && marks.some(k => k.dot), 'at rest: next keys have no dashed outline; the root preview dot is still there');
+    const gridDash = await p.evaluate(() => [...document.querySelectorAll('#suggest .nxdot, #suggest .ss-chip.nx, #suggest .ss-note.nx, #palette button.nxdot')].filter(e => e.getClientRects().length).map(e => ({ os: getComputedStyle(e).outlineStyle, dot: !!e.querySelector(':scope > .nxd') })));
+    F(gridDash.length && gridDash.every(x => x.os === 'none') && gridDash.some(x => x.dot), 'next chord chips have no dashed outline; a preview dot remains ' + JSON.stringify(gridDash.slice(0, 4)));
     await p.evaluate(() => __progApi.next()); await p.waitForTimeout(120); marks = await km(); D.keyMarksPlay = marks;
     F(marks.some(k => k.held), 'Next: a chord sounds on the keys');
     F(marks.filter(k => k.held).every(k => k.os === 'solid' && k.oc === 'rgb(227, 154, 0)' && !k.box), 'sounding keys: one solid gold outline (no dashed, no copper box) ' + JSON.stringify(marks.filter(k => k.held)));
-    F(marks.filter(k => k.nx && !k.held).every(k => k.os === 'dashed' && !k.box), 'next keys not sounding: teal dashed only');
+    F(marks.filter(k => k.nx && !k.held).every(k => k.os === 'none' && !k.box), 'next keys not sounding: no dashed outline');
     await p.evaluate(() => __progApi.stop && __progApi.stop()); await p.waitForTimeout(150);
     F(!errs.length, 'no page errors ' + errs.join(' | ')); D.errs = errs;
     await ctx.close();

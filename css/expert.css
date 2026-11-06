@@ -287,7 +287,8 @@ html.expert .kb.piano .black.held { background: var(--x-gold-deep) !important; }
 html.expert .kb.piano .pad.nx::after { display: none !important; }
 html.expert .kb.piano .pad.nx-root::before { background: var(--x-next-l); }
 html.expert .kb.piano .pad.held { outline: 3px solid var(--x-gold-deep) !important; outline-offset: -3px !important; box-shadow: none !important; }
-html.expert:not(.pa-off) .kb.piano .pad.nx:not(.held):not(.x-pclit), html.expert:not(.pa-off) .kb.piano .pad.x-pcnx { outline: 2.5px dashed var(--x-next-l) !important; outline-offset: -6px !important; box-shadow: none !important; }
+/* rd17: the teal dashed next-outline is off. The root preview dot (.nx-root::before / .nxd) stays. A sounding key keeps the warm gold outline. */
+html.expert:not(.pa-off) .kb.piano .pad.nx:not(.held):not(.x-pclit), html.expert:not(.pa-off) .kb.piano .pad.x-pcnx { outline: none !important; box-shadow: none !important; }
 html.expert.pa-off .kb.piano .pad.nx:not(.held) { outline: none !important; }
 html.expert .kb.piano .pad.black.nokey { opacity: 1; background: #3a3129; color: #7a6a58; border-color: #4a3c2e; }
 html.expert .kb.piano .pad.white.nokey { opacity: .45; }
@@ -310,8 +311,9 @@ html.expert .kb.piano .white.x-pclit { background: #FFE7A6 !important; }
 html.expert .kb.piano .black.x-pclit { background: #8a6a1a !important; }
 /* grid marks in the Expert colours: the chord sounding now = gold, the next chord = dashed teal (Play along off still hides the next marks) */
 html.expert #suggest .ss-chip.pg-on, html.expert #suggest .ss-note.pg-on { background: var(--x-gold) !important; color: #3B2600 !important; box-shadow: inset 0 0 0 3px var(--x-gold-deep) !important; filter: none; }
+/* rd17: no dashed outline on the next chord, its note, or the chord-type chip. The preview dot (.nxd) is unchanged. */
 html.expert:not(.pa-off) #app #suggest .nxdot.nxdot, html.expert:not(.pa-off) #app #suggest .ss-chip.nx, html.expert:not(.pa-off) #app #suggest .ss-note.nx,
-html.expert:not(.pa-off) #app #palette button.nxdot { outline: 3px dashed var(--x-next-l) !important; outline-offset: -1px !important; }
+html.expert:not(.pa-off) #app #palette button.nxdot, html.expert #suggest .la-play { outline: none !important; }
 /* rd2 (Uiux #4) hid the phone-portrait caption ("FX·Layout·Loop" did not fit); rd17: the button is a third wide and the
    caption is "FX · Loop", which fits at 10px, so it shows everywhere. */
 /* rd3 (Noff rd2 Med): a sounding / next note outside the 12-key window marks its same-name key inside it, gold or teal as
