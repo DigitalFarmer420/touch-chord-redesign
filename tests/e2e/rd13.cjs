@@ -103,7 +103,7 @@ async function openClock(b, w, h, setup, time, q, ls) {
 async function contrast(p) { await p.addScriptTag({ content: 'window.__contrast = ' + CONTRAST.toString() }); const a = await p.evaluate(g => __contrast(g), G); return a; }
 async function sheetContrast(p) { await p.addScriptTag({ content: 'window.__contrast = ' + CONTRAST.toString() }); return p.evaluate(g => __contrast(g), GS); }
 const EQH = require('./eqh-lib.cjs'), ST = require('./eqh-states.cjs');
-const LAB = { octave: 'Octave', full: 'Full', buttons: 'Buttons' }, ORD = ['octave', 'full', 'buttons'];
+const LAB = { octave: 'Octave', full: 'Keyboard', buttons: 'Buttons' }, ORD = ['octave', 'full', 'buttons'];   // rd17: the "full" layout is labelled Keyboard (the saved value stays "full")
 const XS = lay => ({ s: Object.assign({}, SET.expert.s, lay ? { layout: lay } : {}), x: SET.expert.x });
 const kb = p => p.evaluate(() => { const q = s => { const e = document.querySelector(s); if (!e || !e.getClientRects().length) return null; const r = e.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; };
   const pads = [...document.querySelectorAll('#pads .pad')].map(e => { const r = e.getBoundingClientRect(); return { m: +e.dataset.midi, x: r.left + r.width / 2, y: r.top + r.height / 2, held: e.classList.contains('held') }; });
@@ -123,9 +123,11 @@ const sounding = p => p.evaluate(() => (__xMarks.sounding() || []).slice().sort(
       const rows = [...document.querySelectorAll('#modeSheet [data-row]')].filter(e => !e.hidden && e.getClientRects().length).map(e => e.dataset.row);
       const prev = row && row.previousElementSibling; return { vis, rows, after: prev && prev.className + ':' + prev.textContent.trim(), seg: row ? [...row.querySelectorAll('#msKeys button')].map(b => b.textContent + (b.classList.contains('on') ? '*' : '')) : [], t: row && row.querySelector('.ms-t').childNodes[0].textContent }; });
     R.data[tag] = r;
-    if (m === 'expert') { F(r.vis && r.rows[0] === 'mode' && r.rows[1] === 'keys' && /ms-lbl:Playing/.test(r.after) && r.t === 'Keys', `${tag}: ${JSON.stringify(r)}`);
-      F(JSON.stringify(r.seg) === '["Octave*","Full","Buttons"]', `${tag}: segment ${r.seg}`); }
-    else F(!r.vis && !r.rows.includes('keys'), `${tag}: shown outside Expert ${JSON.stringify(r)}`);
+    // rd17: Settings has no Keys row in any mode. The keyboard's Keys cycle is the only home (checked below).
+    F(!r.vis && !r.rows.includes('keys') && !r.rows.includes('upload'), `${tag}: Keys or Upload row still in Settings ${JSON.stringify(r)}`);
+    if (m === 'expert') F(r.rows[0] === 'mode' && r.rows[1] === 'playAlong' && !r.rows.includes('help'), `${tag}: Expert rows ${r.rows}`);
+    else if (m === 'kids') F(r.rows.includes('help'), `${tag}: Kids lost How to & tour ${r.rows}`);
+    else F(!r.rows.includes('help'), `${tag}: Simple still has a Help row ${r.rows}`);
     const k = await kb(p); if (m !== 'expert') F(!k.chip, `${tag}: Keys chip shown in ${m}`);
     await done(p, tag);
   }
@@ -147,12 +149,14 @@ const sounding = p => p.evaluate(() => (__xMarks.sounding() || []).slice().sort(
     F(JSON.stringify(seen) === '["octave","full","buttons","octave"]', `${T}: chip cycle ${seen}`);
     await done(p, `${T} cycle`);
   }
-  // 4. persistence: pick in the sheet, then reload, Simple, Kids, back to Expert
+  // 4. persistence: two taps of the keyboard cycle (rd17: no Settings Keys row), then reload, Simple, Kids, back to Expert
   { const tag = 'persist'; const p = await open(b, 360, 780, XS()); const D = R.data[tag] = {};
-    await openSheet(p, 'expert'); await tap(p, '#msKeys button[data-keys="buttons"]'); await p.waitForTimeout(400);
-    let k = await kb(p); D.sheet = k.pick; F(k.pick === 'buttons' && k.cls === 'kb fourths', `${tag}: sheet pick ${k.pick} ${k.cls}`);
-    const sh = await p.evaluate(() => [...document.querySelectorAll('#msKeys button.on')].map(b => b.dataset.keys)); F(sh.join() === 'buttons', `${tag}: sheet shows ${sh}`);
-    await p.evaluate(() => __ms.open(false)); await p.waitForTimeout(400); k = await kb(p); F(k.ls === 'fourths', `${tag}: not saved (${k.ls})`);
+    await tap(p, '#xKeysChip'); await p.waitForTimeout(300); await tap(p, '#xKeysChip'); await p.waitForTimeout(400);
+    let k = await kb(p); D.sheet = k.pick; F(k.pick === 'buttons' && k.cls === 'kb fourths' && k.chip && k.chip.t === 'Buttons', `${tag}: cycle pick ${k.pick} ${k.cls} ${k.chip && k.chip.t}`);
+    await p.evaluate(() => __ms.open(true)); await p.waitForTimeout(200);
+    const sh2 = await p.evaluate(() => [...document.querySelectorAll('#modeSheet [data-row]')].filter(e => !e.hidden && e.getClientRects().length).map(e => e.dataset.row));
+    F(!sh2.includes('keys'), `${tag}: Settings still lists Keys ${sh2}`);
+    await p.evaluate(() => __ms.open(false)); await p.waitForTimeout(200); k = await kb(p); F(k.ls === 'fourths', `${tag}: not saved (${k.ls})`);
     await p.reload(); await p.waitForTimeout(1400); k = await kb(p); D.reload = k.pick; F(k.pick === 'buttons' && k.cls === 'kb fourths', `${tag}: after reload ${k.pick} ${k.cls}`);
     let e = await switchTo(p, 'expert', 'simple'); F(!e, `${tag}: ${e}`); k = await kb(p); D.simple = [k.cls, k.n]; F(k.cls === 'kb piano' && k.n <= 13 && !k.chip, `${tag}: Simple keys changed ${k.cls} ${k.n}`);
     e = await switchTo(p, 'simple', 'kids'); F(!e, `${tag}: ${e}`); await p.waitForTimeout(400);

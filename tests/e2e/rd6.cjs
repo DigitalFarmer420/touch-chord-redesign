@@ -69,8 +69,9 @@ const sheetRows = p => p.evaluate(() => { const v = e => e.getClientRects().leng
     modes: [...document.querySelectorAll('#msMode button')].map(b => b.dataset.mode + (b.classList.contains('on') ? '*' : '') + ':' + b.querySelector('b').textContent + '/' + b.querySelector('small').textContent),
     looks: [...document.querySelectorAll('#msLook button')].map(b => b.textContent + (b.disabled ? '(off)' : '') + (b.classList.contains('on') ? '*' : '')),
     lsub: document.querySelector('#modeSheet .ms-lsub').textContent, all: document.querySelector('#modeSheet .ms-sheet').innerText, inView: (() => { const s = document.querySelector('#modeSheet .ms-sheet').getBoundingClientRect(); return s.top >= -1 && s.bottom <= innerHeight + 1; })() }; });
-const ORDER = { kids: ['mode', 'playAlong', 'hints', 'nums', 'look', 'help', 'reset'], simple: ['mode', 'playAlong', 'hints', 'nums', 'look', 'help', 'reset'],   // rd10: Simple has a Look row again (rd7 hid it)
-  expert: ['mode', 'keys', 'playAlong', 'hints', 'nums', 'look', 'upload', 'help', 'reset'] };   // rd13: + Keys (Expert only)
+const ORDER = { kids: ['mode', 'playAlong', 'hints', 'nums', 'look', 'help', 'reset'],   // rd17: Kids keeps How to & tour
+  simple: ['mode', 'playAlong', 'hints', 'nums', 'look', 'reset'],   // rd17: Simple's ? menu is How to / Tour (no duplicate row, no Upload)
+  expert: ['mode', 'playAlong', 'hints', 'nums', 'look', 'reset'] };   // rd17: no Keys row (the keyboard cycles it), no Upload row (Song is its home), no Help row
 const TEXT = { mode: 'Mode', keys: 'Keys', playAlong: 'Play along', hints: 'Show hints', nums: 'Chord numbers', look: 'Look', upload: 'Upload a song', help: 'How to & tour', reset: 'Start over' };
 const LABEL = { kids: 'Kids', simple: 'Simple', expert: 'Expert' };
 

@@ -12,7 +12,7 @@ const SIZES = process.argv[2] ? [process.argv[2].split('x').map(Number)] : [[360
 const SONG = fs.readFileSync(path.join(__dirname, '../fixtures/upload/expert-song.json'), 'utf8');
 const R = { fails: [], passes: 0, data: {} }; let tag = '', D0 = null;
 const F = (c, m) => { if (c) R.passes++; else R.fails.push(tag + ': ' + m); };
-const SUS = { '360x780': [108, 52], '820x1180': [230, 72], '1180x820': [206, 84] };
+const SUS = { '1180x820': [206, 84] };   // rd17: portrait SUSTAIN is a third of the row (checked with All notes / Sound), not the old fixed 108 / 230. iPad landscape's column width is unchanged.
 (async () => {
   const b = await chromium.launch({ executablePath: process.env.CHROME || undefined });
   for (const [w, h] of (process.env.X_ONLY_STYLELIST ? [] : SIZES)) {
@@ -54,16 +54,22 @@ const SUS = { '360x780': [108, 52], '820x1180': [230, 72], '1180x820': [206, 84]
     D.grid = grid;
     F(grid.notes === 7 && grid.chips >= 7, `7 notes + chord chips (${grid.notes} / ${grid.chips})`); F(grid.inside, 'every grid chip inside the grid box');
     F(grid.border === 'rgb(0, 0, 0)', 'black border on the chord grid (decision 5) ' + grid.border);
-    // 5. decision 3: Sustain size, far left, row order Sustain, Type, Full Range, Sound
+    // 5. rd17: upright / iPad portrait is [SUSTAIN][All notes][Sound], three equal widths. Type lives in the keyboard bar.
+    //    Short landscape: SUSTAIN, then All notes | Sound, then Type | Keys. iPad landscape: SUSTAIN, then All notes | Sound; Type is in the keyboard bar.
     const sus = rs['#sustainBtn'], ty = await r('#xType'), fr = await r('#xFull'), so = await r('#xSound'); D.sus = sus;
+    const keysChip = await r('#xKeysChip');
     if (SUS[tag]) F(Math.abs(sus.w - SUS[tag][0]) <= 3 && Math.abs(sus.h - SUS[tag][1]) <= 3, `Sustain ${Math.round(sus.w)}x${Math.round(sus.h)} = ${SUS[tag]}`);
-    else if (w > h && h < 500) {   // rd15 (Uiux): short landscape draws SUSTAIN 40px tall to fit the Keys button; its tap area stays >= 44px
+    else if (w > h && h < 500) {   // rd15 (Uiux): short landscape draws SUSTAIN 40px tall; its tap area stays >= 44px
       const tapH = await p.evaluate(() => { const e = document.getElementById('sustainBtn'), q = e.getBoundingClientRect(), cx = q.left + q.width / 2, cy = q.top + q.height / 2, on = y => { const t = document.elementFromPoint(cx, y); return !!(t && t.closest('#sustainBtn')); };
         let a = 0, z = 0; while (on(cy - a - 0.5) && a < 40) a += 0.5; while (on(cy + z + 0.5) && z < 40) z += 0.5; return a + z + 0.5; });
       D.susTap = tapH; F(sus.w >= 108 && sus.h >= 40 && tapH >= 44, `Sustain at least 108x40 drawn with a 44px tap area (${Math.round(sus.w)}x${Math.round(sus.h)}, tap ${tapH})`); }
     else F(sus.w >= 108 && sus.h >= 44, `Sustain at least 108x44 (${Math.round(sus.w)}x${Math.round(sus.h)})`);
-    if (!land) F(sus.l < ty.l && ty.l < fr.l && fr.l < so.l && sus.l <= 20, 'row order [Sustain][Type][Full Range][Sound], Sustain far left');
-    else F(sus.b <= ty.t + 0.5 && ty.b <= fr.t + 0.5 && fr.l < so.l, 'landscape column: Sustain first, then Type, then Full Range / Sound');
+    if (!land) {
+      F(sus.l < fr.l && fr.l < so.l && Math.abs(sus.w - fr.w) <= 2 && Math.abs(fr.w - so.w) <= 2 && Math.abs(sus.h - fr.h) <= 1 && Math.abs(fr.h - so.h) <= 1, `three equal buttons SUSTAIN | All notes | Sound ${Math.round(sus.w)}/${Math.round(fr.w)}/${Math.round(so.w)}`);
+      F(ty.t >= rs['.kb-wrap'].t - 1 && ty.l <= 24 && keysChip && keysChip.r >= w - 24 && keysChip.l > ty.r, 'Type at the keyboard bar left, Keys at its right');
+    } else if (h < 500) {
+      F(sus.b <= fr.t + 1 && fr.l < so.l && ty.t >= fr.b - 2 && keysChip && Math.abs(keysChip.t - ty.t) <= 2 && keysChip.l > ty.r, 'short landscape column: SUSTAIN, All notes | Sound, Type | Keys');
+    } else F(sus.b <= fr.t + 1 && fr.l < so.l && ty.t >= rs['.kb-wrap'].t - 1 && keysChip && keysChip.l > ty.r, 'iPad landscape: SUSTAIN then All notes | Sound; Type and Keys in the keyboard bar');
     await shot('play');
     // 6. decision 2 + 4: Type bar toggle, docked table, grid fully visible, Sustain spans both table rows
     F(!(await r('#chords')).vis, 'table folded at start');

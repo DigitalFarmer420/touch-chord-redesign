@@ -127,7 +127,8 @@ const geo = p => p.evaluate(() => { const box = s => { const e = typeof s === 's
   const clip = pads.map(k => { const n = k.querySelector('.nm'); if (!n || !n.getClientRects().length) return null; const a = k.getBoundingClientRect(), r = n.getBoundingClientRect();
     if (getComputedStyle(k).overflow !== 'visible') return null;   // clipped to the key
     return r.left < a.left - 0.5 || r.right > a.right + 0.5 || r.top < a.top - 0.5 || r.bottom > a.bottom + 0.5 ? `${k.dataset.midi} label ${Math.round(r.top)}..${Math.round(r.bottom)} vs key ${Math.round(a.top)}..${Math.round(a.bottom)}` : null; }).filter(Boolean);
-  return { padH: Math.min(...pads.map(e => e.getBoundingClientRect().height)), rows, chipIn: c && c.parentElement ? (c.parentElement.id || c.parentElement.className) : null, chip: box(c), ctl: box('#xCtl'), full: box('#xFull'), snd: box('#xSound'), sus: box('#sustainBtn'), grid: box('.next-card'), wrap: box('.kb-wrap'), pads: box('#pads'), clip }; });
+  const t = document.getElementById('xType');
+  return { padH: Math.min(...pads.map(e => e.getBoundingClientRect().height)), rows, chipIn: c && c.parentElement ? (c.parentElement.id || c.parentElement.className) : null, typeIn: t && t.parentElement ? (t.parentElement.id || t.parentElement.className) : null, chip: box(c), type: box(t), ctl: box('#xCtl'), full: box('#xFull'), snd: box('#xSound'), sus: box('#sustainBtn'), grid: box('.next-card'), wrap: box('.kb-wrap'), pads: box('#pads'), clip }; });
 const topbar = p => p.evaluate(() => { const box = s => { const e = document.querySelector(s); if (!e || !e.getClientRects().length) return null; const r = e.getBoundingClientRect(); return { l: r.left, t: r.top, r: r.right, b: r.bottom, w: r.width, h: r.height }; };
   const o = {}; ['#xKey', '#xStyle', '#xTog', '#xModeChip', '#xHelp'].forEach(s => o[s] = box(s));
   const h = o['#xHelp'], at = (x, y) => { const e = document.elementFromPoint(x, y); return e ? (e.closest('#xHelp') ? 'help' : e.closest('#xModeChip') ? 'chip' : (e.id || e.className || e.tagName)) : null; };
@@ -156,10 +157,11 @@ async function pillTap(p) {   // a real touch on the enable-sound pill: the key 
       F(q.pads.t - q.wrap.t <= 4, `${tag}: a header above the keys (${q.pads.t - q.wrap.t}px)`);
       if (k === 'buttons') { const gaps = q.rows.slice(1).map((y, i) => y - q.rows[i] - q.padH); d.rows = q.rows.length; d.gap = Math.round(Math.max(...gaps) * 10) / 10;
         F(q.rows.length === 4 && q.padH >= 24, `${tag}: Buttons rows ${q.padH}px (${q.rows.length} rows), want >= 24`); F(gaps.every(x => x <= 2.6), `${tag}: Buttons row gaps ${gaps}`); }
-      F(q.chipIn === 'xCtl' && q.chip && q.ctl && Math.abs(q.chip.w - q.ctl.w) <= 1 && q.chip.t >= Math.max(q.full.b, q.snd.b) - 0.5 && q.chip.b <= q.ctl.b + 0.5 && q.chip.h >= 26, `${tag}: Keys chip not a full-width button under Full Range / Sound ${JSON.stringify([q.chipIn, q.chip, q.ctl, q.full])}`);
-      F(q.ctl.b <= q.grid.b + 0.5 && !ov(q.chip, q.pads) && !ov(q.chip, q.wrap), `${tag}: the column grew past the chord grid or the chip meets the keys ${JSON.stringify([q.ctl, q.grid, q.wrap])}`);
+      // rd17: the column is All notes | Sound, then Type | Keys, each half the column. Keys stays (it is not dropped while the table is closed).
+      F(q.chipIn === 'xCtl' && q.typeIn === 'xCtl' && q.chip && q.type && q.full && q.snd && Math.abs(q.chip.w - q.type.w) <= 3 && Math.abs(q.full.w - q.snd.w) <= 3 && q.type.t >= Math.max(q.full.b, q.snd.b) - 2 && Math.abs(q.type.t - q.chip.t) <= 2 && q.chip.l > q.type.r - 1 && q.chip.h >= 30 && q.type.h >= 30, `${tag}: Type | Keys not half-width under All notes | Sound ${JSON.stringify([q.chipIn, q.typeIn, q.chip, q.type, q.full, q.snd])}`);
+      F(q.ctl.b <= q.grid.b + 0.5 && !ov(q.chip, q.pads) && !ov(q.type, q.pads) && !ov(q.chip, q.wrap), `${tag}: the column grew past the chord grid or a control meets the keys ${JSON.stringify([q.ctl, q.grid, q.wrap])}`);
       F(Math.round(q.sus.h) === 40, `${tag}: SUSTAIN ${q.sus.h}px, want 40`);
-      F(Math.abs(q.full.h - q.snd.h) <= 0.5, `${tag}: Full Range ${q.full.h} vs Sound ${q.snd.h}`);
+      F(Math.abs(q.full.h - q.snd.h) <= 1 && Math.abs(q.type.h - q.chip.h) <= 1, `${tag}: All notes ${q.full.h} vs Sound ${q.snd.h}; Type ${q.type && q.type.h} vs Keys ${q.chip && q.chip.h}`);
       F(!q.clip.length, `${tag}: labels past their keys: ${q.clip.slice(0, 4).join('; ')}`);
       if (hour === 12 && RD14 && k !== 'buttons') { const p0 = await open(b, w, h, XS(k), '?test=1&hour=12'); await p0.goto(RD14 + '?test=1&hour=12'); await p0.waitForTimeout(1300); const q0 = await geo(p0);
         d.rd14keyH = Math.round(q0.padH * 10) / 10; F(q.padH >= q0.padH - 0.5, `${tag}: keys ${q.padH}px, rd14 ${q0.padH}px`); await p0.context().close(); }
@@ -183,10 +185,12 @@ async function pillTap(p) {   // a real touch on the enable-sound pill: the key 
   // upright phones and iPad: rd14's strip, the chip in it, the same panel / grid / keys as rd14
   if (!process.env.SZ) for (const [w, h] of [[360, 780], [412, 915], [820, 1180], [1180, 820]]) for (const k of ['buttons', 'octave']) { const tag = `${w}x${h} ${k} (as rd14)`;
     const p = await open(b, w, h, XS(k), '?test=1&hour=12'); const q = await geo(p), g = await hit(p);
-    F(q.chipIn !== 'xCtl' && /kb-wrap/.test(q.chipIn || ''), `${tag}: chip in ${q.chipIn}`); F(!g.bad.length, `${tag}: ${g.bad.length} key points not on their key ${g.bad.slice(0, 3)}`);
+    // rd17: Type and Keys both sit in the keyboard bar (not the old rd14 chip-only strip). Key points still hit the key.
+    F(q.chipIn !== 'xCtl' && /kb-wrap/.test(q.chipIn || '') && /kb-wrap/.test(q.typeIn || ''), `${tag}: chip/type in ${q.chipIn}/${q.typeIn}`); F(!g.bad.length, `${tag}: ${g.bad.length} key points not on their key ${g.bad.slice(0, 3)}`);
     if (RD14) { const p0 = await open(b, w, h, XS(k), '?test=1&hour=12'); await p0.goto(RD14 + '?test=1&hour=12'); await p0.waitForTimeout(1300); const q0 = await geo(p0);
-      const pick = x => JSON.stringify([x.chip, x.wrap, x.pads, x.grid, x.sus, x.padH]);
-      F(pick(q) === pick(q0), `${tag}: differs from rd14 ${pick(q)} vs ${pick(q0)}`); await p0.context().close(); }
+      // rd17 moved Type into a taller header and made SUSTAIN a third of the row, so chip / sus / key height are not rd14's. The chord grid and the keyboard panel's outer box stay.
+      F(JSON.stringify(q.grid) === JSON.stringify(q0.grid) && JSON.stringify(q.wrap) === JSON.stringify(q0.wrap), `${tag}: grid or keyboard panel moved vs rd14 ${JSON.stringify([q.grid, q.wrap])} vs ${JSON.stringify([q0.grid, q0.wrap])}`);
+      F(q.padH >= q0.padH - 16, `${tag}: keys ${q.padH}px, rd14 ${q0.padH}px (header grew by about 10px)`); await p0.context().close(); }
     await done(p, tag); }
   // equal heights in short landscape: Kids, Simple, Expert, Day and Lamp
   if (!process.env.NO_EQH) { const D = R.data.eqh = { checked: 0, rows: 0, bad: [] };

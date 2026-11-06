@@ -314,3 +314,29 @@ Tests: tests/e2e/rd11.cjs (helper line x3, sus chip Day / Lamp, chip alignment a
    lyrics + song bar, controls, step badges and the sheet (360x780, 780x360, 820x1180). Lamp keeps 351c02c's values
    (some below: minor-chip text 4.1:1, dark button edges ~1.5:1); changing them would break Lamp = classic.
 Tests: unit rd10.test.js; e2e tests/e2e/rd10.cjs; rd6 / rd7 updated for Simple's Look row.
+
+## rd17 (one home per control) - development only, badge v112.13-rd17
+No production promote, no APK. Base redesign-dev d10aecf (rd16).
+
+1. Expert upright phones and iPad: the keyboard header holds "Type: Auto ▾" on the left and the Keys cycle on the right. Type keeps tap-open / fold and the 0.3 s hold-to-peek, and the live modifier label. Both are drawn in the 40px strip and keep a 44px hit area that reaches up into the gap, not down onto the keys. The enable-sound pill floats over the keys (pointer-events none); the first tap enables sound and plays the key under it once. Above the keyboard, SUSTAIN, All notes and Sound are three equal buttons; labels do not wrap at 360 / 384 / 412.
+2. Short phone landscape: Type and Keys are half-width buttons in the existing right-hand column (All notes | Sound, then Type | Keys) and stay when the type table is open. At 800x330 the column rows stay at least 32px and the keys give up a little height so the labels do not crush. The half-width Keys button reads "↻ Octave" (the "Keys: …" prefix clipped the name). iPad keeps its column (SUSTAIN, then All notes | Sound); Type and Keys are in the keyboard bar.
+3. User-facing Keys names: Octave / Keyboard / Buttons. Saved values stay octave / full / fourths. The keyboard cycle is the only home. The Sound Layout tab is hidden (the classic ?classic=1 hatch still shows it). The Settings Keys row is gone. Start over resets to Octave. Sound subtitle is "FX · Loop". Sound sheet Voicing and Band use Expert ink with space under the tiles so they are not clipped at 360.
+4. Full Range is "All notes", with "in key only" / "all 12". It still only unlocks off-scale keys. Sound is unchanged.
+5. Lock is editable only on the song strip. My songs shows a read-only Lock line. Simple and Expert "?" open How to / Tour. Kids keeps Settings How to & tour. Settings has no Upload row; Expert Song opens My songs. The easy/full chart toggle is the read-only line "Plays the easy chart in Simple, the full one in Expert."
+6. Kids song list fills the width (2 columns on phones upright, 3 on landscape and iPad). Six songs stay at the usual card height. A longer list (tested with clones of the real cards, not new songs) shows whole rows plus a peek of the next row. Picture and title sizes stay put.
+7. How to / tour copy no longer says gear menu, Layout tab, the old upload button, or "6 songs". Badge v112.13-rd17.
+
+Music: sliding piano, tonic snap-back, root-lowest voicing, left-to-right pitch, no octave folding. No audio change. Kids six songs, Simple Play along, mode and sound unlock kept. Noff pack not in this change.
+
+### Test ledger (development, this tree)
+Commands use `CHROME=/usr/local/bin/google-chrome`. Reference servers were git worktrees: 351c02c :8090, rd9 f0cebc4 :8091, rd10 e8cf905 :8092, rd11 aaff6c8 :8093, rd13 b640237 :8094, rd14 5517105 :8095, rd16 d10aecf :8096.
+
+- Unit `node --test tests/unit/*.test.js`: 112/112 PASS (includes tests/unit/rd17.test.js).
+- `node tests/e2e/run.cjs` PORT=8088 with RD9/RD10/RD11/RD13/RD14 set, 108.6 min, 25/41 PASS. Then re-checked the two files that changed after that run.
+- PASS in that run: lyrfit111, kbaccept 360/780 octave and full (4), kidsview 360/780/768/1024/820 (5), kvaudio, expert (422s), modeswitch 360/412/780 (3), rd6, rd7, rd8, rd9, rd10, rd11, rd13, rd14, rd15, rd17.
+- rd17 e2e re-run after the classic-hatch fix below: PASS (same sizes).
+- howto112: the suite crashed on a hidden `#uploadBtn` click. Re-run after opening that form with `element.click()` (the button is no longer on screen): 0 fails PASS.
+- rd12: suite 6 fails. Re-run after masking/clipping the upright Expert control row (changed on purpose): 2 fails, both `744x1133` simple lyric clip. The same clip is on rd16 (`scrollHeight 20` vs `clientHeight 18` on both). Not an rd17 change. Phone expert pixels above that row match rd11.
+- audioeq `audioeq.cjs` classic hatch, 351c02c vs this tree: 64 runs, 4268 calls, 0 differences.
+- grownup `grownup.cjs 360x780` vs 351c02c: 4/14 identical (the two Simple setups). The other 10 differ only by the classic button reading All notes instead of Full Range. A first cut had also parked Type inside the classic keyboard and pushed the keys down; Type now stays in the hidden Expert controls unless Expert is on, and the keys/pill line up with 351c02c again.
+- Pre-existing on rd16 d10aecf, same failure shape, not changed here: tour112 (gear `#configBtn` hidden), hints112 and hints1121, test111, keysplit, validate (hidden classic controls), labelfit (50), kbfix (91, same count on rd16), kidsascend (0 classic kid pads), kidsgold, playoff (2: kids gold pad not shown), upload13 (hidden `#uploadBtn`). These suites assume the classic chrome that Expert replaced in earlier redesign rounds.

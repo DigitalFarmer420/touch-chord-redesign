@@ -23,6 +23,7 @@ import { stripPress, stripRelease } from "../ui/strip.js?v=112.13";
 import { keyOf, soundFinger, liftFinger, resoundHeldFinger } from "../ui/touch.js?v=112.13";
 import { api as ChordAudio } from "../audio/index.js?v=112.13";
 import { makeChip, openModeSheet } from "../ui/modesheet.js?v=112.13";
+import { kidsRowPlan, KIDS_ROWS } from "./grid.js?v=112.13";
 import { registerLook, lookApplyNow } from "../ui/look.js?v=112.13";
 
 // The six Kids songs (presets.js order): picture, title for parents, short chip name.
@@ -133,6 +134,19 @@ function buildCards() {
     c.addEventListener("click", function () { unlock(); pickSong(i, false); });
     els.cards.appendChild(c);
   });
+  fitCards();
+}
+// rd17 (Uiux): the song list fills the width and, when it scrolls, the next row peeks in (js/kids/grid.js).
+export function fitCards() {
+  var c = els.cards, sc = els.songs;
+  if (!c || !sc || sc.hidden || !c.children.length) return null;
+  var de = document.documentElement, lay = ["phone-port", "phone-land", "pad-port", "pad-land"].filter(function (l) { return de.classList.contains("lay-" + l); })[0] || "phone-port";
+  var cs = getComputedStyle(c), cols = cs.gridTemplateColumns.split(" ").filter(Boolean).length || 1, g = parseFloat(cs.rowGap) || 0;
+  var top = c.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop;
+  var plan = kidsRowPlan(sc.clientHeight - top, c.children.length, cols, g, KIDS_ROWS[lay]);
+  c.style.gridAutoRows = plan.r + "px";
+  kv.grid = { lay: lay, cols: cols, n: c.children.length, r: plan.r, full: plan.full, peek: plan.peek };
+  return kv.grid;
 }
 // rd7 (Noff rd6 #4): a reload in Kids opens Hello as before; Start (or picking the same song) then resumes the saved step.
 function bootResume() {
@@ -227,7 +241,7 @@ export function show(scr) {
   kv.screen = scr; kv.sig = "";
   root.dataset.screen = scr;
   [["hello", els.hello], ["songs", els.songs], ["play", els.playScr]].forEach(function (x) { x[1].hidden = x[0] !== scr; });
-  if (scr === "songs") buildCards();
+  if (scr === "songs") { buildCards(); requestAnimationFrame(function () { if (kv.screen === "songs") fitCards(); }); }   // rd17: measure after layout (the first pass can run before the list has a height)
   kv.log.push("screen:" + scr);
   if (scr !== "play") { paint(true); return; }
   try { paint(true); } catch (err) { kv.log.push("play-failed"); show("songs"); return; }   // rd5.1 guard: finish the play screen or go back to the list
@@ -424,7 +438,7 @@ function stopPaint() { if (kv.timer) { clearInterval(kv.timer); kv.timer = 0; } 
 export function boot() {
   build();
   registerLook("kids", function () { return state.theme; }, function (l) { document.documentElement.classList.toggle("kv-lamp", l === "lamp"); });
-  window.addEventListener("resize", function () { paint(true); });
+  window.addEventListener("resize", function () { paint(true); if (kv.on && kv.screen === "songs") fitCards(); });
   if (!state.expert) enter(true);
-  if (TEST) window.__kv = { kv: kv, show: show, setExpert: setExpert, setTheme: setTheme, paint: paint, reward: showReward, gold: goldMidi, songs: function () { return prog.list.map(function (p) { return p.name; }); } };
+  if (TEST) window.__kv = { kv: kv, show: show, setExpert: setExpert, setTheme: setTheme, paint: paint, reward: showReward, gold: goldMidi, songs: function () { return prog.list.map(function (p) { return p.name; }); }, fitCards: fitCards };
 }

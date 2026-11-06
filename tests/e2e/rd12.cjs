@@ -12,7 +12,7 @@ const SLK = 'touchChord.simpleLook.v1', LK = look => ({ ls: { [SLK]: { v: 1, loo
 const FREEZE = '*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}#dev-badge{visibility:hidden!important}#xKeysChip{visibility:hidden!important}';
 // rd13 changed on purpose: the phone top rows (Simple's mode chip 40 -> 44px, Expert's top bar / Next / Play / picker
 // heights) and Expert's Keys chip; the pixel checks against older builds hide the chip and mask those rows.
-const RD13M = p => ({ mask: [p.locator('header.topbar'), p.locator('#xTop'), p.locator('#xGo'), p.locator('#xSrc'), p.locator('html.expert .kb-wrap'), p.locator('html.expert.lay-phone-land #sustainBtn'), p.locator('html.expert.lay-phone-land #xCtl'), p.locator('html.expert.lay-phone-land .now-col')] })   // rd15: + short landscape's right-hand column and Now card   // rd14: + Expert's keyboard panel (header strip);
+const RD13M = p => ({ mask: [p.locator('header.topbar'), p.locator('#xTop'), p.locator('#xGo'), p.locator('#xSrc'), p.locator('html.expert .kb-wrap'), p.locator('html.expert #sustainBtn'), p.locator('html.expert #xCtl'), p.locator('html.expert.lay-phone-land .now-col')] })   // rd17: the upright control row is SUSTAIN | All notes | Sound (Type moved into the keyboard bar), so it is masked with the keyboard panel   // rd15: + short landscape's right-hand column and Now card   // rd14: + Expert's keyboard panel (header strip);
 const CONTRAST = function (groups) {
   function parse(c) { const m = c.match(/rgba?\(([^)]+)\)/); if (!m) return null; const p = m[1].split(/[ ,\/]+/).filter(Boolean).map(Number); return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 }; }
   function over(f, b) { const a = f.a + b.a * (1 - f.a); if (!a) return { r: 0, g: 0, b: 0, a: 0 }; return { r: (f.r * f.a + b.r * b.a * (1 - f.a)) / a, g: (f.g * f.a + b.g * b.a * (1 - f.a)) / a, b: (f.b * f.a + b.b * b.a * (1 - f.a)) / a, a }; }
@@ -139,9 +139,11 @@ async function lampOpen(b, base, w, h, setup, look) {
   if (RD11) for (const [w, h] of PHONES) { const T = `${w}x${h}`, D = R.data[T] = {};
     for (const [m, look] of [['simple', 'day'], ['simple', 'lamp'], ['expert', 'day'], ['expert', 'lamp']]) { const shots = [];
       for (const base of [URL, RD11]) { const p = await lampOpen(b, base, w, h, SET[m], look);
-        // rd15: short-landscape Expert's right-hand column (SUSTAIN 40, the Keys button) and the 36px "?" changed on purpose: compare left of the column
+        // rd15: short-landscape Expert's right-hand column changed on purpose: compare left of the column.
+        // rd17: upright Expert's control row and keyboard header changed on purpose (Type in the bar, three equal buttons): compare above that row.
         const cut = m === 'expert' && w > h && h < 500 ? await p.evaluate(() => Math.floor(document.getElementById('sustainBtn').getBoundingClientRect().left) - 1) : 0;
-        const opt = () => Object.assign(RD13M(p), cut ? { clip: { x: 0, y: 0, width: cut, height: h } } : {});
+        const above = m === 'expert' && !cut ? await p.evaluate(() => Math.floor(document.getElementById('sustainBtn').getBoundingClientRect().top) - 2) : 0;
+        const opt = () => Object.assign(RD13M(p), cut ? { clip: { x: 0, y: 0, width: cut, height: h } } : above ? { clip: { x: 0, y: 0, width: w, height: above } } : {});
         const one = [await p.screenshot(opt())]; await song(p); one.push(await p.screenshot(opt())); shots.push(one); await p.context().close(); }
       const same = shots[0].map((s, i) => s.equals(shots[1][i])); D[`${m} ${look}`] = same; F(same.every(Boolean), `${T} ${m} ${look}: differs from rd11 (${same})`);
       if (!same.every(Boolean)) shots.forEach((one, k) => one.forEach((s, i) => fs.writeFileSync(path.join(OUT, `rd12-${T}-${m}-${look}-${k ? 'rd11' : 'rd12'}-${i}.png`), s)));

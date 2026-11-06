@@ -5,13 +5,16 @@ const APPV=require('fs').readFileSync(require('path').resolve(__dirname,'../../j
 const { chromium } = require('playwright-core'); const fs = require('fs');
 const URL = process.env.URL || (process.env.BASE||'http://localhost:8080/index.html'); const SH = (process.env.SHOTS||'/tmp/tc-shots')+'/s111/howto-dialog-';
 const R = { fails: [], info: {} }; const F = (c, m) => { if (!c) R.fails.push(m); };
-const KIDS10 = ['Twinkle', 'Old MacDonald', 'Itsy Bitsy Spider', 'Row Your Boat', 'Head, Shoulders, Knees and Toes', 'Mary&#8217;s Lamb'];   // Kids redesign: the six Kids songs
 (async () => { const b = await chromium.launch({ executablePath:process.env.CHROME||undefined,});
   const html = await (await fetch(URL)).text();
   F(html.includes('Tap a song to play it.'), 'step 9 "Tap a song to play it" changed');
   const kidsCap = html.slice(html.indexOf('<span class="ht-num">10.</span> Kids'), html.indexOf('</section></li>', html.indexOf('<span class="ht-num">10.</span> Kids')));
-  KIDS10.forEach(n => F(kidsCap.includes(n), 'How to Kids misses ' + n)); F(!/Wheels|You&#8217;re Happy/.test(html), 'dropped song still in page');
-  F(/right of <b>Full Range<\/b>/.test(html), 'Upload wording');
+  F(!/Wheels|You&#8217;re Happy/.test(html), 'dropped song still in page');   // rd17: the Kids step no longer names the six songs (the list can grow)
+  F(/My songs/.test(html) && /tap <b>Song<\/b>/i.test(html) && !/right of <b>Full Range<\/b>/.test(html), 'Upload wording');   // rd17: Song tab opens My songs; the old Full Range upload button is gone
+  F(/All notes/.test(html) && !/Tap <b>Full Range<\/b>/.test(html), 'All notes wording');
+  F(/Keyboard<\/b> shows the whole two-octave/.test(html) && !/Open <b>Layout<\/b>/.test(html), 'Keys wording');
+  F(/pick a song from the list/.test(kidsCap) && !/There are 6|6 songs/.test(html), 'Kids copy is count-agnostic');
+  F(!/gear menu/.test(html.slice(html.indexOf('id="howto"'), html.indexOf('id="htWordsH"'))), 'How to no longer says gear menu');
   // v111 steering: no album anywhere the user can see (How to, Upload button labels, Upload form)
   const ht = html.slice(html.indexOf('id="howto"'), html.indexOf('</section>', html.indexOf('htWordsH')));
   F(!/album/i.test(ht), 'How to mentions album'); F(!/album/i.test(html.match(/<button[^>]*id="uploadBtn"[^>]*>/)[0]), 'upload button label album');
@@ -23,7 +26,12 @@ const KIDS10 = ['Twinkle', 'Old MacDonald', 'Itsy Bitsy Spider', 'Row Your Boat'
     p.on('pageerror', e => errs.push('' + e)); p.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
     p.on('response', r => { if (r.status() >= 400) bad.push(r.status() + ' ' + r.url()); if (/\/images\//.test(r.url())) imgs[r.url()] = r.status(); });
     await p.goto(URL + '?test=1'); await p.waitForTimeout(1000);
-    await p.click('#howtoBtn'); await p.waitForTimeout(500);
+    // rd17: "?" opens How to / Tour. Expert's visible control is #xHelp (the classic #howtoBtn is in the hidden top bar).
+    const help = await p.evaluate(() => { const vis = e => e && e.getClientRects().length && getComputedStyle(e).visibility !== 'hidden' && getComputedStyle(e).display !== 'none';
+      if (vis(document.getElementById('xHelp'))) return '#xHelp'; if (vis(document.getElementById('howtoBtn'))) return '#howtoBtn'; return null; });
+    F(!!help, tag + ' no visible ?'); if (help) { await p.click(help); await p.waitForTimeout(250);
+      const menu = await p.evaluate(() => { const m = document.getElementById('helpMenu'); return !!(m && !m.hidden); });
+      F(menu, tag + ' ? did not open the How to / Tour menu'); if (menu) { await p.click('#helpMenu button[data-help="howto"]'); await p.waitForTimeout(400); } }
     const open = await p.evaluate(() => { const d = document.getElementById('howto'); return !d.hidden && getComputedStyle(d).display !== 'none'; }); F(open, tag + ' How to did not open');
     await p.screenshot({ path: SH + tag + '-top.png' });
     // scroll through, picture by picture
@@ -42,7 +50,8 @@ const KIDS10 = ['Twinkle', 'Old MacDonald', 'Itsy Bitsy Spider', 'Row Your Boat'
     F(!bad.length, tag + ' HTTP errors ' + bad); F(!errs.length, tag + ' console ' + errs);
     await p.screenshot({ path: SH + tag + '-end.png' });
     await p.click('#howto .ht-x'); await p.waitForTimeout(300); F(await p.evaluate(() => document.getElementById('howto').hidden), tag + ' did not close');
-    if (!simple) { await p.click('#uploadBtn'); await p.waitForTimeout(300); for (const [t, a] of [['Hotel California', 'Eagles'], ['', 'Eagles'], ['Thriller', 'MJ']]) { await p.fill('#upTitle', t); await p.fill('#upArtist', a); await p.dispatchEvent('#upArtist', 'input'); await p.waitForTimeout(100);
+    if (!simple) { await p.evaluate(() => document.getElementById('uploadBtn').click()); await p.waitForTimeout(300); // rd17: the Upload button is no longer on screen (Song opens My songs); the same control still opens the form
+      for (const [t, a] of [['Hotel California', 'Eagles'], ['', 'Eagles'], ['Thriller', 'MJ']]) { await p.fill('#upTitle', t); await p.fill('#upArtist', a); await p.dispatchEvent('#upArtist', 'input'); await p.waitForTimeout(100);
       const v = await p.evaluate(() => ({ txt: document.getElementById('uploadPick').innerText, attrs: [...document.querySelectorAll('#uploadPick [aria-label], #uploadPick [title], #uploadPick [placeholder], #uploadBtn')].map(e => (e.getAttribute('aria-label') || '') + (e.getAttribute('title') || '') + (e.getAttribute('placeholder') || '')).join(' '), copy: __upload.copyText() }));
       F(!/album/i.test(v.txt + v.attrs), tag + ' upload UI shows album: ' + t); F(!/album/i.test(v.copy), tag + ' Copy for AI mentions album: ' + t); } }
     R.info[tag] = { n, sizes: g.im.map(i => i.w + 'x' + i.h).join(' '), bw: g.bw }; await ctx.close(); }

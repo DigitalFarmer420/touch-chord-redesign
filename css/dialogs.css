@@ -235,6 +235,10 @@ html.lay-phone-land .up-lib .ul-edit { min-height: 34px; }
 .up-detail .ud-head:not([hidden]) { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
 .up-detail .ud-note { font-size: var(--fs-s); color: var(--muted); text-align: right; }
 .up-detail .ud-note[hidden] { display: none; }
+/* rd17 (Uiux): My songs shows the chart and the Lock as read-only lines (the mode picks the chart; the song bar's Lock is the control) */
+.up-detail .ud-chart { font-size: var(--fs-s); color: var(--muted); text-align: right; }
+.up-detail .ud-chart[hidden] { display: none; }
+.up-lockrow .up-lockstate { font-weight: 700; font-size: var(--fs-m); white-space: nowrap; }
 .up-detail .ul-ver button:disabled { opacity: .4; cursor: default; }
 .up-detail.ro .up-ch, .up-detail.ro .up-ch .alt { pointer-events: none; }
 html.lay-phone-land .up-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; align-items: start; }

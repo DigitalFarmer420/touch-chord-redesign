@@ -28,7 +28,8 @@ import { setSimple } from "../ui/layout.js?v=112.13";
 import { libSetVer } from "../songs/library.js?v=112.13";
 import { secLyrics } from "../songs/fullchart.js?v=112.13";
 import { KEYS_CHOICES, makeChip, configureSheet, openModeSheet, bootSheet, paintSheet, sheetOpen } from "../ui/modesheet.js?v=112.13";
-import { registerLook, lookApplyNow, lookShown } from "../ui/look.js?v=112.13";   // redesign-dev: the Kids view (kids-build) is the switch's Kids
+import { registerLook, lookApplyNow, lookShown } from "../ui/look.js?v=112.13";
+import { toggleHelpMenu } from "../ui/helpmenu.js?v=112.13";   // redesign-dev: the Kids view (kids-build) is the switch's Kids
 import { EXPERT_STORE, parsePref, prefFromUrl, modeOf, modeTarget, typeBarInit, typeBarReduce, typeBarLabel, TYPEBAR_HOLD_MS,
   sourceInit, sourceReduce, progDots, lyricNow, STYLE_MENU, styleName, expertWindowKeys, expertStyleFix, fullToExpert, chartFor } from "./model.js?v=112.13";
 // rd6: ?test=1&classic=1 keeps the legacy classic screens (Full layout, Kids style chip in Simple) for the sound-equivalence
@@ -77,12 +78,24 @@ export function setKeys(k) {
   if (active) setTimeout(function () { placeBadges(); }, 0);
 }
 function nextKeys() { var i = 0; KEYS_CHOICES.forEach(function (c, j) { if (c[0] === keysPick()) i = j; }); return KEYS_CHOICES[(i + 1) % KEYS_CHOICES.length][0]; }
-// rd15 (Uiux): in short landscape the keyboard has no header strip; the chip is a full-width button in the right-hand
-// column under Full Range / Sound. Everywhere else it sits at the right end of the keyboard's header strip (rd14).
+// rd15 (Uiux): in short landscape the keyboard has no header strip; the chip is a button in the right-hand column.
+// rd17 (Uiux): the keyboard's top bar is the keyboard's own controls - "Type: Auto ▾" at its left, the Keys cycle at its
+// right (upright phones and iPad). Short landscape (no bar) puts the two side by side, half width, in the right-hand
+// column under All notes / Sound (CSS places them; the DOM order is Type, All notes, Sound, Keys).
 function placeKeysChip() {
-  var c = $("xKeysChip"), land = document.documentElement.classList.contains("lay-phone-land");
-  var to = land ? $("xCtl") : document.querySelector(".kb-wrap");
-  if (c && to && c.parentNode !== to) to.appendChild(c);
+  var c = $("xKeysChip"), t = $("xType"), de = document.documentElement, ctl = $("xCtl");
+  // Outside Expert both controls stay in #xCtl, which is hidden. Leaving Type in the keyboard panel
+  // pushed the classic keys down (the ?classic=1 hatch and grownup).
+  if (!de.classList.contains("expert")) {
+    if (ctl && t && t.parentNode !== ctl) ctl.insertBefore(t, ctl.firstChild);
+    if (ctl && c && c.parentNode !== ctl) ctl.appendChild(c);
+    return;
+  }
+  var land = de.classList.contains("lay-phone-land");
+  var to = land ? ctl : document.querySelector(".kb-wrap");
+  if (!to) return;
+  if (t && t.parentNode !== to) to.insertBefore(t, to.firstChild);
+  if (c && c.parentNode !== to) to.appendChild(c);
 }
 function paintKeysChip() {
   var c = $("xKeysChip"); if (!c) return; var k = keysPick();
@@ -155,7 +168,7 @@ function paintMode() {
   paintSimpleLook();
   syncChart();
   if (sheetOpen()) paintSheet();
-  if (on) { paint(); paintKeysChip(); }
+  if (on) { paint(); paintKeysChip(); placeKeysChip(); }
 }
 // rd6: uploaded songs: Simple plays the easy chart, Expert the Full chart (a one-chart song plays it in both). Set on every
 // mode switch, load and song change; the per-song Simple / Full pick in My songs still works until the next one.
@@ -205,9 +218,11 @@ function build() {
   var song = el("div", "x-src", null, { id: "xSrc" });
   var list = el("div", "x-plist", null, { id: "xPList", role: "listbox", "aria-label": "Progressions", hidden: "" });
   var ctl = el("div", "x-ctl", null, { id: "xCtl" });
-  ctl.appendChild(el("button", "x-b x-type", "<span class=\"x-tcol\"><span class=\"x-lbl\">Type</span><span class=\"x-tv\">Auto</span></span><span class=\"x-car\">\u25be</span>", { id: "xType", "aria-expanded": "false", "aria-controls": "chords", "aria-label": "Chord type table" }));
-  ctl.appendChild(el("button", "x-b x-full", "Full Range", { id: "xFull", "aria-pressed": "false" }));
-  ctl.appendChild(el("button", "x-b x-sound", "<span>Sound \u25b4</span><small>FX\u00b7Layout\u00b7Loop</small>", { id: "xSound", "aria-expanded": "false", "aria-controls": "ctl" }));
+  // rd17: one line "Type: Auto ▾" (it lives in the keyboard bar, or half width in the short-landscape column)
+  ctl.appendChild(el("button", "x-b x-type", "<span class=\"x-tcol\"><span class=\"x-lbl\">Type</span><span class=\"x-tsep\">: </span><span class=\"x-tv\">Auto</span></span><span class=\"x-car\">\u25be</span>", { id: "xType", "aria-expanded": "false", "aria-controls": "chords", "aria-label": "Chord type table" }));
+  // rd17 (Uiux): "Full Range" is called "All notes", with a state line under it as SUSTAIN's "hold": in key only / all 12
+  ctl.appendChild(el("button", "x-b x-full", "<span>All notes</span><small class=\"x-fsub\">in key only</small>", { id: "xFull", "aria-pressed": "false", "aria-label": "All notes: in key only" }));
+  ctl.appendChild(el("button", "x-b x-sound", "<span>Sound \u25b4</span><small>FX \u00b7 Loop</small>", { id: "xSound", "aria-expanded": "false", "aria-controls": "ctl" }));
   var scrim = el("div", "x-scrim", null, { id: "xScrim", hidden: "" });
   var smenu = el("div", "x-menu", null, { id: "xStyleMenu", role: "listbox", "aria-label": "Style", hidden: "" });
   STYLE_MENU.forEach(function (s) { var b = el("button", "x-mi", "<b>" + esc(s[1]) + "</b><span>" + esc(s[2]) + "</span>", { role: "option", "data-style": s[0] }); smenu.appendChild(b); });
@@ -255,7 +270,7 @@ function setCtlSheet(on) {
   if ($("xSound")) { $("xSound").setAttribute("aria-expanded", on ? "true" : "false"); $("xSound").classList.toggle("open", !!on); }
   if (on) {
     var ctl = $("ctl");
-    if (!ctl.dataset.open) click("#ctl .ctl-tabs button[data-tab=\"sound\"]");
+    if (!ctl.dataset.open || (ctl.dataset.open === "key" && !de.classList.contains("tc-classic"))) click("#ctl .ctl-tabs button[data-tab=\"sound\"]");   // rd17: the Layout tab is gone (the keyboard bar cycles Keys); a saved "key" pane opens on Sound
     if (de.classList.contains("lay-phone-land") && !de.classList.contains("drawer-open")) click("#ctlToggle");   // phone landscape: the classic drawer shows the panes
     $("xScrim").hidden = false;
     placeSheets();
@@ -483,6 +498,8 @@ export function paint() {
   Array.prototype.forEach.call(document.querySelectorAll("#xKeySheet .x-kmode button"), function (b) { b.classList.toggle("on", b.dataset.km === k.mode); });
   $("xFull").setAttribute("aria-pressed", state.allKeys ? "true" : "false");
   $("xFull").classList.toggle("on", !!state.allKeys);
+  var fs = $("xFull").querySelector(".x-fsub"), ft = state.allKeys ? "all 12" : "in key only";
+  if (fs.textContent !== ft) { fs.textContent = ft; $("xFull").setAttribute("aria-label", "All notes: " + ft); }
   var ps = document.querySelector("#prog .pg-song"), pon = !!(ps && ps.classList.contains("on"));
   $("xPlay").textContent = pon ? "\u25a0" : "\u25b6"; $("xPlay").setAttribute("aria-pressed", pon ? "true" : "false"); $("xPlay").setAttribute("aria-label", pon ? "Stop song" : "Play song");
   var v = $("volume"); if (v) { $("xVol").value = v.value; $("xVolVal").textContent = v.value; }
@@ -501,7 +518,7 @@ function wireAll() {
     var b = e.target.closest("button[data-style]"); if (!b) return;
     unlock(); closeAll(); click("#styles button[data-style=\"" + b.dataset.style + "\"]"); schedule();
   });
-  $("xHelp").addEventListener("click", function () { closeAll(); click("#howtoBtn"); });
+  $("xHelp").addEventListener("click", function (e) { closeAll(); toggleHelpMenu(e.currentTarget); });   // rd17: How to / Tour menu
   $("xNext").addEventListener("click", function () { click("#prog .pg-step"); schedule(); });
   $("xPlay").addEventListener("click", function () { click("#prog .pg-song"); schedule(); });
   $("xTog").addEventListener("click", function (e) {
@@ -520,7 +537,7 @@ function wireAll() {
   $("xScrim").addEventListener("click", function () { closeAll(); });
   $("xFull").addEventListener("click", function () { click("#allKeys"); schedule(); });
   $("xKeysChip").addEventListener("click", function () { closeAll(); setKeys(nextKeys()); });
-  $("layouts").addEventListener("click", function () { setTimeout(paintKeysChip, 0); });   // the Sound ▸ Layout tab sets the same pick
+  $("layouts").addEventListener("click", function () { setTimeout(paintKeysChip, 0); });   // the hidden Layout segment (setKeys drives it; the test-only classic screen shows it)
   $("xSound").addEventListener("click", function () {
     if (document.documentElement.classList.contains("x-ctl-on")) closeAll(); else { closeAll("ctl"); setCtlSheet(true); }
   });
@@ -665,7 +682,6 @@ export function boot() {
       else { pref.look = v; savePref(); lookApplyNow("expert"); paintMode(); }
     },
     isDay: function (m) { return lookShown(m) === "day"; },
-    keysGet: keysPick, keysSet: setKeys,
     startOver: startOver
   });
   placeTog();
