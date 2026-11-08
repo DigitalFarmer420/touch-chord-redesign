@@ -35,6 +35,7 @@ const SUITE = [   // [name, file, args]  (both phone sizes each: the tests loop 
   ['rd14', 'rd14.cjs', []],   // rd14: Keys header strip - every key's area hit-tests to the key (never the chip / pill) in 3 views x 5 sizes; panel and pads = rd13 (RD13 env); track 44 = Next / Play
   ['rd15', 'rd15.cjs', []],   // rd15: short landscape - no keyboard header, Keys chip in the right column, Buttons rows >= 24 (2px gaps), hit tests, labels clipped, pill taps play the key; landscape top bar 36 + ? 44 tap area; upright / iPad = rd14 (RD14 env); eqh in short landscape
   ['rd17', 'rd17.cjs', []],   // rd17: keyboard bar Type + Keys, three equal buttons, All notes, no duplicate controls, Kids scrolling grid, help menu
+  ['ioslayout', 'ioslayout.cjs', []],   // phone + tablet portrait/landscape layout matrix (Kids, Simple, Expert)
 ];
 const only = process.env.ONLY ? process.env.ONLY.split(',') : null;
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.webp': 'image/webp', '.json': 'application/json', '.png': 'image/png' };
