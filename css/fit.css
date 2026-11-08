@@ -38,6 +38,16 @@ html.lay-phone-port:not(.simple) #app { --pal-h: 96px; }
 /* Phone portrait, Simple: styles 36 px (hit 44), volume / key / Major-Minor / song / Next-Play rows 44 px; the top
    row grows 236 -> 300 px (the chord strip below gives it up). */
 html.simple.lay-phone-port #app { grid-template-rows: auto auto 300px minmax(0, 1fr); }
+/* 300px controls fit a 780-tall phone. At 667 the chord grid was left ~209px and Gsus4
+   painted past the screen. Give the five chord rows the height back; the stack tightens. */
+@media (max-height: 700px) {
+  html.simple.lay-phone-port #app { grid-template-rows: auto auto 232px minmax(0, 1fr); }
+  html.simple.lay-phone-port .kid-key { --kk-h: 36px; --kk-mh: 32px; --kk-fs: 22px; gap: 4px; }
+  html.simple.lay-phone-port .prog { --pg-h: 32px; --pg-nh: 32px; --pg-afs: 18px; gap: 3px; }
+  html.simple.lay-phone-port .now-mix > .now-vol,
+  html.simple.lay-phone-port .now-mix > .now-vol input { height: 32px; min-height: 32px; }
+  html.simple.lay-phone-port .now-col { gap: 4px; }
+}
 html.simple.lay-phone-port .style-row { row-gap: 8px; }
 html.simple.lay-phone-port .style-row button { height: 36px; min-height: 36px; position: relative; }
 html.simple.lay-phone-port .style-row button::after { content: ""; position: absolute; inset: -5px -3px; }
@@ -105,6 +115,13 @@ html.lay-pad-land .vticks { display: none; }
    strip below had an empty bottom band); landscape lets the chord buttons grow into their tall rows (92 -> 112 px). */
 html.simple.lay-pad-port #app { grid-template-rows: auto auto 430px minmax(0, 1fr); }
 html.simple.lay-pad-land .ss .ss-chip { height: min(100%, 112px); }
+html.simple.lay-pad-port header.topbar .mode-chip,
+html.simple.lay-pad-land header.topbar .mode-chip,
+html.simple.lay-pad-port .top-btn,
+html.simple.lay-pad-land .top-btn { height: 48px; min-height: 48px; max-height: none; }
+/* 8px test badge sits in this band. The landscape columns and piano row are unchanged. */
+html.simple.lay-phone-land #app,
+html.simple.lay-pad-land #app { padding-bottom: calc(10px + env(safe-area-inset-bottom)) !important; }
 html.simple.lay-pad-port .kid-key { --kk-h: 72px; --kk-mh: 48px; }
 html.simple.lay-pad-port .prog .pg-btn { height: 48px; flex-basis: auto; }
 html.simple.lay-pad-port .now-col > .prog .pg-btns { height: auto; }

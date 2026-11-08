@@ -30,7 +30,7 @@ html.expert #nxArrow { display: none !important; }
 /* ---------- Grid: phone portrait (360x780) ---------- */
 html.expert #app {
   --x-g: 6px; --x-now-w: 78px; --x-sus-w: 108px; --x-row: 44px; --x-src-h: 60px; --x-ctl-h: 52px; --x-chip-r: 12px; --x-fs: 15px; --x-pal-h: 92px; --x-grid-h: 236px;
-  display: grid !important; gap: var(--x-g) !important; padding: 10px 8px calc(6px + env(safe-area-inset-bottom)) !important;
+  display: grid !important; gap: var(--x-g) !important; padding: calc(10px + env(safe-area-inset-top)) calc(8px + env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) calc(8px + env(safe-area-inset-left)) !important;
   --x-sus-w: calc((100% - 2 * var(--x-g)) / 3);   /* rd17 (Uiux): SUSTAIN, All notes, Sound = three equal buttons (Type moved to the keyboard bar) */
   grid-template-columns: var(--x-now-w) calc(var(--x-sus-w) - var(--x-now-w) - var(--x-g)) minmax(0, 1fr) auto !important;
   grid-template-rows: var(--x-row) var(--x-row) var(--x-src-h) var(--x-grid-h) var(--x-ctl-h) minmax(0, 1fr) !important;
@@ -43,7 +43,7 @@ html.expert.x-types-open #app {
   grid-template-areas: "xtop xtop xtop xtop" "xtog xtog xtog xgo" "now xsrc xsrc xsrc" "grid grid grid grid" "sus sus xctl xctl" "sus sus pal pal" "kb kb kb kb" !important;
 }
 /* iPad portrait (820x1180) */
-html.expert.lay-pad-port #app { --x-g: 10px; --x-now-w: 150px; --x-row: 64px; --x-src-h: 88px; --x-ctl-h: 72px; --x-chip-r: 16px; --x-fs: 21px; --x-pal-h: 140px; --x-grid-h: 400px; padding: 16px 16px 12px !important; }
+html.expert.lay-pad-port #app { --x-g: 10px; --x-now-w: 150px; --x-row: 64px; --x-src-h: 88px; --x-ctl-h: 72px; --x-chip-r: 16px; --x-fs: 21px; --x-pal-h: 140px; --x-grid-h: 400px; --ctrl: 48px; padding: calc(16px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left)) !important; }
 html.expert.lay-pad-port.x-types-open #app { --x-grid-h: 380px; }
 /* Landscape, phone and tablet: the playable chord grid is on the right.
    Sustain and the control column keep their old width, on the left. Not the paused rd18 relayout. */
@@ -53,8 +53,10 @@ html.expert.lay-pad-land #app, html.expert.lay-phone-land #app {
   grid-template-rows: var(--x-row) var(--x-src-h) var(--x-sus-h) minmax(0, 1fr) var(--x-kb-h) !important;
   grid-template-areas: "xtop xtop xtop" "now xsrc xgo" "sus grid grid" "xctl grid grid" "kb kb kb" !important;
 }
-html.expert.lay-pad-land #app { --x-side: 196px; --x-g: 10px; --x-now-w: 120px; --x-row: 60px; --x-src-h: 60px; --x-sus-h: 84px; --x-ctl-h: 64px; --x-kb-h: 300px; --x-chip-r: 14px; --x-fs: 20px; padding: 14px 16px 12px !important; }
-html.expert.lay-phone-land #app { --x-g: 3px; --x-now-w: 96px; --x-row: 36px; --x-src-h: 32px; --x-sus-h: 40px; --x-ctl-h: 40px; --x-kb-h: 112px; --x-side: 200px; --x-chip-r: 9px; --x-fs: 13px; padding: 4px max(8px, env(safe-area-inset-right)) 2px max(8px, env(safe-area-inset-left)) !important; }
+/* Approved landscape: left controls, right grid, 300px piano. Short browser chrome is not a reason to restack it.
+   Safe-area insets add to the same 14/16/12 padding; at inset 0 the box matches the pinned RC. The 12px bottom already clears the 8px test badge. */
+html.expert.lay-pad-land #app { --x-side: 196px; --x-g: 10px; --x-now-w: 120px; --x-row: 60px; --x-src-h: 60px; --x-sus-h: 84px; --x-ctl-h: 64px; --x-kb-h: 300px; --x-chip-r: 14px; --x-fs: 20px; padding: calc(14px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left)) !important; }
+html.expert.lay-phone-land #app { --x-g: 3px; --x-now-w: 96px; --x-row: 36px; --x-src-h: 32px; --x-sus-h: 40px; --x-ctl-h: 40px; --x-kb-h: 112px; --x-side: 200px; --x-chip-r: 9px; --x-fs: 13px; padding: calc(4px + env(safe-area-inset-top)) calc(8px + env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) calc(8px + env(safe-area-inset-left)) !important; }
 /* Type table is stashed. If that class is set, keep the playable grid on the right. */
 html.expert.lay-pad-land.x-types-open #app, html.expert.lay-phone-land.x-types-open #app {
   grid-template-areas: "xtop xtop xtop" "now xsrc xgo" "sus grid grid" "xctl grid grid" "kb kb kb" !important;
@@ -472,3 +474,17 @@ html.expert.x-ctl-on #ctl .band-wrap { margin-top: 10px; }
 html.expert.x-ctl-on #ctl .band-row span { color: var(--x-ink); font-weight: 700; }
 html.expert.x-ctl-on #ctl .band-row b { color: var(--x-ink); }
 html.expert.x-ctl-on #ctl .band-wrap.off .band-row b { color: var(--x-muted); }
+
+/* iPad portrait only: the existing rows are already 64px+. Buttons fill those rows (at least 48px).
+   Landscape keeps the approved sizes and the fixed piano; it is not restacked for a shorter browser. */
+html.expert.lay-pad-port #xTop,
+html.expert.lay-pad-port #xGo { align-items: stretch; }
+html.expert.lay-pad-port #xTop > .x-b,
+html.expert.lay-pad-port #xTop .mode-chip,
+html.expert.lay-pad-port #xGo > .x-b { height: auto; min-height: 48px; align-self: stretch; }
+html.expert.lay-pad-port #xTop .x-help { flex: 0 0 48px; width: 48px; height: 48px; min-width: 48px; min-height: 48px; align-self: center; }
+html.expert.lay-pad-port #xTog { height: 100%; min-height: 48px; align-self: stretch; box-sizing: border-box; }
+html.expert.lay-pad-port #xTog button { height: auto; min-height: 44px; align-self: stretch; }
+html.expert.lay-pad-port #app { --x-kh: 52px; }   /* 44px Keys chip in the existing keyboard bar; the ring stays off the keys */
+html.expert.lay-pad-port #sustainBtn,
+html.expert.lay-pad-port #xCtl .x-b { min-height: 48px; height: 100%; }
