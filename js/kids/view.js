@@ -1,5 +1,5 @@
 // Kids view (the Kids redesign, "Simple" mode): its own screens on top of the shared logic.
-//   Hello (its tap unlocks audio) -> Song picker (6 picture cards) -> Play (lyrics, 7 chord pads, Happy / Sad, Play song,
+//   Hello (its tap unlocks audio) -> Song picker (6 picture cards) -> Play (lyrics, 7 major chord pads, Play song,
 //   Next, a fixed one-octave C..B piano) -> Reward when a song is finished. Settings sheet (no grown-up gate: the
 //   Simple / Expert switch is in it), Daylight / Lamplight looks.
 // Nothing here makes sound itself: a pad press goes through strip.js stripPress (the Kids pad path, with its hidden twin
@@ -38,10 +38,9 @@ export const KV_SONGS = {
 const LETTERS = ["C", "D", "E", "F", "G", "A", "B"];
 const WHITE_PC = [0, 2, 4, 5, 7, 9, 11];
 const BLACKS = [{ pc: 1, after: 1 }, { pc: 3, after: 2 }, { pc: 6, after: 4 }, { pc: 8, after: 5 }, { pc: 10, after: 6 }];   // after = white keys to its left
-const HAPPY = "\uD83D\uDE0A", SAD = "\uD83D\uDE22";
 const TEST = /[?&]test=1(&|$)/.test(location.search);
 
-export const kv = { on: false, screen: "hello", mood: "happy", reward: false, endT: 0, rewardT: 0, sig: "", timer: 0, resume: null, log: [], tip: null };
+export const kv = { on: false, screen: "hello", reward: false, endT: 0, rewardT: 0, sig: "", timer: 0, resume: null, log: [], tip: null };
 var root, els = {};
 
 function h(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
@@ -74,18 +73,12 @@ function build() {
   var home = btn("kv-home", emo("\uD83C\uDFE0"), "Songs"); home.addEventListener("click", function () { if (prog.playing) progStop(); hideReward(); show("songs"); });
   els.chip = h("div", "kv-chip");
   els.lyr = h("div", "kv-lyr"); els.lyr.setAttribute("aria-live", "off");
-  els.mood = h("div", "kv-mood"); els.mood.setAttribute("role", "radiogroup"); els.mood.setAttribute("aria-label", "Happy or sad chords");
-  [["happy", HAPPY, "Happy chords"], ["sad", SAD, "Sad chords"]].forEach(function (m) {
-    var b = btn("kv-md kv-md-" + m[0], emo(m[1]), m[2]); b.setAttribute("role", "radio"); b.dataset.mood = m[0];
-    b.addEventListener("click", function () { kv.mood = m[0]; paint(true); });
-    els.mood.appendChild(b);
-  });
   top.appendChild(home); top.appendChild(els.chip); top.appendChild(h("span", "kv-sp")); top.appendChild(chipBtn());
   els.top = top; play.appendChild(top); play.appendChild(els.lyr);
   var mid = h("div", "kv-mid");
   els.pads = h("div", "kv-pads"); els.pads.setAttribute("role", "group"); els.pads.setAttribute("aria-label", "Seven chords");
   LETTERS.forEach(function (L, i) {
-    var p = btn("kv-pad kv-c" + L, "<span class=\"kv-n\">" + L + "</span><span class=\"kv-f\">" + emo(HAPPY) + "</span>", L);
+    var p = btn("kv-pad kv-c" + L, "<span class=\"kv-n\">" + L + "</span>", L + ", major chord");
     p.dataset.pc = String(WHITE_PC[i]); p.dataset.letter = L;
     wirePad(p);
     els.pads.appendChild(p);
@@ -95,7 +88,7 @@ function build() {
   els.play.addEventListener("click", function () { unlock(); hideReward(); progPlay(); kv.log.push("play"); paint(true); });
   els.next = btn("kv-next", "<span class=\"kv-arrow\" aria-hidden=\"true\">\u279C</span>", "Next");
   els.next.addEventListener("click", onNext);
-  ctl.appendChild(els.mood); ctl.appendChild(els.play); ctl.appendChild(els.next);
+  ctl.appendChild(els.play); ctl.appendChild(els.next);
   els.ctl = ctl; mid.appendChild(els.pads); mid.appendChild(ctl); play.appendChild(mid);
   els.piano = h("div", "kv-piano"); els.piano.setAttribute("aria-label", "Piano, C to B");
   var whites = h("div", "kv-whites");
@@ -166,7 +159,7 @@ function pickSong(i, fresh) {
 // Start over in Kids: the grown-up factory reset, then the Kids view from Hello (as before rd6).
 export function kidsStartOver() {
   document.getElementById("factoryReset").click();   // the grown-up factory reset (settings to defaults)
-  state.expert = false; state.theme = "auto"; state.kidsSong = null; state.kidsWalk = null; kv.mood = "happy";
+  state.expert = false; state.theme = "auto"; state.kidsSong = null; state.kidsWalk = null;
   lookApplyNow("kids");
   enter(true);
   scheduleSave(0);
@@ -255,12 +248,6 @@ function twinPad(pc) {
   for (var i = 0; i < pads.length; i++) if (pads[i]._tc && wrap12(pads[i]._tc.item.rootPc) === wrap12(pc)) return pads[i];
   return null;
 }
-function moodItem(it) {
-  if (kv.mood !== "sad") return it;
-  var t = {}, k; for (k in it) t[k] = it[k];
-  t.type = "minor"; t.extensions = {}; t.rootSpell = null; t.degree = null;
-  return t;
-}
 function lastStepNext() { var d = !prog.playing && prog.steps.length ? magicQueue() : null; return !!(d && d.step === prog.steps.length - 1); }
 function wirePad(p) {
   p.addEventListener("pointerdown", function (e) {
@@ -271,7 +258,7 @@ function wirePad(p) {
     try { p.setPointerCapture(e.pointerId); } catch (err) {}
     p.classList.add("down");
     var fin = kidsGoldPad(tw) && lastStepNext();
-    stripPress(tw, moodItem(tw._tc.item), e);
+    stripPress(tw, tw._tc.item, e);   // rd17: the twin is already the major kidTriad; gold still returns inside stripPress as the melody note
     if (fin) rewardSoon();
     paint(true);
   });
@@ -380,13 +367,11 @@ function lyrHtml() {
   }
   return "<div class=\"kv-l1\">" + line(L[li]) + "</div><div class=\"kv-l2\">" + (L[li + 1] ? esc(L[li + 1].text) : "&nbsp;") + "</div>";
 }
-function layoutSlots() {   // phone landscape: the lyric line and Happy / Sad move into the top bar; iPad: Happy / Sad up top
-  var de = document.documentElement, land = de.classList.contains("lay-phone-land"), pad = de.classList.contains("lay-pad-land") || de.classList.contains("lay-pad-port");
-  var sp = els.top.querySelector(".kv-sp"), gear = els.top.querySelector(".mode-chip");
+function layoutSlots() {   // phone landscape: the lyric line moves into the top bar
+  var de = document.documentElement, land = de.classList.contains("lay-phone-land");
+  var sp = els.top.querySelector(".kv-sp");
   if (land) { if (els.lyr.parentNode !== els.top) els.top.insertBefore(els.lyr, sp); }
   else if (els.lyr.parentNode !== els.playScr) els.playScr.insertBefore(els.lyr, els.top.nextSibling);
-  if (land || pad) { if (els.mood.parentNode !== els.top) els.top.insertBefore(els.mood, gear); }
-  else if (els.mood.parentNode !== els.ctl) els.ctl.insertBefore(els.mood, els.ctl.firstChild);
 }
 export function paint(force) {
   if (!kv.on || !root) return;
@@ -404,7 +389,7 @@ export function paint(force) {
   var name = songName();
   if (kv.screen === "play" && name && KV_SONGS[name] && state.kidsSong !== name) { state.kidsSong = name; scheduleSave(); }   // Hello opens the last song played
   if (kv.screen === "play" && name && KV_SONGS[name]) saveWalk(progWalkAt());   // rd6: the step is saved with the song
-  var sig = [kv.screen, name, prog.cur, magic ? magic.pos : -1, prog.playing, g, goldPad, kv.mood, paOff, Object.keys(lit).join(","), state.theme, kv.reward].join("|");
+  var sig = [kv.screen, name, prog.cur, magic ? magic.pos : -1, prog.playing, g, goldPad, paOff, Object.keys(lit).join(","), state.theme, kv.reward].join("|");
   if (!force && sig === kv.sig) return;
   kv.sig = sig;
   root.classList.toggle("pa-off", paOff);
@@ -412,12 +397,10 @@ export function paint(force) {
   var m = meta(name);
   els.chip.innerHTML = "<span class=\"kv-pic\">" + m.pic + "</span><span class=\"kv-cn\">" + m.chip + "</span>";
   var lh = lyrHtml(); if (els.lyr._h !== lh) { els.lyr.innerHTML = lh; els.lyr._h = lh; }
-  Array.prototype.forEach.call(els.mood.querySelectorAll("button"), function (b) { var on = b.dataset.mood === kv.mood; b.classList.toggle("on", on); b.setAttribute("aria-checked", on ? "true" : "false"); });
   Array.prototype.forEach.call(els.pads.children, function (p) {
     var gold = goldPad != null && Number(p.dataset.pc) === goldPad;
     p.classList.toggle("gold", gold);
-    p.querySelector(".kv-f").innerHTML = emo(kv.mood === "sad" ? SAD : HAPPY);
-    p.setAttribute("aria-label", p.dataset.letter + (kv.mood === "sad" ? " sad" : " happy") + (gold && !paOff ? ", next" : ""));
+    p.setAttribute("aria-label", p.dataset.letter + ", major chord" + (gold && !paOff ? ", next" : ""));
   });
   Array.prototype.forEach.call(els.piano.querySelectorAll(".kv-wk, .kv-bk"), function (k) {
     var midi = keyMidi(Number(k.dataset.pc)), gold = g != null && wrap12(g) === wrap12(midi);

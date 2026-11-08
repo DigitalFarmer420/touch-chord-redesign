@@ -157,7 +157,7 @@ export function resoundHeldFinger(pointerId) {
   if (!finger || finger.keyId == null) return;
   if (!(ChordAudio.ctx && ChordAudio.ctx.state === "running")) return;
   rememberFinger(finger);
-  var spec = computeSpec();
+  var spec = kidsChordNow() ? kidsMajorSpec(finger) : computeSpec();
   ChordAudio.stopChord(finger.group);
   ChordAudio.playChord(finger.group, spec.midis, { bass: spec.bassOut, sound: state.sound, key: true });
   finger.sig = chordSig(spec);
@@ -175,7 +175,7 @@ export function specFromFinger(finger) {
   state.rootMidi = finger.midi;
   if (finger.force) state.forceChord = finger.force;
   applyFingerQuality(finger);   // kb-fix: each held key keeps its own quality
-  var spec = computeSpec();
+  var spec = kidsChordNow() ? kidsMajorSpec(finger) : computeSpec();
   state.type = type; Object.assign(state.extensions, ext); state.stripSpell = sspell;
   state.rootPc = root;
   state.degree = degree;
@@ -188,8 +188,31 @@ export function specFromFinger(finger) {
 // Sus4, Dim, 6, min7, maj7, 9) held down right now (shared.paletteHolds, the palette's only state:
 // it is momentary, syncPalette resets state.type to major on release). Held: the palette wins, as
 // before. Not held: the diatonic chord of the key's degree (out-of-key: major), never the type /
-// extensions a chip, Next, Play along step or a reload left in state. Kids keeps its own rule.
+// extensions a chip, Next, Play along step or a reload left in state. Kids keeps its own rule
+// (kidsMajorSpec: a plain major triad, without writing that type back onto Simple / Expert).
 export function paletteHeld() { return !!shared.paletteHolds && Object.keys(shared.paletteHolds).length > 0; }
+function kidsChordNow() { return state.style === "kids" || !!shared.kidsView; }
+// The chord a Kids key plays: the plain major triad on that key (the same chord kidTriad builds
+// for a pad). Key mode, a minor key, and a type / extension / root left by Simple or Expert are
+// used only for this spec, then put back. Gold and Play song do not come through here.
+function kidsMajorSpec(finger) {
+  var saved = {
+    km: state.keyMode, fc: state.forceChord, type: state.type, spell: state.stripSpell,
+    root: state.rootPc, midi: state.rootMidi, deg: state.degree, ext: Object.assign({}, state.extensions)
+  };
+  state.keyMode = false; state.forceChord = null; state.type = "major"; state.stripSpell = null;
+  if (finger) { state.rootPc = finger.pc; if (finger.midi != null) state.rootMidi = finger.midi; }
+  state.extensions.six = state.extensions.min7 = state.extensions.maj7 = state.extensions.nine = false;
+  clearStripExt();
+  var spec;
+  try { spec = computeSpec(); }
+  finally {
+    state.keyMode = saved.km; state.forceChord = saved.fc; state.type = saved.type; state.stripSpell = saved.spell;
+    state.rootPc = saved.root; state.rootMidi = saved.midi; state.degree = saved.deg;
+    Object.assign(state.extensions, saved.ext);
+  }
+  return spec;
+}
 export function keyTapQuality(pc) {
   if (state.style === "kids") return null;
   var ak = activeKey();
@@ -239,11 +262,15 @@ export function soundFinger(pointerId, key) {   // key = keyOf(pad): what the to
   finger.kq = finger.force ? null : keyTapQuality(finger.pc);   // kb-fix
   rememberFinger(finger);
   clearSuggestPreview();
-  if (finger.force) {   // v84: the borrowed root key plays that chord (as the chip did)
-    if (kbChord.item) setItemState(kbChord.item);
-    state.forceChord = finger.force;
+  var spec;
+  if (kidsChordNow()) spec = kidsMajorSpec(finger);   // plain major triad; Simple / Expert type, root and key mode stay as they were
+  else {
+    if (finger.force) {   // v84: the borrowed root key plays that chord (as the chip did)
+      if (kbChord.item) setItemState(kbChord.item);
+      state.forceChord = finger.force;
+    }
+    spec = computeSpec();
   }
-  var spec = computeSpec();
   // New pad: release the old chord (ramped) and attack the new one.
   if (!sustainSlide) ChordAudio.stopChord(finger.group);
   ChordAudio.playChord(finger.group, spec.midis, { bass: spec.bassOut, sound: state.sound, key: true });

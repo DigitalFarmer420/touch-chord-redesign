@@ -4,7 +4,7 @@
 // 7-white-key piano C4..B4 rising left to right; every step of every song: the octave never moves (same keys, same
 // rects, same pitches), exactly one gold key and it is on screen, the gold key is the melody note's letter with an up /
 // down arrow for notes outside C..B, and a tap on it sounds the real pitch (60 + the preset's @note); the reward shows
-// after the last gold tap, after Next on the last step and after Play song's last step (Play stops); Happy / Sad pads;
+// after the last gold tap, after Next on the last step and after Play song's last step (Play stops); every free pad is a major triad (no Happy / Sad);
 // Kids -> Expert -> Kids keeps the song and the step; Play along off hides the gold marks while Next and Play song
 // still move the song on; Daylight / Lamplight and Simple / Expert survive a reload. No page errors.
 // node -r ./emulate.cjs kidsview.cjs [WxH]   env BASE, OUT, KV_SHOTS (dir: a screenshot per screen)
@@ -87,16 +87,63 @@ const st = p => p.evaluate(() => { const rc = e => { const r = e.getBoundingClie
     for (const x of lyr) F(x.o >= 0.99 && x.cr >= 4.5, `${tag}: lyric "${x.t}" (${x.cls}) hard to read: contrast ${x.cr}, opacity ${x.o}`);
     for (const x of lyr.filter(q => q.cls === 'now')) F(x.gold === 'rgb(255, 194, 26)', `${tag}: current word not on gold (${x.gold})`);
     const keyRects = JSON.stringify(s.wk.concat(s.bk).map(k => k.r)), kbWin0 = s.kbWin;
-    // 4. pads: root position, root lowest; Happy = major, Sad = minor
+    // 4. rd17: no Happy / Sad. Every free pad is the major kidTriad (root lowest). The gold pad is still the melody note, not a chord.
+    const moodGone = await p.evaluate(() => ({ ui: document.querySelectorAll('#kv .kv-mood, #kv .kv-md, #kv .kv-f').length, mood: Object.prototype.hasOwnProperty.call(__kv.kv, 'mood'), faces: [...document.querySelectorAll('#kv .kv-pad')].some(e => /happy|sad/i.test(e.getAttribute('aria-label') || '')) }));
+    F(!moodGone.ui && !moodGone.mood && !moodGone.faces, `${tag}: Kids mood still present ${JSON.stringify(moodGone)}`);
     const padSnd = {};
-    for (const mood of ['happy', 'sad']) { await tapEl(`#kv .kv-md-${mood}`); await p.waitForTimeout(120); await take(p);
-      for (const q of s.pads) { const pos0 = (await st(p)).pos; await touch(q.r.x + q.r.w / 2, q.r.y + q.r.h / 2, 150); await p.waitForTimeout(250); const L = await take(p); const m = (L.find(x => x.m.length >= 3) || {}).m || [];
-        if ((await st(p)).pos !== pos0) { padSnd[mood + q.l] = 'gold'; continue; }   // the gold pad plays the song's next note (Kids style), not a free chord
-        padSnd[mood + q.l] = m; const rel = m.map(x => x - m[0]);
-        F(m.length >= 3 && w12(m[0]) === q.pc, `${tag}: ${mood} pad ${q.l} lowest note ${m[0]} (pc ${w12(m[0])}), want the root ${q.pc}`);
-        if (mood === 'happy' && ['C', 'F', 'G'].includes(q.l)) F(rel.includes(4) && rel.includes(7), `${tag}: happy ${q.l} not major root position ${m}`);
-        if (mood === 'sad') F(rel.includes(3) && rel.includes(7) && !rel.includes(4), `${tag}: sad ${q.l} not minor root position ${m}`); } }
-    D.pads = padSnd; await tapEl('#kv .kv-md-happy');
+    await take(p);
+    for (const q of s.pads) { const pos0 = (await st(p)).pos; await touch(q.r.x + q.r.w / 2, q.r.y + q.r.h / 2, 150); await p.waitForTimeout(250); const L = await take(p); const m = (L.find(x => x.m.length >= 3) || {}).m || [];
+      if ((await st(p)).pos !== pos0) { padSnd[q.l] = 'gold'; continue; }
+      padSnd[q.l] = m; const rel = m.map(x => x - m[0]);
+      F(m.length >= 3 && w12(m[0]) === q.pc, `${tag}: pad ${q.l} lowest note ${m[0]} (pc ${w12(m[0])}), want the root ${q.pc}`);
+      F(rel.includes(4) && rel.includes(7) && !rel.includes(3), `${tag}: pad ${q.l} not a major triad ${m}`); }
+    D.pads = padSnd;
+    // Expert minor (key + a real minor chip) must not make a Kids pad or a non-gold Kids key minor.
+    // The assertion is the notes that sounded. state.type is allowed to stay whatever Simple / Expert last set,
+    // so a Kids key does not have to overwrite it. Simple's own Major / Minor control must still flip.
+    // A missed mode-sheet control is recorded here and Kids is put back on the play screen before the melody walk,
+    // so a covered button is not counted again as hundreds of gold-key failures.
+    if (w === 360) {
+      const major = m => { const rel = m.map(x => x - m[0]); return m.length >= 3 && rel.includes(4) && rel.includes(7) && !rel.includes(3); };
+      await holdChip(); await tapEl('#msMode button[data-mode="expert"]'); await p.waitForTimeout(500);
+      await tapEl('#xKey'); await p.waitForTimeout(200); await tapEl('#xKeySheet [data-km="minor"]'); await p.waitForTimeout(250);
+      await tapEl('#xKeySheet .x-close'); await p.waitForTimeout(200);
+      await take(p);
+      const minorChip = await p.evaluate(() => { const b = document.querySelector('#suggest .ss-chip.minor'); if (!b) return null; const r = b.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2, w: r.width }; });
+      if (minorChip && minorChip.w > 0) { await touch(minorChip.x, minorChip.y, 150); await p.waitForTimeout(250); }
+      const expertHeard = ((await take(p)).find(x => x.m.length >= 3) || {}).m || [];
+      const expertRel = expertHeard.map(x => x - expertHeard[0]);
+      F(expertRel.includes(3) && !expertRel.includes(4), `${tag}: Expert minor chip did not sound a minor triad ${expertHeard}`);
+      await tapEl('#xModeChip'); await p.waitForTimeout(250); await tapEl('#msMode button[data-mode="kids"]'); await p.waitForTimeout(500);
+      s = await st(p);
+      if (!(s.on && s.screen === 'play')) {
+        F(false, `${tag}: mode sheet did not return to Kids (on ${s.on} screen ${s.screen}); melody walk continues from a restored Kids play screen`);
+        await p.evaluate(() => { if (window.__kv && __kv.setExpert) __kv.setExpert(false); if (window.__kv) __kv.show('play'); });
+        await p.waitForTimeout(400); s = await st(p);
+      } else {
+        const wk = s.wk.find(k => !(s.gold[0] && s.gold[0].m === k.m)) || s.wk[0];
+        if (wk) { await take(p); await touch(wk.r.x + wk.r.w / 2, wk.r.y + wk.r.h * 0.85, 140); await p.waitForTimeout(200);
+          const km = ((await take(p)).find(x => x.m.length >= 1) || {}).m || [];
+          F(major(km), `${tag}: Kids key inherited Expert minor ${km}`); }
+        const d = s.pads.find(q => q.l === 'D' && !q.gold) || s.pads.find(q => !q.gold);
+        F(!!d, `${tag}: no free pad after returning from minor Expert`);
+        if (d) { await take(p); await touch(d.r.x + d.r.w / 2, d.r.y + d.r.h / 2, 150); await p.waitForTimeout(250);
+          const m = ((await take(p)).find(x => x.m.length >= 3) || {}).m || [];
+          F(major(m) && w12(m[0]) === d.pc, `${tag}: Kids pad inherited Expert minor ${m}`); }
+      }
+      await holdChip(); await tapEl('#msMode button[data-mode="simple"]'); await p.waitForTimeout(500);
+      const sim = await p.evaluate(() => {
+        const b = document.querySelector('#kidKey .kk-mode');
+        const before = b ? b.getAttribute('aria-label') : null;
+        if (b) b.click();
+        const after = b ? b.getAttribute('aria-label') : null;
+        return { gone: !document.querySelector('#kv .kv-mood'), before, after, kids: document.documentElement.classList.contains('kv') };
+      });
+      const flipped = sim.before && sim.after && sim.before !== sim.after && /major|minor/i.test(sim.after);
+      F(!sim.kids && flipped, `${tag}: Simple Major/Minor did not stay its own control (${JSON.stringify(sim)})`);
+      await tapEl('#modeChip'); await p.waitForTimeout(200); await tapEl('#msMode button[data-mode="kids"]'); await p.waitForTimeout(500);
+      if (!(await st(p)).on) { await p.evaluate(() => { if (window.__kv && __kv.setExpert) __kv.setExpert(false); if (window.__kv) __kv.show('play'); }); await p.waitForTimeout(300); }
+    }
     // 5. reload Twinkle fresh, then every song: gold walk
     D.songs = {};
     for (const name of SIX) {

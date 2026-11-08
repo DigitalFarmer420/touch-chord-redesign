@@ -18,8 +18,9 @@ import { computeSpec, renderPads, highlightMidisFromSpec, PERCUSSIVE_SOUNDS, ref
 import { paintProg } from "../ui/progbar.js?v=112.13";
 import { fxStepPulse } from "../ui/pulse.js?v=112.13";
 import { clearSuggestPreview, STRIP_EXT, PREVIEW_MS, stripKey, applySuggestion, prettyAcc, stripLabel, wireStripTap, paintSuggestions, fitStrip } from "../ui/strip.js?v=112.13";
+import { BADGE_SLOTS, badgeCenter, badgeInset } from "../ui/badgeslots.js?v=112.13";
 
-export const prog = { style: null, mode: null, keySig: null, key: null, idx: 0, list: [], steps: [], targets: [], badges: [],
+export const prog = { style: null, mode: null, keySig: null, key: null, idx: 0, list: [], steps: [], targets: [], badges: [], badgeOverflow: [], badgeReport: null,
   cur: -1, playing: false, timer: 0, si: 0, nextT: 0, groups: [], gid: 0, uiT: [], flashT: 0, log: [], tmp: 0, unplaced: 0, model: null };
 // Test hooks only with ?test=1 (not in normal use).
 export var PROG_TEST;
@@ -93,7 +94,7 @@ var kidsKeyFixT;
 export function progDecorate(el, model) {
   prog.model = model;
   Array.prototype.forEach.call(el.querySelectorAll(".pg-badge, .ss-chip.tmp"), function (n) { n.parentNode.removeChild(n); });
-  prog.targets = []; prog.badges = []; prog.tmp = 0; prog.unplaced = 0;
+  prog.targets = []; prog.badges = []; prog.badgeOverflow = []; prog.badgeReport = null; prog.tmp = 0; prog.unplaced = 0;
   var p = prog.list[prog.idx];
   prog.steps = p ? progSteps(model.key, p) : [];
   magic.next = null;   // v68: the queued chord is recomputed against the new strip
@@ -151,32 +152,28 @@ export function progDecorate(el, model) {
   // v60: order badges only with Config > Progression numbers on (both modes; off by default).
   if (state.progNums) {
     groups.forEach(function (g) {
-      var t = g.el, bd = document.createElement("span");
-      var nums = g.steps.map(function (i) { return i + 1; });
-      bd.className = "pg-badge" + (t.classList.contains("ss-note") ? " on-note" : "") + (nums.length > 1 ? " multi" : "");
-      bd.setAttribute("role", "button");
-      bd.setAttribute("aria-label", "Progression step " + nums.join(", "));
-      bd.title = "Step " + nums.join(", ");
-      bd.addEventListener("pointerdown", function (e) { e.preventDefault(); e.stopPropagation(); progBadge(g.steps); });
-      bd.addEventListener("click", function (e) { e.stopPropagation(); });
-      el.appendChild(bd);
-      prog.badges.push({ el: bd, target: t, steps: g.steps });
+      // One badge per actual step. Slot 0 is the first time this chord plays, not the label "1".
+      g.steps.forEach(function (step, ord) {
+        var n = step + 1, slot = ord < BADGE_SLOTS.length ? BADGE_SLOTS[ord] : "over";
+        var bd = document.createElement("span");
+        bd.className = "pg-badge" + (g.el.classList.contains("ss-note") ? " on-note" : "") + (n >= 10 ? " dd" : "") + " slot-" + slot;
+        bd.dataset.step = String(n); bd.dataset.slot = slot; bd.dataset.ord = String(ord);
+        bd.textContent = String(n);
+        bd.setAttribute("role", "button");
+        bd.setAttribute("aria-label", "Progression step " + n);
+        bd.title = "Step " + n;
+        bd.addEventListener("pointerdown", function (e) { e.preventDefault(); e.stopPropagation(); progBadge([step]); });
+        bd.addEventListener("click", function (e) { e.stopPropagation(); });
+        el.appendChild(bd);
+        prog.badges.push({ el: bd, target: g.el, steps: [step], n: n, ord: ord, slot: slot });
+      });
+      if (g.steps.length > BADGE_SLOTS.length) prog.badgeOverflow.push({ steps: g.steps.map(function (i) { return i + 1; }) });
     });
   }
   paintProgActive();
 }
-// v56: badge text. Up to 2 steps: all of them ("1\u00b76"). More (Blues C7 = 1, 3, 4, 7, 11): the
-// current or next step for that chip and how many more ("3 +4"); the full list is in the label.
-function badgeText(b) {
-  var nums = b.steps.map(function (i) { return i + 1; });
-  if (nums.length <= 2) return nums.join("\u00b7");
-  var at = b.steps.indexOf(prog.cur) >= 0 ? prog.cur : null;
-  if (at === null) {
-    for (var i = 0; i < b.steps.length; i++) if (b.steps[i] > prog.cur) { at = b.steps[i]; break; }
-    if (at === null) at = b.steps[0];
-  }
-  return (at + 1) + "<small>+" + (nums.length - 1) + "</small>";
-}
+// Each step number sits on its own border slot (badgeslots.js). The old "1·5" / "3+4" fold is gone:
+// a chord that plays at steps 1, 5 and 9 shows those three numbers, in that order, on TL, TR, BR.
 // v56: badges sit just OUTSIDE their chip, on a corner or edge, never on any chord name,
 // numeral or note name: each badge takes the first spot (corners, then along the edges) that
 // covers no text, stays inside the panel and misses the other badges.
@@ -186,96 +183,99 @@ export function placeBadges() {
   var el = document.getElementById("suggest");
   if (!el || !prog.badges.length) return;
   var sr = el.getBoundingClientRect();
-  var pc = el.parentNode.getBoundingClientRect();
-  // v62: inside the strip on every side, and at least 2px clear of the card's border.
-  var pr = { left: Math.max(pc.left + 2, sr.left), right: Math.min(pc.right - 2, sr.right), top: Math.max(pc.top + 2, sr.top), bottom: Math.min(pc.bottom - 2, sr.bottom) };
-  var texts = [];
-  Array.prototype.forEach.call(el.querySelectorAll(".ss-chip .r, .ss-chip .q, .ss-chip .rn, .ss-note .nn, .ss-note small"), function (n) {
-    if (!n.textContent || getComputedStyle(n).display === "none") return;
-    var q = n.getBoundingClientRect();
-    // v58: keep at least 1.5px clear of any text.
-    if (q.width > 0 && q.height > 0) texts.push({ left: q.left - 1.5, top: q.top - 1.5, right: q.right + 1.5, bottom: q.bottom + 1.5 });
-  });
-  // v64: also the chip name as one block (root over quality, glyph boxes), so a badge corner
-  // never sits in the empty corner of that block next to a narrow root letter.
-  Array.prototype.forEach.call(el.querySelectorAll(".ss-chip .nm"), function (n) {
-    var rg = document.createRange(); rg.selectNodeContents(n); var q = rg.getBoundingClientRect();
-    if (q.width > 0 && q.height > 0) texts.push({ left: q.left - 0.5, top: q.top - 0.5, right: q.right + 0.5, bottom: q.bottom + 0.5 });
-  });
-  // Never over the buttons above the panel either (a badge may poke a little above it).
-  Array.prototype.forEach.call(document.querySelectorAll("button, .prog"), function (n) {
-    if (el.contains(n)) return;
-    var q = n.getBoundingClientRect();
-    if (q.width > 0 && q.bottom > pr.top - 12 && q.top < pr.top) texts.push(q);
-  });
-  var placed = [], avoid = badgeAvoid ? badgeAvoid(el) : [];
-  function avoidSc(r, b) { var sc = 0; avoid.forEach(function (q) { if (q.el !== b.target && !q.el.contains(b.target)) sc += ov(r, q) * 20; }); return sc; }
   function ov(a, b) {
     var w = Math.min(a.right, b.right) - Math.max(a.left, b.left), h = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
     return w > 0 && h > 0 ? w * h : 0;
   }
-  function place(b) {
-    var t = b.target.getBoundingClientRect();
-    var bq = b.el.getBoundingClientRect();
-    var bw = bq.width, bh = bq.height, k = 3;
-    var L = t.left - bw + k, R = t.right - k, T = t.top - bh + k, B = t.bottom - k, ym = t.top + (t.height - bh) / 2, f;
-    // Corners on top, then the sides, then along the top edge, then the bottom (reads as the
-    // chip below, so last), then just inside a corner as a fallback.
-    var cands = [[L, T], [R, T], [t.left - bw + 1, ym], [t.right - 1, ym]];
-    for (f = 0.25; f < 1; f += 0.25) cands.push([t.left + (t.width - bw) * f, t.top - bh + 2]);
-    cands.push([t.left - bw + 1, t.top - bh / 2], [t.right - 1, t.top - bh / 2], [t.left - bw + 1, t.bottom - bh / 2], [t.right - 1, t.bottom - bh / 2]);
-    cands.push([L, B], [R, B]);
-    for (f = 0.25; f < 1; f += 0.25) cands.push([t.left + (t.width - bw) * f, t.bottom - 2]);
-    cands.push([L, t.top + 1], [R, t.top + 1], [t.left - bw * 0.3, t.top - bh * 0.38], [t.right - bw * 0.7, t.top - bh * 0.38]);
-    // v58: corners just touching, when tight (portrait phones).
-    cands.push([t.left - bw, t.top - bh + 1], [t.right, t.top - bh + 1], [t.left - bw, t.bottom - 1], [t.right, t.bottom - 1], [t.left - bw, ym], [t.right, ym]);
-    // v62: each spot also clamped inside the strip, so a spot that would stick out flips inward.
-    var nc = cands.length;
-    for (var ci0 = 0; ci0 < nc; ci0++) {
-      var cx = Math.min(Math.max(cands[ci0][0], pr.left), pr.right - bw), cy = Math.min(Math.max(cands[ci0][1], pr.top), pr.bottom - bh);
-      if (cx !== cands[ci0][0] || cy !== cands[ci0][1]) cands.push([cx, cy]);
-    }
-    var best = null;
-    cands.forEach(function (c, ci) {
-      var r = { left: c[0], top: c[1], right: c[0] + bw, bottom: c[1] + bh };
-      var sc = 0;
-      texts.forEach(function (q) { sc += ov(r, q) * 100; });
-      placed.forEach(function (q) { sc += ov(r, q) * 50; });
-      if (avoid.length) sc += avoidSc(r, b);
-      // v62: never outside the strip (no poking over the top edge any more).
-      var out = Math.max(0, pr.left - r.left) + Math.max(0, r.right - pr.right) + Math.max(0, pr.top - r.top) + Math.max(0, r.bottom - pr.bottom);
-      sc += out * 1e6 + ci * 0.01;
-      if (!best || sc < best.sc) best = { sc: sc, r: r };
-    });
-    // Last resort: clamp (only if every spot was outside, e.g. a strip smaller than the badge).
-    var cl = Math.min(Math.max(best.r.left, pr.left), pr.right - bw), ct = Math.min(Math.max(best.r.top, pr.top), pr.bottom - bh);
-    best.r = { left: cl, top: ct, right: cl + bw, bottom: ct + bh };
-    best.sc = 0;
-    texts.forEach(function (q) { best.sc += ov(best.r, q) * 100; });
-    placed.forEach(function (q) { best.sc += ov(best.r, q) * 50; });
-    if (avoid.length) best.sc += avoidSc(best.r, b);
-    best.bw = bw; best.bh = bh;
-    return best;
-  }
-  prog.badges.forEach(function (b) {
-    b.el.innerHTML = badgeText(b);
-    b.el.classList.remove("cmp");
-    var best = place(b);
-    // v63: crowded (a 10+ step progression on a tablet): when every spot still touches text or
-    // another badge, try a compact badge (still >= 11 px text) and keep it if it fits better.
-    if (best.sc > 0.5) {
-      b.el.classList.add("cmp");
-      var b2 = place(b);
-      if (b2.sc < best.sc) best = b2; else b.el.classList.remove("cmp");
-    }
-    var bw = best.bw, bh = best.bh;
-    placed.push(best.r);
-    var px = Math.round(best.r.left - sr.left), py = Math.round(best.r.top - sr.top);
-    px = Math.max(Math.ceil(pr.left - sr.left), Math.min(px, Math.floor(pr.right - bw - sr.left)));
-    py = Math.max(Math.ceil(pr.top - sr.top), Math.min(py, Math.floor(pr.bottom - bh - sr.top)));
-    b.el.style.left = px + "px";
-    b.el.style.top = py + "px";
+  var names = [];
+  Array.prototype.forEach.call(el.querySelectorAll(".ss-chip .nm, .ss-note .nn"), function (n) {
+    if (!n.textContent || getComputedStyle(n).display === "none") return;
+    var q = n.getBoundingClientRect();
+    if (q.width > 0 && q.height > 0) names.push({ el: n, left: q.left, top: q.top, right: q.right, bottom: q.bottom });
   });
+  function layout() {
+    prog.badges.forEach(function (b) {
+      if (b.n != null) b.el.textContent = String(b.n);
+      var t = b.target.getBoundingClientRect();
+      var bq = b.el.getBoundingClientRect();
+      var bw = bq.width || 16, bh = bq.height || 16;
+      var box = { left: t.left, top: t.top, width: t.width, height: t.height };
+      var c = badgeCenter(box, b.ord || 0, bw, bh);
+      // Expert only: a wide gutter was shrinking the chip's own hit box. Keep the chip
+      // at its normal margin and slide a badge inward on X when it would cross the gutter.
+      if (document.documentElement.classList.contains("expert") && !c.ring) {
+        var gap = parseFloat(getComputedStyle(el).getPropertyValue("--ss-cgap")) || 0;
+        c = badgeInset(c, box, bw, bh, gap);
+      }
+      b.el.style.left = Math.round(c.x - bw / 2 - sr.left) + "px";
+      b.el.style.top = Math.round(c.y - bh / 2 - sr.top) + "px";
+    });
+  }
+  layout();   // second pass uses the badge's real width (a double-digit step is wider than the first measure)
+  layout();
+  // Rounding can leave a 1px graze. Nudge the outer badge toward its own chip, never the label.
+  if (document.documentElement.classList.contains("expert")) {
+    var namesNow = [];
+    Array.prototype.forEach.call(el.querySelectorAll(".ss-chip .nm, .ss-note .nn"), function (n) {
+      if (!n.textContent || getComputedStyle(n).display === "none") return;
+      var q = n.getBoundingClientRect();
+      if (q.width > 0 && q.height > 0) namesNow.push(q);
+    });
+    function nameArea(rect, target) {
+      var a = 0;
+      namesNow.forEach(function (n) {
+        if (n.left < target.left - 1 || n.right > target.right + 1) return;
+        var w = Math.min(rect.right, n.right) - Math.max(rect.left, n.left);
+        var h = Math.min(rect.bottom, n.bottom) - Math.max(rect.top, n.top);
+        if (w > 0 && h > 0) a += w * h;
+      });
+      return a;
+    }
+    for (var pass = 0; pass < 4; pass++) {
+      var moved = false;
+      for (var i = 0; i < prog.badges.length; i++) {
+        for (var j = i + 1; j < prog.badges.length; j++) {
+          var A = prog.badges[i], B = prog.badges[j];
+          if ((A.ord || 0) >= 8 || (B.ord || 0) >= 8) continue;
+          var ra = A.el.getBoundingClientRect(), rb = B.el.getBoundingClientRect();
+          var iw = Math.min(ra.right, rb.right) - Math.max(ra.left, rb.left);
+          var ih = Math.min(ra.bottom, rb.bottom) - Math.max(ra.top, rb.top);
+          if (iw <= 1 || ih <= 1) continue;
+          var pick = A, horiz = iw <= ih;
+          var ac = A.target.getBoundingClientRect(), bc = B.target.getBoundingClientRect();
+          var ad = Math.abs((ra.left + ra.width / 2) - (ac.left + ac.width / 2));
+          var bd = Math.abs((rb.left + rb.width / 2) - (bc.left + bc.width / 2));
+          if (bd > ad) pick = B;
+          var chip = pick.target.getBoundingClientRect();
+          var q = pick.el.getBoundingClientRect();
+          var dir = horiz
+            ? Math.sign((chip.left + chip.width / 2) - (q.left + q.width / 2))
+            : Math.sign((chip.top + chip.height / 2) - (q.top + q.height / 2));
+          if (!dir) continue;
+          var prop = horiz ? "left" : "top";
+          var prev = pick.el.style[prop];
+          pick.el.style[prop] = (parseFloat(prev) + dir) + "px";
+          var nxt = pick.el.getBoundingClientRect();
+          if (nameArea(nxt, chip) > nameArea(q, chip) + 1) { pick.el.style[prop] = prev; continue; }
+          moved = true;
+        }
+      }
+      if (!moved) break;
+    }
+  }
+  var placed = [], collisions = [], nameHits = [];
+  prog.badges.forEach(function (b) {
+    var t = b.target.getBoundingClientRect(), q = b.el.getBoundingClientRect();
+    var r = { left: q.left, top: q.top, right: q.right, bottom: q.bottom };
+    placed.forEach(function (o) { var a = ov(r, o.r); if (a > 1) collisions.push({ a: o.n, b: b.n, area: Math.round(a) }); });
+    names.forEach(function (n) {
+      if (!b.target.contains(n.el)) return;
+      var a = ov(r, n);
+      if (a > 1) nameHits.push({ step: b.n, slot: b.slot, area: Math.round(a) });
+    });
+    placed.push({ n: b.n, r: r, target: t });
+  });
+  prog.badgeReport = { overflow: prog.badgeOverflow.slice(), collisions: collisions, nameHits: nameHits };
 }
 export function progRedecorate() {
   var el = document.getElementById("suggest");

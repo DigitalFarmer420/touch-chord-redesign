@@ -96,6 +96,7 @@ function placeKeysChip() {
   if (!to) return;
   if (t && t.parentNode !== to) to.insertBefore(t, to.firstChild);
   if (c && c.parentNode !== to) to.appendChild(c);
+  stashTypeTable();
 }
 function paintKeysChip() {
   var c = $("xKeysChip"); if (!c) return; var k = keysPick();
@@ -329,6 +330,27 @@ function placeTog() {   // landscape: the Song | Progressions toggle sits in the
 }
 
 // ---------- Type bar (decisions 2, 3, 4, 9) ----------
+// The Expert "Type: Auto" button (#xType) and the chord-type table (#chords > #palette,
+// Major / Minor / Sus4 / Dim and 6 / min7 / maj7 / 9) are off the screen. That table is not
+// the playable chord grid (#suggest). Re-enable the controls by setting this true.
+// The hold-to-sound path stays in typeBarReduce / typeBarLabel (model.js) and palette.js.
+// shared.paletteHolds is momentary and is not written to storage. With the buttons
+// unreachable, nothing is held, so playback stays on the Auto path (a key's own chord).
+export var TYPE_TABLE_UI = false;
+function stashTypeTable() {
+  var hide = document.documentElement.classList.contains("expert") && !TYPE_TABLE_UI;
+  var t = $("xType"), ch = $("chords");
+  if (t) {
+    t.hidden = hide;
+    t.setAttribute("aria-hidden", hide ? "true" : "false");
+    if (hide) t.tabIndex = -1; else t.removeAttribute("tabindex");
+  }
+  if (ch) {
+    ch.hidden = hide;
+    ch.setAttribute("aria-hidden", hide ? "true" : "false");
+  }
+  if (hide && tb && tb.open) tb = typeBarInit(false);
+}
 function tbDo(a) {
   var before = tb.open;
   tb = typeBarReduce(tb, a, { paletteHeld: Object.keys(shared.paletteHolds || {}).length > 0 });

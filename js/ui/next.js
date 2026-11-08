@@ -1,7 +1,7 @@
 // Next-chord marks: lookahead, next hint arrow, Kids gold pad / key.
 import { paintKidChip } from "../kids.js?v=112.13";
 import { magicTarget, magicQueue, magicAdvance } from "../songs/magic.js?v=112.13";
-import { magic, setItemState, prog, PROG_TEST, placeBadges, progPlayStart } from "../songs/playback.js?v=112.13";
+import { magic, setItemState, prog, PROG_TEST, progPlayStart } from "../songs/playback.js?v=112.13";
 import { upSelected, upNextStep } from "../songs/song.js?v=112.13";
 import { state, padsEl } from "../state.js?v=112.13";
 import { wrap12 } from "../theory/quality.js?v=112.13";
@@ -122,7 +122,6 @@ export function paintProgActive() {
   var t = prog.cur >= 0 ? prog.targets[prog.cur] : (magic.lit ? magicTarget(magic.item) : null);
   if (t) t.classList.add("pg-on");
   prog.badges.forEach(function (b) { b.el.classList.toggle("on", prog.cur >= 0 && b.steps.indexOf(prog.cur) >= 0); });
-  if (prog.badges.some(function (b) { return b.steps.length > 2; })) placeBadges();
   paintKidChip();
   paintSongBar();   // Upload: song bar + review flags
   paintKidsLyr();   // v97

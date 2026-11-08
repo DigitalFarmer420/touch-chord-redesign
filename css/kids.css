@@ -84,17 +84,12 @@ html.kv-lamp .kv { --upc: #CDBFA8; }
 .kv-pads { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 98px; gap: 8px; }
 .kv-pad { position: relative; border: none; border-radius: 22px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #2E2016; padding: 0; box-shadow: inset 0 -6px 0 rgba(0,0,0,.12); }
 .kv-pad .kv-n { font-size: 34px; line-height: 1; font-weight: 600; }
-.kv-pad .kv-f { font-size: 22px; margin-top: 4px; line-height: 1; }
 .kv-pad.down { transform: translateY(3px) scale(.96); box-shadow: inset 0 0 0 4px rgba(255,255,255,.75); }
 .kv-pad.gold { outline: 5px solid var(--gold); outline-offset: 3px; }
 .kv-pad.gold::after { content: "\2605"; position: absolute; top: -14px; right: -8px; width: 30px; height: 30px; border-radius: 50%; background: var(--gold); color: #6B4300; font-size: 18px; line-height: 30px; text-align: center; box-shadow: 0 2px 0 var(--gold-deep); }
 .kv-cC { background: var(--C); } .kv-cD { background: var(--D); } .kv-cE { background: var(--E); } .kv-cF { background: var(--F); }
 .kv-cG { background: var(--G); } .kv-cA { background: var(--A); } .kv-cB { background: var(--B); }
 .kv-ctl { display: flex; gap: 10px; height: 80px; margin-top: 18px; }
-.kv-mood { display: flex; background: var(--card); border-radius: 24px; padding: 4px; gap: 4px; width: 156px; flex: none; }
-.kv-md { flex: 1; display: flex; align-items: center; justify-content: center; border-radius: 20px; font-size: 30px; border: none; background: transparent; padding: 0; }
-.kv-md.on { background: var(--happy); box-shadow: inset 0 -4px 0 rgba(0,0,0,.12); }
-.kv-md-sad.on { background: var(--sad); }
 .kv-playbtn { width: 80px; height: 80px; flex: none; border-radius: 50%; background: var(--surface); border: 4px solid var(--next); display: flex; align-items: center; justify-content: center; padding: 0; }
 .kv-playbtn .kv-tri { width: 0; height: 0; border-left: 24px solid var(--next); border-top: 15px solid transparent; border-bottom: 15px solid transparent; margin-left: 6px; }
 .kv-playbtn.on { background: var(--surface); }
@@ -185,15 +180,14 @@ html.kv-lamp .kv-glow { background: radial-gradient(260px 260px at 50% 36%, rgba
 .kv-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: rgba(200,85,61,.18); }
 .kv-et { position: relative; }
 
-/* phone landscape (780x360): lyric line in the top bar with Happy / Sad and the gear; 7 pads in one row, Play + Next on the right */
+/* phone landscape (780x360): lyric line in the top bar; 7 pads in one row, Play + Next on the right */
 html.lay-phone-land .kv-scr { padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left)); }
 html.lay-phone-land .kv-top { height: 60px; gap: 8px; }
 html.lay-phone-land .kv-top .kv-home { width: 60px; height: 60px; }
-html.lay-phone-land .kv-top .mode-chip { height: 60px; }   /* rd15: = Home, the song line and Happy / Sad (60px); was 52 */
+html.lay-phone-land .kv-top .mode-chip { height: 60px; }   /* rd15: = Home and the song line (60px); was 52 */
 html.lay-phone-land .kv-chip { display: none; }
 html.lay-phone-land .kv-top .kv-lyr { flex: 1; min-width: 0; margin: 0; height: 60px; font-size: 24px; padding: 0 14px; }
 html.lay-phone-land .kv-top .kv-lyr .kv-l2 { display: none; }
-html.lay-phone-land .kv-top .kv-mood { width: 140px; height: 60px; }
 html.lay-phone-land .kv-mid { flex-direction: row; margin-top: 10px; gap: 12px; align-items: flex-start; }
 html.lay-phone-land .kv-pads { flex: 1; grid-template-columns: repeat(7, 1fr); grid-auto-rows: 96px; }
 html.lay-phone-land .kv-pad .kv-n { font-size: 30px; }
@@ -226,14 +220,11 @@ html.lay-pad-land .kv-hello .mode-chip, html.lay-pad-port .kv-hello .mode-chip {
 html.lay-pad-land .kv-chip, html.lay-pad-port .kv-chip { flex: 0 1 auto; height: 72px; font-size: 24px; padding: 0 22px; border-radius: 36px; }
 html.lay-pad-land .kv-chip .kv-pic, html.lay-pad-port .kv-chip .kv-pic { font-size: 38px; }
 html.lay-pad-land .kv-sp, html.lay-pad-port .kv-sp { flex: 1; }
-html.lay-pad-land .kv-top .kv-mood, html.lay-pad-port .kv-top .kv-mood { width: 220px; height: 72px; }
-html.lay-pad-land .kv-md, html.lay-pad-port .kv-md { font-size: 38px; }
 html.lay-pad-land .kv-lyr, html.lay-pad-port .kv-lyr { margin-top: 16px; height: 124px; font-size: 42px; align-items: center; text-align: center; }
 html.lay-pad-port .kv-lyr { font-size: 34px; height: 116px; }
 html.lay-pad-land .kv-mid, html.lay-pad-port .kv-mid { margin-top: 16px; }
 html.lay-pad-land .kv-pads, html.lay-pad-port .kv-pads { grid-template-columns: repeat(7, 1fr); grid-auto-rows: 120px; gap: 12px; }
 html.lay-pad-land .kv-pad .kv-n, html.lay-pad-port .kv-pad .kv-n { font-size: 46px; }
-html.lay-pad-land .kv-pad .kv-f, html.lay-pad-port .kv-pad .kv-f { font-size: 28px; }
 html.lay-pad-land .kv-ctl, html.lay-pad-port .kv-ctl { justify-content: center; height: 96px; gap: 16px; margin-top: 16px; }
 html.lay-pad-land .kv-playbtn, html.lay-pad-port .kv-playbtn { width: 96px; height: 96px; }
 html.lay-pad-land .kv-ctl .kv-next, html.lay-pad-port .kv-ctl .kv-next { flex: 0 1 420px; height: 96px; font-size: 48px; }
