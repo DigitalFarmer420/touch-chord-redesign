@@ -17,10 +17,32 @@ export function progFeel(name) { if (upProgObj && shared.U && name === upProgObj
 const PROG_SUFFIX = { maj: "", min: "", "7": "7", maj7: "maj7", m7: "7", m7b5: "\u00f87", sus4: "sus4", sus2: "sus2",
   add9: "add9", madd9: "add9", "9": "9", maj9: "maj9", m9: "9", "9sus": "9sus", "13": "13", "7b9": "7\u266d9",
   "7#9": "7\u266f9", "7sus4": "7sus4", "6": "6", dim: "\u00b0", overV: "/V", moverV: "/V", over3: "/3", mover3: "/3" };
+// Noff six-choice menu, review 6ac9bf47. PROGRESSIONS stays the full catalog.
+// Families with no chart for this mode are omitted. Menu position is not the source-array index.
+var PROG_MENU = {
+  pop: ["Pop Four-Chord", "Pop Turnaround", "Pop Oldies", "Pop Canon", "Pop Climb", "Pop Rock"],
+  jazz: ["Jazz ii\u2013V\u2013I", "Jazz Turnaround", "Jazz Blues", "Jazz Minor ii\u2013V\u2013i", "Jazz Backdoor", "Jazz Modal Vamp"],
+  rnb: ["R&B Classic", "R&B Slow Jam", "R&B Sway", "R&B Church", "R&B Groove", "R&B Glide"],
+  ballad: ["Ballad Classic", "Ballad Hymn", "Ballad Steps", "Ballad Tender", "Ballad Home", "Ballad Sunrise"],
+  reggae: ["Reggae Island Skank", "Reggae One Drop", "Reggae Minor Riddim", "Reggae Sway", "Reggae Lovers", "Reggae Roots"],
+  funk: ["Funk Vamp", "Funk Minor Vamp", "Funk Breakdown", "Funk Fuzz", "Funk Two", "Funk Cool"],
+  yogaDeep: ["Yoga Drone", "Yoga Open", "Yoga Still", "Yoga Breathe", "Yoga Float", "Yoga Glow"],
+  country: ["Country Three-Chord", "Country Modern", "Country Outlaw", "Country Holler", "Country Rag", "Country Sunset"],
+};
+function progMenu(style, full) {
+  var names = PROG_MENU[style];
+  if (!names) return full;
+  var by = {};
+  full.forEach(function (p) { by[p.name] = p; });
+  var out = [];
+  names.forEach(function (name) { if (by[name]) out.push(by[name]); });
+  return out;
+}
 export function progList(style, mode) {
   var s = PROGRESSIONS[style] || PROGRESSIONS.pop;
   var l = s[mode === "minor" ? "minor" : "major"];
   if (!l || !l.length) l = s.major;   // v109: Kids has no minor songs any more
+  l = progMenu(style, l);   // factory menu only; a loaded song is still appended below and is not a factory family
   return upInList() ? l.concat([upProgObj]) : l;   // Upload: the song goes last (full mode, not Kids)
 }
 function progParse(str) {
@@ -114,8 +136,18 @@ export function boot() {
 PROG_BAR = 60 / PROG_BPM * 4;   // 3 s
 PROGRESSIONS = {
     pop: {
-      major: [P("Pop Four-Chord", "1 maj|5 maj|6 min|4 maj"), P("Pop Minor Start", "6 min|4 maj|1 maj|5 maj"), P("Pop Turnaround", "1 maj|6 min|4 maj|5 maj")],
-      minor: [P("Pop Four-Chord", "1 min|5 min|6 maj|4 min"), P("Pop Minor Start", "6 maj|4 min|1 min|5 min"), P("Pop Turnaround", "1 min|6 maj|4 min|5 maj")]
+      major: [P("Pop Four-Chord", "1 maj|5 maj|6 min|4 maj"), P("Pop Minor Start", "6 min|4 maj|1 maj|5 maj"), P("Pop Turnaround", "1 maj|6 min|4 maj|5 maj"),
+              P("Pop Oldies", "1 maj|6 min|2 min|5 maj"),
+              P("Pop Canon", "1 maj|5 maj|6 min|3 min|4 maj|1 maj|4 maj|5 maj"),
+              P("Pop Climb", "4 maj|5 maj|3 min|6 min"),
+              P("Pop Rock", "1 maj|b7 maj|4 maj|4 maj"),
+              P("Pop Bounce", "1 maj|4 maj|6 min|5 maj")],
+      minor: [P("Pop Four-Chord", "1 min|5 min|6 maj|4 min"), P("Pop Minor Start", "6 maj|4 min|1 min|5 min"), P("Pop Turnaround", "1 min|6 maj|4 min|5 maj"),
+              P("Pop Oldies", "1 min|6 maj|3 maj|7 maj"),
+              P("Pop Canon", "1 min|5 min|6 maj|3 maj|4 min|1 min|4 min|5 maj"),
+              P("Pop Climb", "6 maj|7 maj|1 min|1 min"),
+              P("Pop Rock", "1 min|7 maj|6 maj|5 maj"),
+              P("Pop Bounce", "1 min|4 min|6 maj|5 maj")]
     },
     // v97 Kids. One step = one sung note: "degree quality xBars @melody" (melody = semitones above the
     // key's tonic; xBars = note length, 0.25 = a quarter note at 4/4). The step's CHORD is the standard
@@ -137,39 +169,108 @@ PROGRESSIONS = {
               P("Jazz Minor Blues", "1 m7|1 m7|1 m7|1 m7|4 m7|4 m7|1 m7|1 m7|b6 7|5 7|1 m7|5 7"),
               // 8-bar A section, two chords in a bar where shown: I vi | ii V | iii VI7 | ii V | I I7 | IV iv | I V | I
               P("Jazz Rhythm Changes", "1 maj7 x0.5|6 m7 x0.5|2 m7 x0.5|5 7 x0.5|3 m7 x0.5|6 7 x0.5|2 m7 x0.5|5 7 x0.5|1 maj7 x0.5|1 7 x0.5|4 maj7 x0.5|4 m7 x0.5|1 maj7 x0.5|5 7 x0.5|1 maj7"),
-              P("Jazz Minor ii\u2013V\u2013i", "2 m7b5|5 7b9|1 m7"), P("Jazz Backdoor", "4 m7|b7 7|1 maj7"), P("Jazz Modal Vamp", "1 m9 x8|b2 m9 x8")],
+              P("Jazz Minor ii\u2013V\u2013i", "2 m7b5|5 7b9|1 m7"), P("Jazz Backdoor", "4 m7|b7 7|1 maj7"), P("Jazz Modal Vamp", "1 m9 x8|b2 m9 x8"),
+              P("Jazz Circle", "3 m7|6 m7|2 m7|5 7|1 maj7"),
+              P("Jazz Leaves", "2 m7|5 7|1 maj7|4 maj7|7 m7b5|3 7|6 m7|6 m7"),
+              P("Jazz Slide", "2 m7|b2 7|1 maj7|1 maj7"),
+              P("Jazz Bossa", "1 maj7 x2|2 7 x2|2 m7|b2 7|1 maj7 x2"),
+              P("Jazz Chain", "6 7|2 7|5 7|1 maj7")],
       // Minor home: the major ii-V-I, the major 12-bar Blues and Rhythm Changes are skipped
       // (the minor ii-V-i, Minor Blues and the rest cover them).
       minor: [P("Jazz Turnaround", "1 m7|6 maj7|2 m7b5|5 7b9"),
               P("Jazz Minor Blues", "1 m7|1 m7|1 m7|1 m7|4 m7|4 m7|1 m7|1 m7|6 7|5 7|1 m7|5 7"),
-              P("Jazz Minor ii\u2013V\u2013i", "2 m7b5|5 7b9|1 m7"), P("Jazz Backdoor", "4 m7|7 7|1 m7"), P("Jazz Modal Vamp", "1 m9 x8|b2 m9 x8")]
+              P("Jazz Minor ii\u2013V\u2013i", "2 m7b5|5 7b9|1 m7"), P("Jazz Backdoor", "4 m7|7 7|1 m7"), P("Jazz Modal Vamp", "1 m9 x8|b2 m9 x8"),
+              P("Jazz Circle", "5 m7|1 m7|4 m7|7 7|3 maj7"),
+              P("Jazz Leaves", "4 m7|7 7|3 maj7|6 maj7|2 m7b5|5 7b9|1 m7|1 m7"),
+              P("Jazz Slide", "2 m7b5|b2 7|1 m7|1 m7"),
+              P("Jazz Bossa", "1 m7 x2|4 m7 x2|2 m7b5|5 7b9|1 m7 x2")]
     },
     rnb: {
-      major: [P("R&B Classic", "1 maj7|6 m7|4 maj7|5 7"), P("R&B ii\u2013V\u2013I", "2 m9|5 13|1 maj9|6 m9"), P("R&B Smooth", "1 maj9|3 m7|6 m9|2 m9|5 13"), P("R&B Slow Jam", "4 maj7|3 m7|2 m7|1 maj7")],
-      minor: [P("R&B Classic", "1 m7|6 maj7|4 m7|5 7"), P("R&B ii\u2013V\u2013I", "2 m7b5|5 7#9|1 m9|6 maj9"), P("R&B Smooth", "1 m9|3 maj9|6 maj9|2 m7b5|5 7#9"), P("R&B Slow Jam", "4 m9|3 maj9|2 m7b5|1 m9")]
+      major: [P("R&B Classic", "1 maj7|6 m7|4 maj7|5 7"), P("R&B ii\u2013V\u2013I", "2 m9|5 13|1 maj9|6 m9"), P("R&B Smooth", "1 maj9|3 m7|6 m9|2 m9|5 13"), P("R&B Slow Jam", "4 maj7|3 m7|2 m7|1 maj7"),
+              P("R&B Float", "2 m9|5 9sus|1 maj9|1 maj9"),
+              P("R&B Sway", "1 maj9|4 maj9"),
+              P("R&B Church", "4 maj9|5 13|3 m7|6 m9|2 m9|5 9sus|1 maj9"),
+              P("R&B Groove", "1 maj9|b7 maj7|4 maj9|4 maj9"),
+              P("R&B Glide", "4 maj9|3 7|6 m9|6 m9")],
+      minor: [P("R&B Classic", "1 m7|6 maj7|4 m7|5 7"), P("R&B ii\u2013V\u2013I", "2 m7b5|5 7#9|1 m9|6 maj9"), P("R&B Smooth", "1 m9|3 maj9|6 maj9|2 m7b5|5 7#9"), P("R&B Slow Jam", "4 m9|3 maj9|2 m7b5|1 m9"),
+              P("R&B Float", "4 m9|7 13|3 maj9|6 maj9"),
+              P("R&B Sway", "1 m9|4 9"),
+              P("R&B Church", "6 maj9|7 13|5 m7|1 m9|4 m9|5 7#9|1 m9"),
+              P("R&B Groove", "1 m9|7 13|6 maj9|5 m7"),
+              P("R&B Glide", "6 maj9|5 m7|1 m9|1 m9")]
     },
     ballad: {
-      major: [P("Ballad Classic", "1 maj|6 min|4 maj|5 maj"), P("Ballad Hymn", "1 maj|4 maj|1 over3|5 maj"), P("Ballad Big Finish", "4 maj|4 overV|3 min|6 min|2 min|5 maj|1 maj")],   // v109: "Ballad All I Ask" removed (the list is not saved; an old in-session index past the end falls back to 0 = Ballad Classic in progSync)
-      minor: [P("Ballad Classic", "1 min|6 maj|4 min|5 maj"), P("Ballad Hymn", "1 min|4 min|1 mover3|5 maj"), P("Ballad Big Finish", "4 min|4 moverV|3 maj|6 maj|2 dim|5 maj|1 min")]
+      major: [P("Ballad Classic", "1 maj|6 min|4 maj|5 maj"), P("Ballad Hymn", "1 maj|4 maj|1 over3|5 maj"), P("Ballad Big Finish", "4 maj|4 overV|3 min|6 min|2 min|5 maj|1 maj"),
+              P("Ballad Gentle", "1 add9|3 min|6 m7|4 add9"),
+              P("Ballad Steps", "1 add9|5 over3|6 m7|4 add9"),
+              P("Ballad Tender", "1 add9|4 add9|4 min|1 add9"),
+              P("Ballad Home", "6 m7|2 m7|5 maj|1 add9"),
+              P("Ballad Sunrise", "b7 maj|4 add9|1 add9|1 add9")],   // v109: "Ballad All I Ask" removed (the list is not saved; an old in-session index past the end falls back to 0 = Ballad Classic in progSync)
+      minor: [P("Ballad Classic", "1 min|6 maj|4 min|5 maj"), P("Ballad Hymn", "1 min|4 min|1 mover3|5 maj"), P("Ballad Big Finish", "4 min|4 moverV|3 maj|6 maj|2 dim|5 maj|1 min"),
+              P("Ballad Gentle", "1 m7|3 add9|6 add9|7 maj"),
+              P("Ballad Steps", "1 m7|7 maj|6 add9|5 maj"),
+              P("Ballad Tender", "1 m7|4 m7|1 m7|5 maj"),
+              P("Ballad Home", "6 add9|4 m7|5 maj|1 m7"),
+              P("Ballad Sunrise", "6 add9|7 maj|1 m7|1 m7")]
     },
     reggae: {
-      major: [P("Reggae Island Skank", "1 maj|4 maj|5 maj|4 maj"), P("Reggae One Drop", "1 maj|b7 maj|4 maj|1 maj"), P("Reggae Minor Riddim", "1 min|4 min|5 min|4 min")],
+      major: [P("Reggae Island Skank", "1 maj|4 maj|5 maj|4 maj"), P("Reggae One Drop", "1 maj|b7 maj|4 maj|1 maj"), P("Reggae Minor Riddim", "1 min|4 min|5 min|4 min"),
+              P("Reggae Sway", "1 maj|2 min"),
+              P("Reggae Easy", "1 maj|1 maj|4 maj|4 maj"),
+              P("Reggae Lovers", "1 maj|6 min|4 maj|5 maj"),
+              P("Reggae Ska", "1 maj x0.5|6 min x0.5|2 min x0.5|5 maj x0.5"),
+              P("Reggae Roots", "6 min|5 maj|4 maj|5 maj")],
       // Minor home: Island Skank becomes i-iv-v-iv, so Minor Riddim takes its minor-key form i-bVII.
-      minor: [P("Reggae Island Skank", "1 min|4 min|5 min|4 min"), P("Reggae One Drop", "1 min|7 maj|4 min|1 min"), P("Reggae Minor Riddim", "1 min|7 maj")]
+      minor: [P("Reggae Island Skank", "1 min|4 min|5 min|4 min"), P("Reggae One Drop", "1 min|7 maj|4 min|1 min"), P("Reggae Minor Riddim", "1 min|7 maj"),
+              P("Reggae Sway", "1 min|6 maj"),
+              P("Reggae Easy", "6 maj|7 maj|1 min|1 min"),
+              P("Reggae Lovers", "1 min|6 maj|3 maj|7 maj"),
+              P("Reggae Ska", "1 min x0.5|4 min x0.5|5 maj x0.5|1 min x0.5"),
+              P("Reggae Roots", "1 min|7 maj|6 maj|7 maj")]
     },
     funk: {
-      major: [P("Funk Vamp", "1 7|4 7"), P("Funk Minor Vamp", "1 m7|4 7"), P("Funk Breakdown", "1 9|b7 9|4 9|1 9")],
-      minor: [P("Funk Vamp", "1 m7|4 m7"), P("Funk Minor Vamp", "1 m7|4 7"), P("Funk Breakdown", "1 m9|7 9|4 9|1 m9")]
+      major: [P("Funk Vamp", "1 7|4 7"), P("Funk Minor Vamp", "1 m7|4 7"), P("Funk Breakdown", "1 9|b7 9|4 9|1 9"),
+              P("Funk Strut", "1 9|b7 9"),
+              P("Funk Fuzz", "1 7#9|1 7#9|4 9|1 7#9"),
+              P("Funk Two", "2 m7|5 9"),
+              P("Funk Party", "1 9|4 9|5 9|4 9"),
+              P("Funk Cool", "6 m7|2 m7|6 m7|5 9")],
+      minor: [P("Funk Vamp", "1 m7|4 m7"), P("Funk Minor Vamp", "1 m7|4 7"), P("Funk Breakdown", "1 m9|7 9|4 9|1 m9"),
+              P("Funk Strut", "1 m7|7 9"),
+              P("Funk Fuzz", "1 m7|1 m7|5 7#9|1 m7"),
+              P("Funk Two", "4 m7|7 9"),
+              P("Funk Party", "1 m7|6 maj7|7 9|1 m7"),
+              P("Funk Cool", "1 m7|3 maj7|4 m7|5 7#9")]
     },
     yogaDeep: {
-      major: [P("Yoga Drone", "1 sus2"), P("Yoga Open", "1 sus2|b7 sus2|4 sus2"), P("Yoga Still", "1 m9|b6 maj7|b7 6|1 m9")],
-      minor: [P("Yoga Drone", "1 sus2"), P("Yoga Open", "1 sus2|7 sus2|4 sus2"), P("Yoga Still", "1 m9|6 maj7|7 6|1 m9")]
+      major: [P("Yoga Drone", "1 sus2"), P("Yoga Open", "1 sus2|b7 sus2|4 sus2"), P("Yoga Still", "1 m9|b6 maj7|b7 6|1 m9"),
+              P("Yoga Breathe", "1 sus2 x2|1 sus4 x2"),
+              P("Yoga Float", "1 sus2 x2|4 sus2 x2"),
+              P("Yoga Glow", "6 m7 x2|4 sus2 x2|1 sus2 x2|5 sus2 x2"),
+              P("Yoga Sky", "1 sus2 x2|5 sus2 x2|6 m7 x2|4 sus2 x2"),
+              P("Yoga Moon", "2 m7 x2|1 sus2 x2")],
+      minor: [P("Yoga Drone", "1 sus2"), P("Yoga Open", "1 sus2|7 sus2|4 sus2"), P("Yoga Still", "1 m9|6 maj7|7 6|1 m9"),
+              P("Yoga Breathe", "1 m7 x2|1 sus4 x2"),
+              P("Yoga Float", "1 m7 x2|4 m7 x2"),
+              P("Yoga Glow", "6 sus2 x2|7 sus2 x2|1 m7 x4"),
+              P("Yoga Sky", "1 m7 x2|3 sus2 x2|6 sus2 x2|7 sus2 x2"),
+              P("Yoga Moon", "4 m7 x2|1 m7 x2")]
     },
     // v60 Country. The strip's V chip is V7, so V steps use it (one G7 chip, no extra dashed G).
     country: {
       major: [P("Country Three-Chord", "1 maj|1 maj|4 maj|1 maj|5 7|5 7|1 maj|1 maj"), P("Country Two-Step", "1 maj|4 maj|1 maj|5 7"),
-              P("Country Swing", "1 maj|1 maj|2 7|2 7|5 7|5 7|1 maj|1 maj"), P("Country Modern", "1 maj|5 7|6 min|4 maj")],
-      minor: [P("Country Outlaw", "1 min|7 maj|6 maj|7 maj"), P("Country Minor Three-Chord", "1 min|4 min|1 min|5 min"), P("Country Holler", "1 min|3 maj|7 maj|4 min")]
+              P("Country Swing", "1 maj|1 maj|2 7|2 7|5 7|5 7|1 maj|1 maj"), P("Country Modern", "1 maj|5 7|6 min|4 maj"),
+              P("Country Porch", "1 maj|4 maj|5 7|1 maj"),
+              P("Country Hoedown", "1 maj|4 maj|1 maj|5 7|1 maj|4 maj|5 7|1 maj"),
+              P("Country Rag", "1 maj|6 7|2 7|5 7"),
+              P("Country Sunset", "1 maj|3 min|4 maj|5 7"),
+              P("Country Ramble", "1 maj|1 maj|b7 maj|4 maj")],
+      minor: [P("Country Outlaw", "1 min|7 maj|6 maj|7 maj"), P("Country Minor Three-Chord", "1 min|4 min|1 min|5 min"), P("Country Holler", "1 min|3 maj|7 maj|4 min"),
+              P("Country Porch", "1 min|4 min|5 7|1 min"),
+              P("Country Hoedown", "1 min|7 maj|1 min|5 7|1 min|7 maj|5 7|1 min"),
+              P("Country Rag", "1 min|6 maj|2 dim|5 7"),
+              P("Country Sunset", "1 min|3 maj|6 maj|5 7"),
+              P("Country Ramble", "1 min|4 maj|1 min|7 maj")]
     }
   };
 }

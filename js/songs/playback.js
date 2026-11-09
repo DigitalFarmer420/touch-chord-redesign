@@ -60,13 +60,18 @@ export function progSync(key) {
   var oldName = prog.list[prog.idx] ? prog.list[prog.idx].name : null;
   var wasUp = !!(prog.list[prog.idx] && prog.list[prog.idx].up);   // Upload: a style change keeps the song
   prog.list = progList(state.style, key.mode);
-  if (styleChanged) prog.idx = 0;
-  else if (prog.mode !== null && prog.mode !== key.mode) {
+  // A loaded song stays on the song route. A factory name that is no longer on the
+  // menu (held chart, or no chart in this mode) cannot stay selected: the label,
+  // the steps and the next chord all come from the visible row, or the first one.
+  if (wasUp) {
+    for (var uj = 0; uj < prog.list.length; uj++) if (prog.list[uj].up) prog.idx = uj;
+  } else if (styleChanged) {
+    prog.idx = 0;
+  } else if (oldName) {
     var ix = -1;
-    prog.list.forEach(function (p, i) { if (p.name === oldName) ix = i; });
-    prog.idx = Math.max(0, ix);
+    prog.list.forEach(function (p, i) { if (!p.up && p.name === oldName) ix = i; });
+    prog.idx = ix >= 0 ? ix : 0;
   }
-  if (wasUp) for (var uj = 0; uj < prog.list.length; uj++) if (prog.list[uj].up) prog.idx = uj;
   if (prog.idx >= prog.list.length) prog.idx = 0;
   if (shared.U && shared.U.locked && prog.list[prog.idx] && prog.list[prog.idx].up) {   // v73 Lock: the key change is the transpose target
     var lk0 = shared.U.liveKey, nk = { tonic: keyRootName(key), mode: key.mode };

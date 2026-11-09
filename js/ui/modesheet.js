@@ -91,6 +91,7 @@ function build() {
   sheet = h("div", "ms-sheet", null, { role: "dialog", "aria-modal": "true", "aria-label": "Settings" });
   var html = "<div class=\"ms-grab\"></div><div class=\"ms-head\"><h2>Settings</h2><button type=\"button\" class=\"ms-x\" aria-label=\"Close\">\u2715</button></div>"
     + "<div class=\"ms-body\">"
+    + "<div class=\"ms-ver\" id=\"msVer\"><div class=\"ms-ver-n\">Version " + APP_VERSION + "</div><div class=\"ms-ver-rc\">RC testing</div></div>"
     + "<div class=\"ms-lbl\" data-row=\"mode\">Mode</div><div class=\"ms-mode\" id=\"msMode\" role=\"radiogroup\" aria-label=\"Mode\">"
     + MODES.map(function (m) { return "<button type=\"button\" role=\"radio\" data-mode=\"" + m[0] + "\"><b>" + m[1] + "</b><small>" + m[2] + "</small></button>"; }).join("") + "</div>"
     + "<div class=\"ms-lbl\">Playing</div>"
@@ -101,8 +102,7 @@ function build() {
     + LOOK_CHOICES.map(function (l) { return "<button type=\"button\" role=\"radio\" data-look=\"" + l + "\">" + LOOK_LABELS[l] + "</button>"; }).join("") + "</span></div>"
     + "<div class=\"ms-row ms-help\" data-row=\"help\"><span class=\"ms-t\">How to &amp; tour</span><span class=\"ms-pair\"><button type=\"button\" data-act=\"howto\" id=\"msHowto\">How to</button><button type=\"button\" data-act=\"tour\" id=\"msTour\">Tour</button></span></div>"
     + "<button type=\"button\" class=\"ms-row ms-go ms-danger\" data-row=\"reset\" data-act=\"reset\" id=\"msReset\"><span class=\"ms-t\">Start over<small>Asks first; your songs stay</small></span><span class=\"ms-chev\" aria-hidden=\"true\">\u203a</span></button>"
-    + "<div class=\"ms-note\" id=\"msNote\"></div>"
-    + "<div class=\"ms-ver\">Touch Chord " + APP_VERSION + "</div></div>";
+    + "<div class=\"ms-note\" id=\"msNote\"></div></div>";
   sheet.innerHTML = html;
   confirmEl = h("div", "ms-confirm", null, { id: "msConfirm" }); confirmEl.hidden = true;
   confirmEl.innerHTML = "<div class=\"ms-cdim\"></div><div class=\"ms-ccard\" role=\"alertdialog\" aria-label=\"Start over?\"><div class=\"ms-broom\" aria-hidden=\"true\">\uD83E\uDDF9</div><div class=\"ms-ch\">Start over?</div>"

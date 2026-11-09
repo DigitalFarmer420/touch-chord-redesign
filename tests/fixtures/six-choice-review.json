@@ -1,0 +1,1088 @@
+{
+  "sourceHashes": {
+    "work/prog-existing.json": "8fbaae5eb4fbaa6acb417466e436f62e5d4c713fbe09efcc3ea292e652c4d12e",
+    "release-1/progressions.json": "300ab2b602f0c5dfa7af6f55f8a8253da4ca8c73875617a5c9c62c04df749dac"
+  },
+  "selected": {
+    "pop": [
+      "Pop Four-Chord",
+      "Pop Turnaround",
+      "Pop Oldies",
+      "Pop Canon",
+      "Pop Climb",
+      "Pop Rock"
+    ],
+    "jazz": [
+      "Jazz ii–V–I",
+      "Jazz Turnaround",
+      "Jazz Blues",
+      "Jazz Minor ii–V–i",
+      "Jazz Backdoor",
+      "Jazz Modal Vamp"
+    ],
+    "rnb": [
+      "R&B Classic",
+      "R&B Slow Jam",
+      "R&B Sway",
+      "R&B Church",
+      "R&B Groove",
+      "R&B Glide"
+    ],
+    "ballad": [
+      "Ballad Classic",
+      "Ballad Hymn",
+      "Ballad Steps",
+      "Ballad Tender",
+      "Ballad Home",
+      "Ballad Sunrise"
+    ],
+    "reggae": [
+      "Reggae Island Skank",
+      "Reggae One Drop",
+      "Reggae Minor Riddim",
+      "Reggae Sway",
+      "Reggae Lovers",
+      "Reggae Roots"
+    ],
+    "funk": [
+      "Funk Vamp",
+      "Funk Minor Vamp",
+      "Funk Breakdown",
+      "Funk Fuzz",
+      "Funk Two",
+      "Funk Cool"
+    ],
+    "yogaDeep": [
+      "Yoga Drone",
+      "Yoga Open",
+      "Yoga Still",
+      "Yoga Breathe",
+      "Yoga Float",
+      "Yoga Glow"
+    ],
+    "country": [
+      "Country Three-Chord",
+      "Country Modern",
+      "Country Outlaw",
+      "Country Holler",
+      "Country Rag",
+      "Country Sunset"
+    ]
+  },
+  "items": [
+    {
+      "name": "Pop Four-Chord",
+      "style": "pop",
+      "origin": "Existing",
+      "modes": {
+        "major": "1 maj|5 maj|6 min|4 maj",
+        "minor": "1 min|5 min|6 maj|4 min"
+      },
+      "sourceNames": {
+        "major": "Pop Four-Chord",
+        "minor": "Pop Four-Chord"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Pop Minor Start",
+      "style": "pop",
+      "origin": "Existing",
+      "modes": {
+        "major": "6 min|4 maj|1 maj|5 maj",
+        "minor": "6 maj|4 min|1 min|5 min"
+      },
+      "sourceNames": {
+        "major": "Pop Minor Start",
+        "minor": "Pop Minor Start"
+      },
+      "decision": "Hold"
+    },
+    {
+      "name": "Pop Turnaround",
+      "style": "pop",
+      "origin": "Existing",
+      "modes": {
+        "major": "1 maj|6 min|4 maj|5 maj",
+        "minor": "1 min|6 maj|4 min|5 maj"
+      },
+      "sourceNames": {
+        "major": "Pop Turnaround",
+        "minor": "Pop Turnaround"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Jazz ii–V–I",
+      "style": "jazz",
+      "origin": "Existing",
+      "modes": {
+        "major": "2 m7|5 7|1 maj7"
+      },
+      "sourceNames": {
+        "major": "Jazz ii\\u2013V\\u2013I"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Jazz Turnaround",
+      "style": "jazz",
+      "origin": "Existing",
+      "modes": {
+        "major": "1 maj7|6 m7|2 m7|5 7",
+        "minor": "1 m7|6 maj7|2 m7b5|5 7b9"
+      },
+      "sourceNames": {
+        "major": "Jazz Turnaround",
+        "minor": "Jazz Turnaround"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Jazz Blues",
+      "style": "jazz",
+      "origin": "Existing",
+      "modes": {
+        "major": "1 7|4 7|1 7|1 7|4 7|4 7|1 7|6 7|2 m7|5 7|1 7|5 7"
+      },
+      "sourceNames": {
+        "major": "Jazz Blues"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Jazz Minor Blues",
+      "style": "jazz",
+      "origin": "Existing",
+      "modes": {
+        "major": "1 m7|1 m7|1 m7|1 m7|4 m7|4 m7|1 m7|1 m7|b6 7|5 7|1 m7|5 7",
+        "minor": "1 m7|1 m7|1 m7|1 m7|4 m7|4 m7|1 m7|1 m7|6 7|5 7|1 m7|5 7"
+      },
+      "sourceNames": {
+        "major": "Jazz Minor Blues",
+        "minor": "Jazz Minor Blues"
+      },
+      "decision": "Hold"
+    },
+    {
+      "name": "Jazz Rhythm Changes",
+      "style": "jazz",
+      "origin": "Existing",
+      "modes": {
+        "major": "1 maj7 x0.5|6 m7 x0.5|2 m7 x0.5|5 7 x0.5|3 m7 x0.5|6 7 x0.5|2 m7 x0.5|5 7 x0.5|1 maj7 x0.5|1 7 x0.5|4 maj7 x0.5|4 m7 x0.5|1 maj7 x0.5|5 7 x0.5|1 maj7"
+      },
+      "sourceNames": {
+        "major": "Jazz Rhythm Changes"
+      },
+      "decision": "Hold"
+    },
+    {
+      "name": "Jazz Minor ii–V–i",
+      "style": "jazz",
+      "origin": "Existing",
+      "modes": {
+        "major": "2 m7b5|5 7b9|1 m7",
+        "minor": "2 m7b5|5 7b9|1 m7"
+      },
+      "sourceNames": {
+        "major": "Jazz Minor ii\\u2013V\\u2013i",
+        "minor": "Jazz Minor ii\\u2013V\\u2013i"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Jazz Backdoor",
+      "style": "jazz",
+      "origin": "Existing",
+      "modes": {
+        "major": "4 m7|b7 7|1 maj7",
+        "minor": "4 m7|7 7|1 m7"
+      },
+      "sourceNames": {
+        "major": "Jazz Backdoor",
+        "minor": "Jazz Backdoor"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Jazz Modal Vamp",
+      "style": "jazz",
+      "origin": "Existing",
+      "modes": {
+        "major": "1 m9 x8|b2 m9 x8",
+        "minor": "1 m9 x8|b2 m9 x8"
+      },
+      "sourceNames": {
+        "major": "Jazz Modal Vamp",
+        "minor": "Jazz Modal Vamp"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "R&B Classic",
+      "style": "rnb",
+      "origin": "Existing",
+      "modes": {
+        "major": "1 maj7|6 m7|4 maj7|5 7",
+        "minor": "1 m7|6 maj7|4 m7|5 7"
+      },
+      "sourceNames": {
+        "major": "R&B Classic",
+        "minor": "R&B Classic"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "R&B ii–V–I",
+      "style": "rnb",
+      "origin": "Existing",
+      "modes": {
+        "major": "2 m9|5 13|1 maj9|6 m9",
+        "minor": "2 m7b5|5 7#9|1 m9|6 maj9"
+      },
+      "sourceNames": {
+        "major": "R&B ii\\u2013V\\u2013I",
+        "minor": "R&B ii\\u2013V\\u2013I"
+      },
+      "decision": "Hold"
+    },
+    {
+      "name": "R&B Smooth",
+      "style": "rnb",
+      "origin": "Existing",
+      "modes": {
+        "major": "1 maj9|3 m7|6 m9|2 m9|5 13",
+        "minor": "1 m9|3 maj9|6 maj9|2 m7b5|5 7#9"
+      },
+      "sourceNames": {
+        "major": "R&B Smooth",
+        "minor": "R&B Smooth"
+      },
+      "decision": "Hold"
+    },
+    {
+      "name": "R&B Slow Jam",
+      "style": "rnb",
+      "origin": "Existing",
+      "modes": {
+        "major": "4 maj7|3 m7|2 m7|1 maj7",
+        "minor": "4 m9|3 maj9|2 m7b5|1 m9"
+      },
+      "sourceNames": {
+        "major": "R&B Slow Jam",
+        "minor": "R&B Slow Jam"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Ballad Classic",
+      "style": "ballad",
+      "origin": "Existing",
+      "modes": {
+        "major": "1 maj|6 min|4 maj|5 maj",
+        "minor": "1 min|6 maj|4 min|5 maj"
+      },
+      "sourceNames": {
+        "major": "Ballad Classic",
+        "minor": "Ballad Classic"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Ballad Hymn",
+      "style": "ballad",
+      "origin": "Existing",
+      "modes": {
+        "major": "1 maj|4 maj|1 over3|5 maj",
+        "minor": "1 min|4 min|1 mover3|5 maj"
+      },
+      "sourceNames": {
+        "major": "Ballad Hymn",
+        "minor": "Ballad Hymn"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Ballad Big Finish",
+      "style": "ballad",
+      "origin": "Existing",
+      "modes": {
+        "major": "4 maj|4 overV|3 min|6 min|2 min|5 maj|1 maj",
+        "minor": "4 min|4 moverV|3 maj|6 maj|2 dim|5 maj|1 min"
+      },
+      "sourceNames": {
+        "major": "Ballad Big Finish",
+        "minor": "Ballad Big Finish"
+      },
+      "decision": "Hold"
+    },
+    {
+      "name": "Reggae Island Skank",
+      "style": "reggae",
+      "origin": "Existing",
+      "modes": {
+        "major": "1 maj|4 maj|5 maj|4 maj",
+        "minor": "1 min|4 min|5 min|4 min"
+      },
+      "sourceNames": {
+        "major": "Reggae Island Skank",
+        "minor": "Reggae Island Skank"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Reggae One Drop",
+      "style": "reggae",
+      "origin": "Existing",
+      "modes": {
+        "major": "1 maj|b7 maj|4 maj|1 maj",
+        "minor": "1 min|7 maj|4 min|1 min"
+      },
+      "sourceNames": {
+        "major": "Reggae One Drop",
+        "minor": "Reggae One Drop"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Reggae Minor Riddim",
+      "style": "reggae",
+      "origin": "Existing",
+      "modes": {
+        "major": "1 min|4 min|5 min|4 min",
+        "minor": "1 min|7 maj"
+      },
+      "sourceNames": {
+        "major": "Reggae Minor Riddim",
+        "minor": "Reggae Minor Riddim"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Funk Vamp",
+      "style": "funk",
+      "origin": "Existing",
+      "modes": {
+        "major": "1 7|4 7",
+        "minor": "1 m7|4 m7"
+      },
+      "sourceNames": {
+        "major": "Funk Vamp",
+        "minor": "Funk Vamp"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Funk Minor Vamp",
+      "style": "funk",
+      "origin": "Existing",
+      "modes": {
+        "major": "1 m7|4 7",
+        "minor": "1 m7|4 7"
+      },
+      "sourceNames": {
+        "major": "Funk Minor Vamp",
+        "minor": "Funk Minor Vamp"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Funk Breakdown",
+      "style": "funk",
+      "origin": "Existing",
+      "modes": {
+        "major": "1 9|b7 9|4 9|1 9",
+        "minor": "1 m9|7 9|4 9|1 m9"
+      },
+      "sourceNames": {
+        "major": "Funk Breakdown",
+        "minor": "Funk Breakdown"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Yoga Drone",
+      "style": "yogaDeep",
+      "origin": "Existing",
+      "modes": {
+        "major": "1 sus2",
+        "minor": "1 sus2"
+      },
+      "sourceNames": {
+        "major": "Yoga Drone",
+        "minor": "Yoga Drone"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Yoga Open",
+      "style": "yogaDeep",
+      "origin": "Existing",
+      "modes": {
+        "major": "1 sus2|b7 sus2|4 sus2",
+        "minor": "1 sus2|7 sus2|4 sus2"
+      },
+      "sourceNames": {
+        "major": "Yoga Open",
+        "minor": "Yoga Open"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Yoga Still",
+      "style": "yogaDeep",
+      "origin": "Existing",
+      "modes": {
+        "major": "1 m9|b6 maj7|b7 6|1 m9",
+        "minor": "1 m9|6 maj7|7 6|1 m9"
+      },
+      "sourceNames": {
+        "major": "Yoga Still",
+        "minor": "Yoga Still"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Country Three-Chord",
+      "style": "country",
+      "origin": "Existing",
+      "modes": {
+        "major": "1 maj|1 maj|4 maj|1 maj|5 7|5 7|1 maj|1 maj"
+      },
+      "sourceNames": {
+        "major": "Country Three-Chord"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Country Two-Step",
+      "style": "country",
+      "origin": "Existing",
+      "modes": {
+        "major": "1 maj|4 maj|1 maj|5 7"
+      },
+      "sourceNames": {
+        "major": "Country Two-Step"
+      },
+      "decision": "Hold"
+    },
+    {
+      "name": "Country Swing",
+      "style": "country",
+      "origin": "Existing",
+      "modes": {
+        "major": "1 maj|1 maj|2 7|2 7|5 7|5 7|1 maj|1 maj"
+      },
+      "sourceNames": {
+        "major": "Country Swing"
+      },
+      "decision": "Hold"
+    },
+    {
+      "name": "Country Modern",
+      "style": "country",
+      "origin": "Existing",
+      "modes": {
+        "major": "1 maj|5 7|6 min|4 maj"
+      },
+      "sourceNames": {
+        "major": "Country Modern"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Country Outlaw",
+      "style": "country",
+      "origin": "Existing",
+      "modes": {
+        "minor": "1 min|7 maj|6 maj|7 maj"
+      },
+      "sourceNames": {
+        "minor": "Country Outlaw"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Country Minor Three-Chord",
+      "style": "country",
+      "origin": "Existing",
+      "modes": {
+        "minor": "1 min|4 min|1 min|5 min"
+      },
+      "sourceNames": {
+        "minor": "Country Minor Three-Chord"
+      },
+      "decision": "Hold"
+    },
+    {
+      "name": "Country Holler",
+      "style": "country",
+      "origin": "Existing",
+      "modes": {
+        "minor": "1 min|3 maj|7 maj|4 min"
+      },
+      "sourceNames": {
+        "minor": "Country Holler"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Pop Oldies",
+      "style": "pop",
+      "origin": "Queued",
+      "modes": {
+        "major": "1 maj|6 min|2 min|5 maj",
+        "minor": "1 min|6 maj|3 maj|7 maj"
+      },
+      "sourceNames": {
+        "major": "Pop Oldies",
+        "minor": "Pop Oldies"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Pop Canon",
+      "style": "pop",
+      "origin": "Queued",
+      "modes": {
+        "major": "1 maj|5 maj|6 min|3 min|4 maj|1 maj|4 maj|5 maj",
+        "minor": "1 min|5 min|6 maj|3 maj|4 min|1 min|4 min|5 maj"
+      },
+      "sourceNames": {
+        "major": "Pop Canon",
+        "minor": "Pop Canon"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Pop Climb",
+      "style": "pop",
+      "origin": "Queued",
+      "modes": {
+        "major": "4 maj|5 maj|3 min|6 min",
+        "minor": "6 maj|7 maj|1 min|1 min"
+      },
+      "sourceNames": {
+        "major": "Pop Climb",
+        "minor": "Pop Climb"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Pop Rock",
+      "style": "pop",
+      "origin": "Queued",
+      "modes": {
+        "major": "1 maj|b7 maj|4 maj|4 maj",
+        "minor": "1 min|7 maj|6 maj|5 maj"
+      },
+      "sourceNames": {
+        "major": "Pop Rock",
+        "minor": "Pop Rock"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Pop Bounce",
+      "style": "pop",
+      "origin": "Queued",
+      "modes": {
+        "major": "1 maj|4 maj|6 min|5 maj",
+        "minor": "1 min|4 min|6 maj|5 maj"
+      },
+      "sourceNames": {
+        "major": "Pop Bounce",
+        "minor": "Pop Bounce"
+      },
+      "decision": "Hold"
+    },
+    {
+      "name": "Jazz Circle",
+      "style": "jazz",
+      "origin": "Queued",
+      "modes": {
+        "major": "3 m7|6 m7|2 m7|5 7|1 maj7",
+        "minor": "5 m7|1 m7|4 m7|7 7|3 maj7"
+      },
+      "sourceNames": {
+        "major": "Jazz Circle",
+        "minor": "Jazz Circle"
+      },
+      "decision": "Hold"
+    },
+    {
+      "name": "Jazz Leaves",
+      "style": "jazz",
+      "origin": "Queued",
+      "modes": {
+        "major": "2 m7|5 7|1 maj7|4 maj7|7 m7b5|3 7|6 m7|6 m7",
+        "minor": "4 m7|7 7|3 maj7|6 maj7|2 m7b5|5 7b9|1 m7|1 m7"
+      },
+      "sourceNames": {
+        "major": "Jazz Leaves",
+        "minor": "Jazz Leaves"
+      },
+      "decision": "Hold"
+    },
+    {
+      "name": "Jazz Slide",
+      "style": "jazz",
+      "origin": "Queued",
+      "modes": {
+        "major": "2 m7|b2 7|1 maj7|1 maj7",
+        "minor": "2 m7b5|b2 7|1 m7|1 m7"
+      },
+      "sourceNames": {
+        "major": "Jazz Slide",
+        "minor": "Jazz Slide"
+      },
+      "decision": "Hold"
+    },
+    {
+      "name": "Jazz Bossa",
+      "style": "jazz",
+      "origin": "Queued",
+      "modes": {
+        "major": "1 maj7 x2|2 7 x2|2 m7|b2 7|1 maj7 x2",
+        "minor": "1 m7 x2|4 m7 x2|2 m7b5|5 7b9|1 m7 x2"
+      },
+      "sourceNames": {
+        "major": "Jazz Bossa",
+        "minor": "Jazz Bossa"
+      },
+      "decision": "Hold"
+    },
+    {
+      "name": "Jazz Chain",
+      "style": "jazz",
+      "origin": "Queued",
+      "modes": {
+        "major": "6 7|2 7|5 7|1 maj7"
+      },
+      "sourceNames": {
+        "major": "Jazz Chain"
+      },
+      "decision": "Hold"
+    },
+    {
+      "name": "R&B Float",
+      "style": "rnb",
+      "origin": "Queued",
+      "modes": {
+        "major": "2 m9|5 9sus|1 maj9|1 maj9",
+        "minor": "4 m9|7 13|3 maj9|6 maj9"
+      },
+      "sourceNames": {
+        "major": "R&B Float",
+        "minor": "R&B Float"
+      },
+      "decision": "Hold"
+    },
+    {
+      "name": "R&B Sway",
+      "style": "rnb",
+      "origin": "Queued",
+      "modes": {
+        "major": "1 maj9|4 maj9",
+        "minor": "1 m9|4 9"
+      },
+      "sourceNames": {
+        "major": "R&B Sway",
+        "minor": "R&B Sway"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "R&B Church",
+      "style": "rnb",
+      "origin": "Queued",
+      "modes": {
+        "major": "4 maj9|5 13|3 m7|6 m9|2 m9|5 9sus|1 maj9",
+        "minor": "6 maj9|7 13|5 m7|1 m9|4 m9|5 7#9|1 m9"
+      },
+      "sourceNames": {
+        "major": "R&B Church",
+        "minor": "R&B Church"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "R&B Groove",
+      "style": "rnb",
+      "origin": "Queued",
+      "modes": {
+        "major": "1 maj9|b7 maj7|4 maj9|4 maj9",
+        "minor": "1 m9|7 13|6 maj9|5 m7"
+      },
+      "sourceNames": {
+        "major": "R&B Groove",
+        "minor": "R&B Groove"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "R&B Glide",
+      "style": "rnb",
+      "origin": "Queued",
+      "modes": {
+        "major": "4 maj9|3 7|6 m9|6 m9",
+        "minor": "6 maj9|5 m7|1 m9|1 m9"
+      },
+      "sourceNames": {
+        "major": "R&B Glide",
+        "minor": "R&B Glide"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Ballad Gentle",
+      "style": "ballad",
+      "origin": "Queued",
+      "modes": {
+        "major": "1 add9|3 min|6 m7|4 add9",
+        "minor": "1 m7|3 add9|6 add9|7 maj"
+      },
+      "sourceNames": {
+        "major": "Ballad Gentle",
+        "minor": "Ballad Gentle"
+      },
+      "decision": "Hold"
+    },
+    {
+      "name": "Ballad Steps",
+      "style": "ballad",
+      "origin": "Queued",
+      "modes": {
+        "major": "1 add9|5 over3|6 m7|4 add9",
+        "minor": "1 m7|7 maj|6 add9|5 maj"
+      },
+      "sourceNames": {
+        "major": "Ballad Steps",
+        "minor": "Ballad Steps"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Ballad Tender",
+      "style": "ballad",
+      "origin": "Queued",
+      "modes": {
+        "major": "1 add9|4 add9|4 min|1 add9",
+        "minor": "1 m7|4 m7|1 m7|5 maj"
+      },
+      "sourceNames": {
+        "major": "Ballad Tender",
+        "minor": "Ballad Tender"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Ballad Home",
+      "style": "ballad",
+      "origin": "Queued",
+      "modes": {
+        "major": "6 m7|2 m7|5 maj|1 add9",
+        "minor": "6 add9|4 m7|5 maj|1 m7"
+      },
+      "sourceNames": {
+        "major": "Ballad Home",
+        "minor": "Ballad Home"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Ballad Sunrise",
+      "style": "ballad",
+      "origin": "Queued",
+      "modes": {
+        "major": "b7 maj|4 add9|1 add9|1 add9",
+        "minor": "6 add9|7 maj|1 m7|1 m7"
+      },
+      "sourceNames": {
+        "major": "Ballad Sunrise",
+        "minor": "Ballad Sunrise"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Reggae Sway",
+      "style": "reggae",
+      "origin": "Queued",
+      "modes": {
+        "major": "1 maj|2 min",
+        "minor": "1 min|6 maj"
+      },
+      "sourceNames": {
+        "major": "Reggae Sway",
+        "minor": "Reggae Sway"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Reggae Easy",
+      "style": "reggae",
+      "origin": "Queued",
+      "modes": {
+        "major": "1 maj|1 maj|4 maj|4 maj",
+        "minor": "6 maj|7 maj|1 min|1 min"
+      },
+      "sourceNames": {
+        "major": "Reggae Easy",
+        "minor": "Reggae Easy"
+      },
+      "decision": "Hold"
+    },
+    {
+      "name": "Reggae Lovers",
+      "style": "reggae",
+      "origin": "Queued",
+      "modes": {
+        "major": "1 maj|6 min|4 maj|5 maj",
+        "minor": "1 min|6 maj|3 maj|7 maj"
+      },
+      "sourceNames": {
+        "major": "Reggae Lovers",
+        "minor": "Reggae Lovers"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Reggae Ska",
+      "style": "reggae",
+      "origin": "Queued",
+      "modes": {
+        "major": "1 maj x0.5|6 min x0.5|2 min x0.5|5 maj x0.5",
+        "minor": "1 min x0.5|4 min x0.5|5 maj x0.5|1 min x0.5"
+      },
+      "sourceNames": {
+        "major": "Reggae Ska",
+        "minor": "Reggae Ska"
+      },
+      "decision": "Hold"
+    },
+    {
+      "name": "Reggae Roots",
+      "style": "reggae",
+      "origin": "Queued",
+      "modes": {
+        "major": "6 min|5 maj|4 maj|5 maj",
+        "minor": "1 min|7 maj|6 maj|7 maj"
+      },
+      "sourceNames": {
+        "major": "Reggae Roots",
+        "minor": "Reggae Roots"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Funk Strut",
+      "style": "funk",
+      "origin": "Queued",
+      "modes": {
+        "major": "1 9|b7 9",
+        "minor": "1 m7|7 9"
+      },
+      "sourceNames": {
+        "major": "Funk Strut",
+        "minor": "Funk Strut"
+      },
+      "decision": "Hold"
+    },
+    {
+      "name": "Funk Fuzz",
+      "style": "funk",
+      "origin": "Queued",
+      "modes": {
+        "major": "1 7#9|1 7#9|4 9|1 7#9",
+        "minor": "1 m7|1 m7|5 7#9|1 m7"
+      },
+      "sourceNames": {
+        "major": "Funk Fuzz",
+        "minor": "Funk Fuzz"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Funk Two",
+      "style": "funk",
+      "origin": "Queued",
+      "modes": {
+        "major": "2 m7|5 9",
+        "minor": "4 m7|7 9"
+      },
+      "sourceNames": {
+        "major": "Funk Two",
+        "minor": "Funk Two"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Funk Party",
+      "style": "funk",
+      "origin": "Queued",
+      "modes": {
+        "major": "1 9|4 9|5 9|4 9",
+        "minor": "1 m7|6 maj7|7 9|1 m7"
+      },
+      "sourceNames": {
+        "major": "Funk Party",
+        "minor": "Funk Party"
+      },
+      "decision": "Hold"
+    },
+    {
+      "name": "Funk Cool",
+      "style": "funk",
+      "origin": "Queued",
+      "modes": {
+        "major": "6 m7|2 m7|6 m7|5 9",
+        "minor": "1 m7|3 maj7|4 m7|5 7#9"
+      },
+      "sourceNames": {
+        "major": "Funk Cool",
+        "minor": "Funk Cool"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Yoga Breathe",
+      "style": "yogaDeep",
+      "origin": "Queued",
+      "modes": {
+        "major": "1 sus2 x2|1 sus4 x2",
+        "minor": "1 m7 x2|1 sus4 x2"
+      },
+      "sourceNames": {
+        "major": "Yoga Breathe",
+        "minor": "Yoga Breathe"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Yoga Float",
+      "style": "yogaDeep",
+      "origin": "Queued",
+      "modes": {
+        "major": "1 sus2 x2|4 sus2 x2",
+        "minor": "1 m7 x2|4 m7 x2"
+      },
+      "sourceNames": {
+        "major": "Yoga Float",
+        "minor": "Yoga Float"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Yoga Glow",
+      "style": "yogaDeep",
+      "origin": "Queued",
+      "modes": {
+        "major": "6 m7 x2|4 sus2 x2|1 sus2 x2|5 sus2 x2",
+        "minor": "6 sus2 x2|7 sus2 x2|1 m7 x4"
+      },
+      "sourceNames": {
+        "major": "Yoga Glow",
+        "minor": "Yoga Glow"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Yoga Sky",
+      "style": "yogaDeep",
+      "origin": "Queued",
+      "modes": {
+        "major": "1 sus2 x2|5 sus2 x2|6 m7 x2|4 sus2 x2",
+        "minor": "1 m7 x2|3 sus2 x2|6 sus2 x2|7 sus2 x2"
+      },
+      "sourceNames": {
+        "major": "Yoga Sky",
+        "minor": "Yoga Sky"
+      },
+      "decision": "Hold"
+    },
+    {
+      "name": "Yoga Moon",
+      "style": "yogaDeep",
+      "origin": "Queued",
+      "modes": {
+        "major": "2 m7 x2|1 sus2 x2",
+        "minor": "4 m7 x2|1 m7 x2"
+      },
+      "sourceNames": {
+        "major": "Yoga Moon",
+        "minor": "Yoga Moon"
+      },
+      "decision": "Hold"
+    },
+    {
+      "name": "Country Porch",
+      "style": "country",
+      "origin": "Queued",
+      "modes": {
+        "major": "1 maj|4 maj|5 7|1 maj",
+        "minor": "1 min|4 min|5 7|1 min"
+      },
+      "sourceNames": {
+        "major": "Country Porch",
+        "minor": "Country Porch"
+      },
+      "decision": "Hold"
+    },
+    {
+      "name": "Country Hoedown",
+      "style": "country",
+      "origin": "Queued",
+      "modes": {
+        "major": "1 maj|4 maj|1 maj|5 7|1 maj|4 maj|5 7|1 maj",
+        "minor": "1 min|7 maj|1 min|5 7|1 min|7 maj|5 7|1 min"
+      },
+      "sourceNames": {
+        "major": "Country Hoedown",
+        "minor": "Country Hoedown"
+      },
+      "decision": "Hold"
+    },
+    {
+      "name": "Country Rag",
+      "style": "country",
+      "origin": "Queued",
+      "modes": {
+        "major": "1 maj|6 7|2 7|5 7",
+        "minor": "1 min|6 maj|2 dim|5 7"
+      },
+      "sourceNames": {
+        "major": "Country Rag",
+        "minor": "Country Rag"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Country Sunset",
+      "style": "country",
+      "origin": "Queued",
+      "modes": {
+        "major": "1 maj|3 min|4 maj|5 7",
+        "minor": "1 min|3 maj|6 maj|5 7"
+      },
+      "sourceNames": {
+        "major": "Country Sunset",
+        "minor": "Country Sunset"
+      },
+      "decision": "Keep"
+    },
+    {
+      "name": "Country Ramble",
+      "style": "country",
+      "origin": "Queued",
+      "modes": {
+        "major": "1 maj|1 maj|b7 maj|4 maj",
+        "minor": "1 min|4 maj|1 min|7 maj"
+      },
+      "sourceNames": {
+        "major": "Country Ramble",
+        "minor": "Country Ramble"
+      },
+      "decision": "Hold"
+    }
+  ]
+}
