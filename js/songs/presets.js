@@ -66,6 +66,8 @@ function progMenu(style, full, mode) {
     if (over[name]) out.push({ name: src.name, steps: over[name].split("|") });
     else out.push(src);
   });
+  // Owner Nov 9: after the selected set, list every other catalog chart for this style and mode, in source order.
+  full.forEach(function (p) { if (names.indexOf(p.name) < 0) out.push(p); });
   return out;
 }
 export function progList(style, mode) {
