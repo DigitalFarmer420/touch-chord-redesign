@@ -17,32 +17,63 @@ export function progFeel(name) { if (upProgObj && shared.U && name === upProgObj
 const PROG_SUFFIX = { maj: "", min: "", "7": "7", maj7: "maj7", m7: "7", m7b5: "\u00f87", sus4: "sus4", sus2: "sus2",
   add9: "add9", madd9: "add9", "9": "9", maj9: "maj9", m9: "9", "9sus": "9sus", "13": "13", "7b9": "7\u266d9",
   "7#9": "7\u266f9", "7sus4": "7sus4", "6": "6", dim: "\u00b0", overV: "/V", moverV: "/V", over3: "/3", mover3: "/3" };
-// Noff six-choice menu, review 6ac9bf47. PROGRESSIONS stays the full catalog.
-// Families with no chart for this mode are omitted. Menu position is not the source-array index.
+// Selected menu, held-17 v2 8ffe69c3. PROGRESSIONS stays the full catalog.
+// A family with no chart for this mode is omitted. Chain has no minor chart.
+// PROG_OVR is a menu copy of a revised sequence. It does not write the source array.
 var PROG_MENU = {
-  pop: ["Pop Four-Chord", "Pop Turnaround", "Pop Oldies", "Pop Canon", "Pop Climb", "Pop Rock"],
-  jazz: ["Jazz ii\u2013V\u2013I", "Jazz Turnaround", "Jazz Blues", "Jazz Minor ii\u2013V\u2013i", "Jazz Backdoor", "Jazz Modal Vamp"],
-  rnb: ["R&B Classic", "R&B Slow Jam", "R&B Sway", "R&B Church", "R&B Groove", "R&B Glide"],
-  ballad: ["Ballad Classic", "Ballad Hymn", "Ballad Steps", "Ballad Tender", "Ballad Home", "Ballad Sunrise"],
-  reggae: ["Reggae Island Skank", "Reggae One Drop", "Reggae Minor Riddim", "Reggae Sway", "Reggae Lovers", "Reggae Roots"],
-  funk: ["Funk Vamp", "Funk Minor Vamp", "Funk Breakdown", "Funk Fuzz", "Funk Two", "Funk Cool"],
-  yogaDeep: ["Yoga Drone", "Yoga Open", "Yoga Still", "Yoga Breathe", "Yoga Float", "Yoga Glow"],
-  country: ["Country Three-Chord", "Country Modern", "Country Outlaw", "Country Holler", "Country Rag", "Country Sunset"],
+  pop: ["Pop Bounce"],
+  jazz: ["Jazz Circle", "Jazz Leaves", "Jazz Slide", "Jazz Bossa", "Jazz Chain"],
+  rnb: ["R&B Float"],
+  ballad: ["Ballad Gentle"],
+  reggae: ["Reggae Easy", "Reggae Ska"],
+  funk: ["Funk Strut", "Funk Party"],
+  yogaDeep: ["Yoga Sky", "Yoga Moon"],
+  country: ["Country Porch", "Country Hoedown", "Country Ramble"],
 };
-function progMenu(style, full) {
+var PROG_OVR = {
+  jazz: {
+    major: { "Jazz Leaves": "2 m7|5 7|1 maj7|4 maj7|7 m7b5|3 7|6 m7 x2", "Jazz Slide": "2 m7|b2 7|1 maj7|6 m7" },
+    minor: { "Jazz Leaves": "4 m7|7 7|3 maj7|6 maj7|2 m7b5|5 7b9|1 m7 x2", "Jazz Slide": "2 m7b5|b2 7|1 m7|4 m7" }
+  },
+  rnb: { major: { "R&B Float": "2 m9|5 9sus|1 maj9|6 m9" } },
+  reggae: {
+    major: { "Reggae Easy": "1 maj|4 maj|5 maj|b7 maj" },
+    minor: { "Reggae Easy": "6 maj|7 maj|1 min|4 min" }
+  },
+  funk: {
+    major: { "Funk Strut": "1 9|b7 9|4 9|5 9" },
+    minor: { "Funk Strut": "1 m7|7 9|4 m7|5 9" }
+  },
+  yogaDeep: {
+    major: { "Yoga Moon": "2 m7 x2|5 sus2 x2|4 sus2 x2|1 sus2 x2" },
+    minor: { "Yoga Moon": "4 m7 x2|7 sus2 x2|3 sus2 x2|1 m7 x2" }
+  },
+  country: {
+    major: { "Country Hoedown": "1 maj|4 maj|5 7|1 maj", "Country Ramble": "1 maj|b7 maj|4 maj|5 maj" },
+    minor: { "Country Hoedown": "1 min|7 maj|5 7|1 min" }
+  }
+};
+function progMenu(style, full, mode) {
   var names = PROG_MENU[style];
   if (!names) return full;
   var by = {};
   full.forEach(function (p) { by[p.name] = p; });
+  var over = (PROG_OVR[style] && PROG_OVR[style][mode]) || {};
   var out = [];
-  names.forEach(function (name) { if (by[name]) out.push(by[name]); });
+  names.forEach(function (name) {
+    var src = by[name];
+    if (!src) return;
+    if (over[name]) out.push({ name: src.name, steps: over[name].split("|") });
+    else out.push(src);
+  });
   return out;
 }
 export function progList(style, mode) {
   var s = PROGRESSIONS[style] || PROGRESSIONS.pop;
   var l = s[mode === "minor" ? "minor" : "major"];
   if (!l || !l.length) l = s.major;   // v109: Kids has no minor songs any more
-  l = progMenu(style, l);   // factory menu only; a loaded song is still appended below and is not a factory family
+  var menuMode = mode === "minor" && l === s.minor ? "minor" : "major";
+  l = progMenu(style, l, menuMode);   // factory menu only; a loaded song is still appended below and is not a factory family
   return upInList() ? l.concat([upProgObj]) : l;   // Upload: the song goes last (full mode, not Kids)
 }
 function progParse(str) {

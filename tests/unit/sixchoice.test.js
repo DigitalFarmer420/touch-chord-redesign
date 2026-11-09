@@ -4,12 +4,8 @@ import { readFileSync } from "node:fs";
 
 const SRC = readFileSync(new URL("../../js/songs/presets.js", import.meta.url), "utf8");
 const REV = JSON.parse(readFileSync(new URL("../fixtures/six-choice-review.json", import.meta.url), "utf8"));
+const V2 = JSON.parse(readFileSync(new URL("../fixtures/held-17-v2.json", import.meta.url), "utf8"));
 const ADULT = ["pop", "jazz", "rnb", "ballad", "reggae", "funk", "yogaDeep", "country"];
-const EXPECT = {
-  pop: { major: 6, minor: 6 }, jazz: { major: 6, minor: 4 }, rnb: { major: 6, minor: 6 },
-  ballad: { major: 6, minor: 6 }, reggae: { major: 6, minor: 6 }, funk: { major: 6, minor: 6 },
-  yogaDeep: { major: 6, minor: 6 }, country: { major: 4, minor: 4 }
-};
 
 function catalog() {
   const at = SRC.indexOf("PROGRESSIONS = {");
@@ -21,8 +17,8 @@ function catalog() {
   const P = (name, steps) => ({ name, steps });
   return eval("(" + SRC.slice(i, end + 1) + ")");
 }
-function menu() {
-  const at = SRC.indexOf("var PROG_MENU = {");
+function grab(mark) {
+  const at = SRC.indexOf(mark);
   let i = SRC.indexOf("{", at), depth = 0, end = -1;
   for (let j = i; j < SRC.length; j++) {
     if (SRC[j] === "{") depth++;
@@ -30,19 +26,26 @@ function menu() {
   }
   return eval("(" + SRC.slice(i, end + 1) + ")");
 }
+function menu() { return grab("var PROG_MENU = {"); }
+function ovr() { return grab("var PROG_OVR = {"); }
 function visible(data, style, mode) {
   const full = data[style][mode];
   const by = {};
   full.forEach((p) => { by[p.name] = p; });
-  return menu()[style].map((name) => by[name]).filter(Boolean);
+  const over = (ovr()[style] && ovr()[style][mode]) || {};
+  return menu()[style].map((name) => {
+    const src = by[name];
+    if (!src) return null;
+    if (over[name]) return { name: src.name, steps: over[name] };
+    return { name: src.name, steps: src.steps };
+  }).filter(Boolean);
 }
 
 const data = catalog();
 const byItem = {};
 REV.items.forEach((it) => { byItem[it.style + "\0" + it.name] = it; });
 
-test("review file is the authoritative selection", () => {
-  assert.equal(REV.selected.pop.length + REV.selected.jazz.length + REV.selected.rnb.length + REV.selected.ballad.length + REV.selected.reggae.length + REV.selected.funk.length + REV.selected.yogaDeep.length + REV.selected.country.length, 48);
+test("the old review remains a catalog record, not the menu", () => {
   assert.equal(REV.items.length, 74);
   assert.equal(REV.items.filter((it) => it.decision === "Keep").length, 48);
 });
@@ -65,37 +68,42 @@ test("full catalog stays underneath the menu", () => {
   }
 });
 
-test("rendered menu is the reviewed families and supported modes only", () => {
-  assert.deepEqual(menu(), REV.selected);
+test("rendered menu is the 17-family v2 set and its 33 charts", () => {
   let entries = 0;
+  const families = new Set();
   for (const style of ADULT) {
+    assert.deepEqual(menu()[style], [...new Set([].concat(V2.progressions[style].major, V2.progressions[style].minor).map((p) => p.name))]);
     for (const mode of ["major", "minor"]) {
+      const want = V2.progressions[style][mode];
       const rows = visible(data, style, mode);
-      assert.equal(rows.length, EXPECT[style][mode], style + " " + mode + " " + rows.map((p) => p.name).join(","));
-      assert.ok(rows.length <= 6);
-      const names = new Set(rows.map((p) => p.name));
-      assert.equal(names.size, rows.length);
-      for (const p of rows) {
-        const it = byItem[style + "\0" + p.name];
-        assert.equal(it.decision, "Keep");
-        assert.ok(it.modes[mode]);
-      }
+      assert.deepEqual(rows.map((p) => p.name), want.map((p) => p.name), style + " " + mode);
+      assert.ok(rows.length <= 6, style + " " + mode);
+      rows.forEach((p, i) => {
+        assert.equal(p.steps, want[i].steps, p.name + " " + mode);
+        const n = want[i].steps.split("|").length;
+        assert.ok(n >= 4 && n <= 8, p.name + " steps " + n);
+        families.add(p.name);
+      });
       entries += rows.length;
     }
   }
-  assert.equal(entries, 90);
+  assert.equal(entries, 33);
+  assert.equal(families.size, 17);
+  assert.equal(visible(data, "jazz", "minor").some((p) => p.name === "Jazz Chain"), false);
+  const leaves = visible(data, "jazz", "major").find((p) => p.name === "Jazz Leaves");
+  assert.equal(leaves.steps.split("|").length, 7);
+  assert.equal(leaves.steps.endsWith("6 m7 x2"), true);
+  const moon = visible(data, "yogaDeep", "major").find((p) => p.name === "Yoga Moon");
+  assert.equal(moon.steps.split("|").every((s) => s.endsWith("x2")), true);
 });
 
-test("source-array indexes of kept charts are not renumbered", () => {
+test("revised menu copies do not replace the source sequences", () => {
   for (const style of ADULT) {
     for (const mode of ["major", "minor"]) {
-      const full = data[style][mode];
-      for (const name of REV.selected[style]) {
-        const it = byItem[style + "\0" + name];
-        if (!it.modes[mode]) continue;
-        const idx = full.findIndex((p) => p.name === name);
-        assert.ok(idx >= 0);
-        assert.equal(full[idx].steps, it.modes[mode]);
+      for (const it of V2.progressions[style][mode]) {
+        const hit = data[style][mode].find((p) => p.name === it.name);
+        assert.ok(hit, it.name);
+        assert.equal(hit.steps, it.originalSteps, it.name + " source");
       }
     }
   }

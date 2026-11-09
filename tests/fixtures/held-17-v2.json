@@ -1,0 +1,518 @@
+{
+  "version": "held-17-progressions-export-v2",
+  "schema": "progressions.json subset + sampleChords/sampleKey",
+  "fromV1Sha256": "3431da5c9d0f4d1cb32c8dedcfcabe65228068118913ef7c78d648949b64ac74",
+  "authorship": "Metadata-aligned v2 for revised records; sequences identical to v1",
+  "progressions": {
+    "pop": {
+      "major": [
+        {
+          "name": "Pop Bounce",
+          "steps": "1 maj|4 maj|6 min|5 maj",
+          "numerals": "I–IV–vi–V",
+          "sampleChords": "C | F | Am | G",
+          "sampleKey": "C major",
+          "key": "C major",
+          "bars": 4.0,
+          "note": "I-IV-vi-V. All strip chips.",
+          "revised": false,
+          "authorship": "unchanged-original",
+          "originalSteps": "1 maj|4 maj|6 min|5 maj",
+          "metadataVersion": "v1-unchanged"
+        }
+      ],
+      "minor": [
+        {
+          "name": "Pop Bounce",
+          "steps": "1 min|4 min|6 maj|5 maj",
+          "numerals": "i–iv–VI–V",
+          "sampleChords": "Am | Dm | F | E",
+          "sampleKey": "A minor",
+          "key": "A minor",
+          "bars": 4.0,
+          "note": "i-iv-VI-V. All strip chips.",
+          "revised": false,
+          "authorship": "unchanged-original",
+          "originalSteps": "1 min|4 min|6 maj|5 maj",
+          "metadataVersion": "v1-unchanged"
+        }
+      ]
+    },
+    "jazz": {
+      "major": [
+        {
+          "name": "Jazz Circle",
+          "steps": "3 m7|6 m7|2 m7|5 7|1 maj7",
+          "numerals": "iii7–vi7–ii7–V7–Imaj7",
+          "sampleChords": "Em7 | Am7 | Dm7 | G7 | Cmaj7",
+          "sampleKey": "C major",
+          "key": "C major",
+          "bars": 5.0,
+          "note": "iii-vi-ii-V-I, the long way home round the circle. All strip chips.",
+          "revised": false,
+          "authorship": "unchanged-original",
+          "originalSteps": "3 m7|6 m7|2 m7|5 7|1 maj7",
+          "metadataVersion": "v1-unchanged"
+        },
+        {
+          "name": "Jazz Leaves",
+          "steps": "2 m7|5 7|1 maj7|4 maj7|7 m7b5|3 7|6 m7 x2",
+          "numerals": "ii7–V7–Imaj7–IVmaj7–viiø7–III7–vi7 (2 bars)",
+          "sampleChords": "Dm7 | G7 | Cmaj7 | Fmaj7 | Bm7b5 | E7 | Am7 x2",
+          "sampleKey": "C major",
+          "key": "C major",
+          "bars": 8.0,
+          "note": "Autumn Leaves circle in major: ii–V–I–IV then viiø–III7–vi, with the final vi held two bars (x2) instead of a duplicated step. [metadata aligned v2; sequence unchanged from v1]",
+          "revised": true,
+          "authorship": "musician-authored-revision",
+          "originalSteps": "2 m7|5 7|1 maj7|4 maj7|7 m7b5|3 7|6 m7|6 m7",
+          "metadataVersion": "v2"
+        },
+        {
+          "name": "Jazz Slide",
+          "steps": "2 m7|b2 7|1 maj7|6 m7",
+          "numerals": "ii7–bII7–Imaj7–vi7",
+          "sampleChords": "Dm7 | Db7 | Cmaj7 | Am7",
+          "sampleKey": "C major",
+          "key": "C major",
+          "bars": 4.0,
+          "note": "Tritone-sub slide ii–bII7–Imaj7 continuing to vi7 (no held tonic repeat). [metadata aligned v2; sequence unchanged from v1]",
+          "revised": true,
+          "authorship": "musician-authored-revision",
+          "originalSteps": "2 m7|b2 7|1 maj7|1 maj7",
+          "metadataVersion": "v2"
+        },
+        {
+          "name": "Jazz Bossa",
+          "steps": "1 maj7 x2|2 7 x2|2 m7|b2 7|1 maj7 x2",
+          "numerals": "Imaj7 (2 bars)–II7 (2 bars)–ii7–bII7–Imaj7 (2 bars)",
+          "sampleChords": "Cmaj7 x2 | D7 x2 | Dm7 | Db7 | Cmaj7 x2",
+          "sampleKey": "C major",
+          "key": "C major",
+          "bars": 8.0,
+          "note": "Bossa-style A section: I, II7 (bright), ii, bII7, I. Two dashed chips (D7, Db7).",
+          "revised": false,
+          "authorship": "unchanged-original",
+          "originalSteps": "1 maj7 x2|2 7 x2|2 m7|b2 7|1 maj7 x2",
+          "metadataVersion": "v1-unchanged"
+        },
+        {
+          "name": "Jazz Chain",
+          "steps": "6 7|2 7|5 7|1 maj7",
+          "numerals": "VI7–II7–V7–Imaj7",
+          "sampleChords": "A7 | D7 | G7 | Cmaj7",
+          "sampleKey": "C major",
+          "key": "C major",
+          "bars": 4.0,
+          "note": "VI7-II7-V7-I, a chain of dominants. Two dashed chips (A7, D7).",
+          "revised": false,
+          "authorship": "unchanged-original",
+          "originalSteps": "6 7|2 7|5 7|1 maj7",
+          "metadataVersion": "v1-unchanged"
+        }
+      ],
+      "minor": [
+        {
+          "name": "Jazz Circle",
+          "steps": "5 m7|1 m7|4 m7|7 7|3 maj7",
+          "numerals": "v7–i7–iv7–VII7–IIImaj7",
+          "sampleChords": "Em7 | Am7 | Dm7 | G7 | Cmaj7",
+          "sampleKey": "A minor",
+          "key": "A minor",
+          "bars": 5.0,
+          "note": "v-i-iv-VII-III, down in fifths. All strip chips.",
+          "revised": false,
+          "authorship": "unchanged-original",
+          "originalSteps": "5 m7|1 m7|4 m7|7 7|3 maj7",
+          "metadataVersion": "v1-unchanged"
+        },
+        {
+          "name": "Jazz Leaves",
+          "steps": "4 m7|7 7|3 maj7|6 maj7|2 m7b5|5 7b9|1 m7 x2",
+          "numerals": "iv7–VII7–IIImaj7–VImaj7–iiø7–V7♭9–i7 (2 bars)",
+          "sampleChords": "Dm7 | G7 | Cmaj7 | Fmaj7 | Bm7b5 | E7b9 | Am7 x2",
+          "sampleKey": "A minor",
+          "key": "A minor",
+          "bars": 8.0,
+          "note": "Autumn Leaves circle in minor: iv–VII–III–VI then iiø–V7♭9–i, with the final i held two bars (x2) instead of a duplicated step. [metadata aligned v2; sequence unchanged from v1]",
+          "revised": true,
+          "authorship": "musician-authored-revision",
+          "originalSteps": "4 m7|7 7|3 maj7|6 maj7|2 m7b5|5 7b9|1 m7|1 m7",
+          "metadataVersion": "v2"
+        },
+        {
+          "name": "Jazz Slide",
+          "steps": "2 m7b5|b2 7|1 m7|4 m7",
+          "numerals": "iiø7–bII7–i7–iv7",
+          "sampleChords": "Bm7b5 | Bb7 | Am7 | Dm7",
+          "sampleKey": "A minor",
+          "key": "A minor",
+          "bars": 4.0,
+          "note": "Tritone-sub slide iiø–bII7–i7 continuing to iv7 (no held tonic repeat). [metadata aligned v2; sequence unchanged from v1]",
+          "revised": true,
+          "authorship": "musician-authored-revision",
+          "originalSteps": "2 m7b5|b2 7|1 m7|1 m7",
+          "metadataVersion": "v2"
+        },
+        {
+          "name": "Jazz Bossa",
+          "steps": "1 m7 x2|4 m7 x2|2 m7b5|5 7b9|1 m7 x2",
+          "numerals": "i7 (2 bars)–iv7 (2 bars)–iiø7–v7♭9–i7 (2 bars)",
+          "sampleChords": "Am7 x2 | Dm7 x2 | Bm7b5 | E7b9 | Am7 x2",
+          "sampleKey": "A minor",
+          "key": "A minor",
+          "bars": 8.0,
+          "note": "Minor bossa (the 'Blue Bossa' shape, first 8 bars). All strip chips.",
+          "revised": false,
+          "authorship": "unchanged-original",
+          "originalSteps": "1 m7 x2|4 m7 x2|2 m7b5|5 7b9|1 m7 x2",
+          "metadataVersion": "v1-unchanged"
+        }
+      ]
+    },
+    "rnb": {
+      "major": [
+        {
+          "name": "R&B Float",
+          "steps": "2 m9|5 9sus|1 maj9|6 m9",
+          "numerals": "ii9–V9sus–Imaj9–vi9",
+          "sampleChords": "Dm9 | G9sus | Cmaj9 | Am9",
+          "sampleKey": "C major",
+          "key": "C major",
+          "bars": 4.0,
+          "note": "Soft neo-soul ii9–V9sus–Imaj9 releasing into vi9 (no held tonic repeat). [metadata aligned v2; sequence unchanged from v1]",
+          "revised": true,
+          "authorship": "musician-authored-revision",
+          "originalSteps": "2 m9|5 9sus|1 maj9|1 maj9",
+          "metadataVersion": "v2"
+        }
+      ],
+      "minor": [
+        {
+          "name": "R&B Float",
+          "steps": "4 m9|7 13|3 maj9|6 maj9",
+          "numerals": "iv9–VII13–IIImaj9–VImaj9",
+          "sampleChords": "Dm9 | G13 | Cmaj9 | Fmaj9",
+          "sampleKey": "A minor",
+          "key": "A minor",
+          "bars": 4.0,
+          "note": "iv9-VII13-IIImaj9-VImaj9. All strip chips.",
+          "revised": false,
+          "authorship": "unchanged-original",
+          "originalSteps": "4 m9|7 13|3 maj9|6 maj9",
+          "metadataVersion": "v1-unchanged"
+        }
+      ]
+    },
+    "ballad": {
+      "major": [
+        {
+          "name": "Ballad Gentle",
+          "steps": "1 add9|3 min|6 m7|4 add9",
+          "numerals": "Iadd9–iii–vi7–IVadd9",
+          "sampleChords": "Cadd9 | Em | Am7 | Fadd9",
+          "sampleKey": "C major",
+          "key": "C major",
+          "bars": 4.0,
+          "note": "I-iii-vi-IV. All strip chips.",
+          "revised": false,
+          "authorship": "unchanged-original",
+          "originalSteps": "1 add9|3 min|6 m7|4 add9",
+          "metadataVersion": "v1-unchanged"
+        }
+      ],
+      "minor": [
+        {
+          "name": "Ballad Gentle",
+          "steps": "1 m7|3 add9|6 add9|7 maj",
+          "numerals": "i7–IIIadd9–VIadd9–VII",
+          "sampleChords": "Am7 | Cadd9 | Fadd9 | G",
+          "sampleKey": "A minor",
+          "key": "A minor",
+          "bars": 4.0,
+          "note": "i-III-VI-VII. All strip chips.",
+          "revised": false,
+          "authorship": "unchanged-original",
+          "originalSteps": "1 m7|3 add9|6 add9|7 maj",
+          "metadataVersion": "v1-unchanged"
+        }
+      ]
+    },
+    "reggae": {
+      "major": [
+        {
+          "name": "Reggae Easy",
+          "steps": "1 maj|4 maj|5 maj|b7 maj",
+          "numerals": "I–IV–V–bVII",
+          "sampleChords": "C | F | G | Bb",
+          "sampleKey": "C major",
+          "key": "C major",
+          "bars": 4.0,
+          "note": "Easy Mixolydian reggae loop I–IV–V–bVII with four distinct chords (replaces the old doubled I–I–IV–IV vamp). [metadata aligned v2; sequence unchanged from v1]",
+          "revised": true,
+          "authorship": "musician-authored-revision",
+          "originalSteps": "1 maj|1 maj|4 maj|4 maj",
+          "metadataVersion": "v2"
+        },
+        {
+          "name": "Reggae Ska",
+          "steps": "1 maj x0.5|6 min x0.5|2 min x0.5|5 maj x0.5",
+          "numerals": "I x0.5–vi x0.5–ii x0.5–V x0.5",
+          "sampleChords": "C x0.5 | Am x0.5 | Dm x0.5 | G x0.5",
+          "sampleKey": "C major",
+          "key": "C major",
+          "bars": 2.0,
+          "note": "I-vi-ii-V, two chords a bar, ska / rocksteady. All strip chips.",
+          "revised": false,
+          "authorship": "unchanged-original",
+          "originalSteps": "1 maj x0.5|6 min x0.5|2 min x0.5|5 maj x0.5",
+          "metadataVersion": "v1-unchanged"
+        }
+      ],
+      "minor": [
+        {
+          "name": "Reggae Easy",
+          "steps": "6 maj|7 maj|1 min|4 min",
+          "numerals": "VI–VII–i–iv",
+          "sampleChords": "F | G | Am | Dm",
+          "sampleKey": "A minor",
+          "key": "A minor",
+          "bars": 4.0,
+          "note": "Easy minor loop VI–VII–i–iv (replaces the old held i–i ending). [metadata aligned v2; sequence unchanged from v1]",
+          "revised": true,
+          "authorship": "musician-authored-revision",
+          "originalSteps": "6 maj|7 maj|1 min|1 min",
+          "metadataVersion": "v2"
+        },
+        {
+          "name": "Reggae Ska",
+          "steps": "1 min x0.5|4 min x0.5|5 maj x0.5|1 min x0.5",
+          "numerals": "i x0.5–iv x0.5–V x0.5–i x0.5",
+          "sampleChords": "Am x0.5 | Dm x0.5 | E x0.5 | Am x0.5",
+          "sampleKey": "A minor",
+          "key": "A minor",
+          "bars": 2.0,
+          "note": "i-iv-V-i, two chords a bar. All strip chips.",
+          "revised": false,
+          "authorship": "unchanged-original",
+          "originalSteps": "1 min x0.5|4 min x0.5|5 maj x0.5|1 min x0.5",
+          "metadataVersion": "v1-unchanged"
+        }
+      ]
+    },
+    "funk": {
+      "major": [
+        {
+          "name": "Funk Strut",
+          "steps": "1 9|b7 9|4 9|5 9",
+          "numerals": "I9–bVII9–IV9–V9",
+          "sampleChords": "C9 | Bb9 | F9 | G9",
+          "sampleKey": "C major",
+          "key": "C major",
+          "bars": 4.0,
+          "note": "Four-step dominant-ninth strut I9–bVII9–IV9–V9 (extended from the old two-chord vamp). [metadata aligned v2; sequence unchanged from v1]",
+          "revised": true,
+          "authorship": "musician-authored-revision",
+          "originalSteps": "1 9|b7 9",
+          "metadataVersion": "v2"
+        },
+        {
+          "name": "Funk Party",
+          "steps": "1 9|4 9|5 9|4 9",
+          "numerals": "I9–IV9–V9–IV9",
+          "sampleChords": "C9 | F9 | G9 | F9",
+          "sampleKey": "C major",
+          "key": "C major",
+          "bars": 4.0,
+          "note": "I9-IV9-V9-IV9. All strip chips.",
+          "revised": false,
+          "authorship": "unchanged-original",
+          "originalSteps": "1 9|4 9|5 9|4 9",
+          "metadataVersion": "v1-unchanged"
+        }
+      ],
+      "minor": [
+        {
+          "name": "Funk Strut",
+          "steps": "1 m7|7 9|4 m7|5 9",
+          "numerals": "i7–VII9–iv7–V9",
+          "sampleChords": "Am7 | G9 | Dm7 | E9",
+          "sampleKey": "A minor",
+          "key": "A minor",
+          "bars": 4.0,
+          "note": "Four-step strut i7–VII9–iv7–V9 (extended from the old two-chord vamp). [metadata aligned v2; sequence unchanged from v1]",
+          "revised": true,
+          "authorship": "musician-authored-revision",
+          "originalSteps": "1 m7|7 9",
+          "metadataVersion": "v2"
+        },
+        {
+          "name": "Funk Party",
+          "steps": "1 m7|6 maj7|7 9|1 m7",
+          "numerals": "i7–VImaj7–VII9–i7",
+          "sampleChords": "Am7 | Fmaj7 | G9 | Am7",
+          "sampleKey": "A minor",
+          "key": "A minor",
+          "bars": 4.0,
+          "note": "i7-VImaj7-VII9-i7. All strip chips.",
+          "revised": false,
+          "authorship": "unchanged-original",
+          "originalSteps": "1 m7|6 maj7|7 9|1 m7",
+          "metadataVersion": "v1-unchanged"
+        }
+      ]
+    },
+    "yogaDeep": {
+      "major": [
+        {
+          "name": "Yoga Sky",
+          "steps": "1 sus2 x2|5 sus2 x2|6 m7 x2|4 sus2 x2",
+          "numerals": "Isus2 (2 bars)–Vsus2 (2 bars)–vi7 (2 bars)–IVsus2 (2 bars)",
+          "sampleChords": "Csus2 x2 | Gsus2 x2 | Am7 x2 | Fsus2 x2",
+          "sampleKey": "C major",
+          "key": "C major",
+          "bars": 8.0,
+          "note": "I-V-vi-IV, slow and open. All strip chips.",
+          "revised": false,
+          "authorship": "unchanged-original",
+          "originalSteps": "1 sus2 x2|5 sus2 x2|6 m7 x2|4 sus2 x2",
+          "metadataVersion": "v1-unchanged"
+        },
+        {
+          "name": "Yoga Moon",
+          "steps": "2 m7 x2|5 sus2 x2|4 sus2 x2|1 sus2 x2",
+          "numerals": "ii7 (2 bars)–Vsus2 (2 bars)–IVsus2 (2 bars)–Isus2 (2 bars)",
+          "sampleChords": "Dm7 x2 | Gsus2 x2 | Fsus2 x2 | Csus2 x2",
+          "sampleKey": "C major",
+          "key": "C major",
+          "bars": 8.0,
+          "note": "Long-held moon cycle ii7–Vsus2–IVsus2–Isus2 (each two bars). [metadata aligned v2; sequence unchanged from v1]",
+          "revised": true,
+          "authorship": "musician-authored-revision",
+          "originalSteps": "2 m7 x2|1 sus2 x2",
+          "metadataVersion": "v2"
+        }
+      ],
+      "minor": [
+        {
+          "name": "Yoga Sky",
+          "steps": "1 m7 x2|3 sus2 x2|6 sus2 x2|7 sus2 x2",
+          "numerals": "i7 (2 bars)–IIIsus2 (2 bars)–VIsus2 (2 bars)–VIIsus2 (2 bars)",
+          "sampleChords": "Am7 x2 | Csus2 x2 | Fsus2 x2 | Gsus2 x2",
+          "sampleKey": "A minor",
+          "key": "A minor",
+          "bars": 8.0,
+          "note": "i-III-VI-VII. All strip chips.",
+          "revised": false,
+          "authorship": "unchanged-original",
+          "originalSteps": "1 m7 x2|3 sus2 x2|6 sus2 x2|7 sus2 x2",
+          "metadataVersion": "v1-unchanged"
+        },
+        {
+          "name": "Yoga Moon",
+          "steps": "4 m7 x2|7 sus2 x2|3 sus2 x2|1 m7 x2",
+          "numerals": "iv7 (2 bars)–VIIsus2 (2 bars)–IIIsus2 (2 bars)–i7 (2 bars)",
+          "sampleChords": "Dm7 x2 | Gsus2 x2 | Csus2 x2 | Am7 x2",
+          "sampleKey": "A minor",
+          "key": "A minor",
+          "bars": 8.0,
+          "note": "Long-held minor moon cycle iv7–VIIsus2–IIIsus2–i7 (each two bars). [metadata aligned v2; sequence unchanged from v1]",
+          "revised": true,
+          "authorship": "musician-authored-revision",
+          "originalSteps": "4 m7 x2|1 m7 x2",
+          "metadataVersion": "v2"
+        }
+      ]
+    },
+    "country": {
+      "major": [
+        {
+          "name": "Country Porch",
+          "steps": "1 maj|4 maj|5 7|1 maj",
+          "numerals": "I–IV–V7–I",
+          "sampleChords": "C | F | G7 | C",
+          "sampleKey": "C major",
+          "key": "C major",
+          "bars": 4.0,
+          "note": "I-IV-V7-I. All strip chips.",
+          "revised": false,
+          "authorship": "unchanged-original",
+          "originalSteps": "1 maj|4 maj|5 7|1 maj",
+          "metadataVersion": "v1-unchanged"
+        },
+        {
+          "name": "Country Hoedown",
+          "steps": "1 maj|4 maj|5 7|1 maj",
+          "numerals": "I–IV–V7–I",
+          "sampleChords": "C | F | G7 | C",
+          "sampleKey": "C major",
+          "key": "C major",
+          "bars": 4.0,
+          "note": "Compact four-step hoedown cadence I–IV–V7–I (compressed from the old eight-bar fiddle form; non-adjacent tonic return is intentional). [metadata aligned v2; sequence unchanged from v1]",
+          "revised": true,
+          "authorship": "musician-authored-revision",
+          "originalSteps": "1 maj|4 maj|1 maj|5 7|1 maj|4 maj|5 7|1 maj",
+          "metadataVersion": "v2"
+        },
+        {
+          "name": "Country Ramble",
+          "steps": "1 maj|b7 maj|4 maj|5 maj",
+          "numerals": "I–bVII–IV–V",
+          "sampleChords": "C | Bb | F | G",
+          "sampleKey": "C major",
+          "key": "C major",
+          "bars": 4.0,
+          "note": "Country-rock ramble I–bVII–IV–V (replaces the old doubled opening I–I). [metadata aligned v2; sequence unchanged from v1]",
+          "revised": true,
+          "authorship": "musician-authored-revision",
+          "originalSteps": "1 maj|1 maj|b7 maj|4 maj",
+          "metadataVersion": "v2"
+        }
+      ],
+      "minor": [
+        {
+          "name": "Country Porch",
+          "steps": "1 min|4 min|5 7|1 min",
+          "numerals": "i–iv–V7–i",
+          "sampleChords": "Am | Dm | E7 | Am",
+          "sampleKey": "A minor",
+          "key": "A minor",
+          "bars": 4.0,
+          "note": "i-iv-V7-i. All strip chips.",
+          "revised": false,
+          "authorship": "unchanged-original",
+          "originalSteps": "1 min|4 min|5 7|1 min",
+          "metadataVersion": "v1-unchanged"
+        },
+        {
+          "name": "Country Hoedown",
+          "steps": "1 min|7 maj|5 7|1 min",
+          "numerals": "i–VII–V7–i",
+          "sampleChords": "Am | G | E7 | Am",
+          "sampleKey": "A minor",
+          "key": "A minor",
+          "bars": 4.0,
+          "note": "Compact four-step modal hoedown i–VII–V7–i (compressed from the old eight-bar form; non-adjacent tonic return is intentional). [metadata aligned v2; sequence unchanged from v1]",
+          "revised": true,
+          "authorship": "musician-authored-revision",
+          "originalSteps": "1 min|7 maj|1 min|5 7|1 min|7 maj|5 7|1 min",
+          "metadataVersion": "v2"
+        },
+        {
+          "name": "Country Ramble",
+          "steps": "1 min|4 maj|1 min|7 maj",
+          "numerals": "i–IV–i–VII",
+          "sampleChords": "Am | D | Am | G",
+          "sampleKey": "A minor",
+          "key": "A minor",
+          "bars": 4.0,
+          "note": "i-IV-i-VII, Dorian (green IV). All strip chips.",
+          "revised": false,
+          "authorship": "unchanged-original",
+          "originalSteps": "1 min|4 maj|1 min|7 maj",
+          "metadataVersion": "v1-unchanged"
+        }
+      ]
+    }
+  }
+}
