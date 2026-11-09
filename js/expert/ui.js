@@ -12,7 +12,7 @@ import { prog, progSet, placeBadges, setBadgeAvoid, magic, progStop, progWalkAt,
 import { magicQueue } from "../songs/magic.js?v=112.13";
 import { nextHintSpec } from "../ui/next.js?v=112.13";
 import { setHintAvoid } from "../ui/hints.js?v=112.13";
-import { progFeel, progSteps, progNumerals } from "../songs/presets.js?v=112.13";
+import { progFeel, progSteps } from "../songs/presets.js?v=112.13";
 import { upSelected, upCurStep, upNextStep } from "../songs/song.js?v=112.13";
 import { state, shared, fingers, loop, scheduleSave } from "../state.js?v=112.13";
 import { accSym } from "../theory/spelling.js?v=112.13";
@@ -480,7 +480,7 @@ function paintSrc() {
     else if (!prog.list[lastProg] || prog.list[lastProg].up) lastProg = firstProg();
     var p = prog.list[songOn ? lastProg : prog.idx], n = songOn ? (p && p.steps ? p.steps.length : 0) : prog.steps.length;
     var dots = progDots(n, songOn ? -1 : prog.cur).map(function (d) { return "<i class=\"" + d + "\"></i>"; }).join("");
-    html = "<button type=\"button\" class=\"x-pbar" + (src.listOpen ? " open" : "") + "\" aria-expanded=\"" + src.listOpen + "\" aria-controls=\"xPList\"><span class=\"x-pcol\"><span class=\"x-pn\">" + esc(p ? progFeel(p.name) : "") + " <small>" + esc(songOn ? (p ? progNumerals(progSteps(prog.key || activeKey() || { pc: 0, mode: "major" }, p)) : "") : (prog.label ? prog.label.num : "")) + "</small></span><span class=\"x-dots\">" + dots + "</span></span><span class=\"x-car\">" + (src.listOpen ? "\u25b4" : "\u25be") + "</span></button>";
+    html = "<button type=\"button\" class=\"x-pbar" + (src.listOpen ? " open" : "") + "\" aria-expanded=\"" + src.listOpen + "\" aria-controls=\"xPList\"><span class=\"x-pcol\"><span class=\"x-pn\">" + esc(p ? progFeel(p.name) : "") + "</span><span class=\"x-dots\">" + dots + "</span></span><span class=\"x-car\">" + (src.listOpen ? "\u25b4" : "\u25be") + "</span></button>";
     box.className = "x-src x-mode-prog";
   }
   sig = src.view + "|" + html;
@@ -499,9 +499,9 @@ function paintList() {
   var h = "<div class=\"x-lbl\">" + esc(styleName(state.style)) + " progressions \u00b7 " + esc(keyLabel(k)) + "</div>";
   prog.list.forEach(function (p, i) {
     if (p.up) return;
-    var steps = progSteps(k, p), num = progNumerals(steps);
+    var steps = progSteps(k, p);
     var chips = steps.map(function (s) { return "<i class=\"x-pc " + esc(s.item.type) + "\">" + esc(accSym(stripLabel(s.item))) + "</i>"; }).join("");
-    h += "<button type=\"button\" role=\"option\" class=\"x-prow" + (i === (upSelected() ? lastProg : prog.idx) ? " on" : "") + "\" data-i=\"" + i + "\" aria-selected=\"" + (i === prog.idx && !upSelected()) + "\"><span class=\"x-pcol\"><b>" + esc(progFeel(p.name)) + "</b><small>" + esc(num) + "</small></span><span class=\"x-pchips\">" + chips + "</span></button>";
+    h += "<button type=\"button\" role=\"option\" class=\"x-prow" + (i === (upSelected() ? lastProg : prog.idx) ? " on" : "") + "\" data-i=\"" + i + "\" aria-selected=\"" + (i === prog.idx && !upSelected()) + "\"><span class=\"x-pcol\"><b>" + esc(progFeel(p.name)) + "</b></span><span class=\"x-pchips\">" + chips + "</span></button>";
   });
   h += "<p class=\"x-pnote\">Picking one unloads the song and folds this list to the bar above.</p>";
   L.innerHTML = h;
